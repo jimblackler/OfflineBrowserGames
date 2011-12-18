@@ -1,0 +1,104 @@
+body {
+	background-color: #40a040;
+	font-family: arial;
+	margin: 0px;
+}
+
+a {
+	text-decoration: none;
+	color: black;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a#close {
+	float: right;
+}
+
+div#chromePrompt {
+	margin: 0px;
+	padding: 8px;
+	position: relative;
+	height: 16px;
+	top: -36px;
+}
+
+div#chromePrompt,ul#menu {
+	background: rgba(255, 255, 0, 0.8);
+	box-shadow: 0px 2px 5px rgba(0, 0, 0, .5);
+}
+
+div#chromePrompt.animateOn {
+	top: 0px;
+	-webkit-transition: top 1200ms ease-out;
+}
+
+span.indicator,span.card,span.placeholder,span#gears {
+	background: url('cards103x143.png');
+	position: absolute;
+}
+
+span.overlay {
+	position: absolute;
+	z-index: 2; /* IE8 workaround */
+}
+
+span#gears {
+	width: 38px;
+	height: 38px;
+	background-position: -112px -717px;
+	left: 860px;
+	top: 38px;
+	opacity: 0.6;
+}
+
+span#gears:hover {
+	opacity: 1.0;
+	-webkit-transition: opacity 300ms ease-out;
+	-moz-transition: opacity 300ms ease-out;
+}
+
+ul#menu {
+	position: absolute;
+	left: 850px;
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+	top: 70px;
+	display: none;
+}
+
+ul#menu.visible {
+	display: block;
+}
+
+ul#menu lh,ul#menu li {
+	padding: 12px;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+	display: block;
+}
+
+ul#menu lh:hover,ul#menu li:hover {
+	background: rgba(0, 0, 255, 1.0);
+	box-shadow: 0px 2px 5px rgba(0, 0, 0, .5);
+}
+
+ul#menu lh {
+	background: rgba(0, 0, 0, 0.9);
+}
+
+ul#menu lh a {
+	color: white;
+	font-weight: bold;
+	font-size: small;
+}
+
+ul#menu li:hover a {
+	color: white;
+}
+
+ul#menu a:hover {
+	text-decoration: none;
+}
