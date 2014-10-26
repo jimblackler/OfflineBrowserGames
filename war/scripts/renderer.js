@@ -225,7 +225,7 @@ Renderer.prototype.startDrag = function (cards, gameState, evt) {
     var cardImage = outer.cards[cardNumber];
     var slots = outer.slotsFor[cardNumber];
     if (slots) {
-      // if click ... priority is (age-> usefullness -> proximity)
+      // if click ... priority is (age-> usefulness -> proximity)
       // otherwise it is proximity
       if (click) {
         var oldest = Number.MAX_VALUE;
@@ -343,7 +343,7 @@ Renderer.prototype.render = function (gameState) {
   // Position foundation cards.
   var outer = this;
   for (var foundationIdx = 0; foundationIdx != Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-    var foundation = gameState.foundations[foundationIdx];
+    var foundation = gameState["foundations"][foundationIdx];
     var x = this.FOUNDATION_X + this.FOUNDATION_X_SPACING * foundationIdx;
     var foundationLength = foundation.length();
     if (foundationLength == 0) {
@@ -413,7 +413,7 @@ Renderer.prototype.render = function (gameState) {
   
   // Position tableau cards.
   for (var tableauIdx = 0; tableauIdx != Rules.NUMBER_TABLEAUS; tableauIdx++) {
-    var tableau = gameState.tableausFaceDown[tableauIdx];
+    var tableau = gameState["tableausFaceDown"][tableauIdx];
     var faceDownLength = tableau.length();
     for (var position = 0; position < faceDownLength; position++) {
       var cardNumber = tableau.get(position);
@@ -423,7 +423,7 @@ Renderer.prototype.render = function (gameState) {
       outer.faceDown(cardImage, cardNumber);
       outer.raise(cardImage);
     }
-    var tableau = gameState.tableausFaceUp[tableauIdx];
+    var tableau = gameState["tableausFaceUp"][tableauIdx];
     var tableauLength = tableau.length();
     if (tableauLength == 0) {
       // Empty tableau ... will take Kings
@@ -490,10 +490,10 @@ Renderer.prototype.render = function (gameState) {
   }
 
   // Position stock cards.
-  var stockLength = gameState.stock.length();
+  var stockLength = gameState["stock"].length();
   
   for (var idx = 0; idx != stockLength; idx++) {
-    var cardNumber = gameState.stock.get(idx);
+    var cardNumber = gameState["stock"].get(idx);
     var cardImage = this.cards[cardNumber];
     outer.faceDown(cardImage);
     var clickFunction;
@@ -510,10 +510,10 @@ Renderer.prototype.render = function (gameState) {
   });
   
   // Position waste cards.
-  var wasteLength = gameState.waste.length();
+  var wasteLength = gameState["waste"].length();
   for (var idx = 0; idx != wasteLength; idx++) {
     new function () {
-      var cardNumber = gameState.waste.get(idx);
+      var cardNumber = gameState["waste"].get(idx);
       var cardImage = outer.cards[cardNumber];
       var onArrive;
       if (idx == wasteLength - 1) {
@@ -531,7 +531,7 @@ Renderer.prototype.render = function (gameState) {
         };
       }
       outer.raise(cardImage);
-      var position = idx - (wasteLength - Math.min(Rules.CARDS_TO_DRAW, wasteLength));
+      var position = idx - (wasteLength - Math.min(gameState["rules"]["cardsToDraw"], wasteLength));
       if (position < 0) {
         position = 0;
       }
@@ -541,10 +541,10 @@ Renderer.prototype.render = function (gameState) {
   }
   
   // Auto play
-  if (gameState.stock.length() == 0 && gameState.waste.length() <= 1) {
+  if (gameState["stock"].length() == 0 && gameState["waste"].length() <= 1) {
     var anyFaceDown = false;
     for (var tableauIdx = 0; tableauIdx != Rules.NUMBER_TABLEAUS; tableauIdx++) {
-      var tableau = gameState.tableausFaceDown[tableauIdx];
+      var tableau = gameState["tableausFaceDown"][tableauIdx];
       if(tableau.length() > 0) {
         anyFaceDown = true;
         break;
@@ -553,7 +553,7 @@ Renderer.prototype.render = function (gameState) {
     if (!anyFaceDown) {
       window.setTimeout(function(){
         for (var tableauIdx = 0; tableauIdx != Rules.NUMBER_TABLEAUS; tableauIdx++) {
-          var tableau = gameState.tableausFaceUp[tableauIdx];
+          var tableau = gameState["tableausFaceUp"][tableauIdx];
           if (tableau.length() > 0) {
             position = tableau.length() - 1;
             var cardNumber = tableau.get(position);
@@ -579,10 +579,10 @@ Renderer.prototype.render = function (gameState) {
 
 Renderer.prototype.store = function (gameState) {
   var MAX_UNDOS = 3;
-  if (localStorage.gamePosition > MAX_UNDOS) { // max undos
-    delete localStorage["gamePosition" + (localStorage.gamePosition - MAX_UNDOS)]; 
+  if (localStorage["gamePosition"] > MAX_UNDOS) { // max undos
+    delete localStorage["gamePosition" + (localStorage["gamePosition"] - MAX_UNDOS)]; 
   }
-  localStorage.gamePosition++;
-  localStorage["gamePosition" + localStorage.gamePosition] = JSON.stringify(gameState);
+  localStorage["gamePosition"]++;
+  localStorage["gamePosition" + localStorage["gamePosition"]] = JSON.stringify(gameState);
   
 };

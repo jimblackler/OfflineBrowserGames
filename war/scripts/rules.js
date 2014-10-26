@@ -14,7 +14,6 @@ var Rules = {
   ACE_TYPE : 0,
   KING_TYPE : 12,
   NUMBER_CARDS_IN_SUIT : 13,
-  CARDS_TO_DRAW : 3,
   NUMBER_FOUNDATIONS : 4,
   
   getSuit : function(cardNumber) {

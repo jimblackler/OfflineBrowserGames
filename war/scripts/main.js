@@ -12,15 +12,18 @@ var renderer = new Renderer(document.getElementById("gameDiv"));
 
 window["redraw"] = function() {
   gameState = new GameState();
+  gameState.newGame(JSON.parse(localStorage["rules"]));
   renderer.render(gameState); // Render twice to not animate everything (only draw).
   gameState.draw(); // Initial draw.
   renderer.store(gameState);
   renderer.render(gameState);
 }
 
-window["newGame"] = function() {
-  localStorage.gamePosition = 0;
-  localStorage.seed = Math.floor(Math.random() * 100000);
+window["newGame"] = function(rules) {
+  localStorage["gamePosition"] = 0;
+  localStorage["version"] = 2;
+  localStorage["seed"] = Math.floor(Math.random() * 100000);
+  localStorage["rules"] = JSON.stringify(rules);
   window["redraw"]();
 }
 
@@ -29,23 +32,29 @@ document.oncontextmenu = function() {
 };
 
 var gameState;
-if (localStorage.gamePosition > 0) {
-  gameState = new GameState(JSON.parse(localStorage["gamePosition" + localStorage.gamePosition]));
-  renderer.render(gameState); // Render twice to not animate everything (only draw).
-  renderer.render(gameState);
-  // delete localStorage.games; // So that refresh will restart game
+if (localStorage["gamePosition"] > 0 && localStorage["version"] == 2) {
+  gameState = new GameState();
+  if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
+    renderer.render(gameState); // Render twice to not animate everything (only draw).
+    renderer.render(gameState);    
+  } else {
+    window["newGame"]({"cardsToDraw":3});
+  }
+ 
 } else {
-  window["newGame"]();
+  window["newGame"]({"cardsToDraw":3});
 }
 
 function canUndo() {
-  return localStorage.gamePosition > 1;
+  return localStorage["gamePosition"] > 1 &&
+      localStorage["gamePosition" + (localStorage["gamePosition"] - 1)];
 }
 
 window["undo"] = function() {
   if (canUndo()) {
-    localStorage.gamePosition--;
-    gameState = new GameState(JSON.parse(localStorage["gamePosition" + localStorage.gamePosition]));
+    localStorage["gamePosition"]--;
+    gameState = new GameState();
+    gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]));
     renderer.render(gameState);
   }
 }
@@ -94,6 +103,12 @@ document.addEventListener("mouseover", function(evt) {
     return;
   }
 
+}, false);
+
+document.addEventListener("keypress", function(evt) {
+  if (evt.ctrlKey && evt.which === 26) {
+    window["undo"]();
+  }
 }, false);
 
 if (typeof (chrome) == "undefined" || typeof (chrome["app"]) == "undefined"
