@@ -1,7 +1,6 @@
 <%response.setContentType("text/cache-manifest");%>CACHE MANIFEST
-#version 51
+#version 64
 CACHE:
-index.html
 welcome.html
 style.css
 script.js
