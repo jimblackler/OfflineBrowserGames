@@ -1,12 +1,13 @@
 {
   "name": "Offline Solitaire",
   "description": "A Solitaire (Klondike) game that can be played with no internet connection.",
-  "version": "9",
+  "version": "11",
+  "manifest_version": 2,
   "app": {
     "urls": [
       "http://offlinebrowsergames.appspot.com/index.html",
+      "http://offlinebrowsergames.appspot.com/script.js",
       "http://offlinebrowsergames.appspot.com/style.css",
-      "http://offlinebrowsergames.appspot.com/style.js",
       "http://offlinebrowsergames.appspot.com/cards103x143.png"
     ],
     "launch": {
