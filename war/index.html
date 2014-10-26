@@ -18,7 +18,8 @@
 		<span id="gears"></span>
 		<ul id="menu">
 			<lh> <a href="#">Offline Solitaire by Jim Blackler</a></lh>
-			<li onclick="newGame();menu.className = '';"><a>New game</a></li>
+			<li onclick="newGame({cardsToDraw:3});menu.className = '';"><a>New game: three card draw</a></li>
+            <li onclick="newGame({cardsToDraw:1});menu.className = '';"><a>New game: one card draw</a></li>
 			<li onclick="redraw();menu.className = '';"><a>Re-attempt same game</a></li>
 			<li id="undoItem" onclick="undo();menu.className = '';"><a>Undo last move</a></li>
 			<li><a href='about.html'>About, rules and credits</a></li>
