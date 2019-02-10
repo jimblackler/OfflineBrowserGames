@@ -17,20 +17,12 @@ a#close {
 	float: right;
 }
 
-div#chromePrompt {
-	margin: 0px;
-	padding: 8px;
-	position: relative;
-	height: 16px;
-	top: -36px;
-}
-
-div#chromePrompt,ul#menu {
+ul#menu {
 	background: rgba(255, 255, 0, 0.8);
 	box-shadow: 0px 2px 5px rgba(0, 0, 0, .5);
 }
 
-div#chromePrompt.animateOn {
+animateOn {
 	top: 0px;
 	-webkit-transition: top 1200ms ease-out;
 }

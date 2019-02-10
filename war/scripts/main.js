@@ -17,7 +17,7 @@ window["redraw"] = function() {
   gameState.draw(); // Initial draw.
   renderer.store(gameState);
   renderer.render(gameState);
-}
+};
 
 window["newGame"] = function(rules) {
   localStorage["gamePosition"] = 0;
@@ -25,7 +25,7 @@ window["newGame"] = function(rules) {
   localStorage["seed"] = Math.floor(Math.random() * 100000);
   localStorage["rules"] = JSON.stringify(rules);
   window["redraw"]();
-}
+};
 
 document.oncontextmenu = function() {
   return false;
@@ -57,20 +57,7 @@ window["undo"] = function() {
     gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]));
     renderer.render(gameState);
   }
-}
-
-if (window.applicationCache) {
-  window.applicationCache.addEventListener('updateready', function(e) {
-    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
-      window.applicationCache.swapCache();
-      // App will update on next refresh.
-    }
-  }, false);
-}
-window["hidePrompt"] = function() {
-  document.getElementById('chromePrompt').style.display = 'none';
-}
-document.getElementById('chromePrompt').className = 'animateOn';
+};
 
 var menu = document.getElementById('menu');
 var gears = document.getElementById('gears');
@@ -86,7 +73,7 @@ gears.onmouseover = function(evt) {
     menu.className = "visible";
     menuFocused = false;
   }
-}
+};
 var menuFocused = false;
 
 document.addEventListener("mouseover", function(evt) {
@@ -110,8 +97,3 @@ document.addEventListener("keypress", function(evt) {
     window["undo"]();
   }
 }, false);
-
-if (typeof (chrome) == "undefined" || typeof (chrome["app"]) == "undefined"
-    || chrome["app"]["isInstalled"]) {
-  window["hidePrompt"]();
-}

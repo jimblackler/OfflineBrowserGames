@@ -1,0 +1,40 @@
+application: offlinebrowsergames
+version: 10
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+handlers:
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+
+- url: /main
+  script: main.app
+
+- url: /
+  script: main.app
+
+- url: /serviceworker.js
+  static_files: common/serviceworker.js
+  upload: common/serviceworker.js
+
+- url: /manifest.json
+  static_files: common/manifest.json
+  upload: common/manifest.json
+
+- url: /icon_128.png
+  static_files: common/icon_128.png
+  upload: common/icon_128.png
+
+- url: /v2/(.*)
+  static_files: v2/\1
+  upload: v2/(.*)
+
+- url: /(.*)
+  static_files: war/\1
+  upload: war/(.*)
+
+libraries:
+- name: webapp2
+  version: "2.5.2"

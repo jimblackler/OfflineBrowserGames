@@ -1,0 +1,14 @@
+{
+  "short_name": "Solitaire",
+  "name": "Offline Solitaire",
+  "icons": [
+    {
+      "src": "icon_128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    }
+  ],
+  "start_url": "index.html",
+  "background_color": "#40a040",
+  "theme_color": "#40a040"
+}
