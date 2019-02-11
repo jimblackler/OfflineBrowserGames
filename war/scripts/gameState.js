@@ -176,14 +176,4 @@ export class GameState {
       this.foundations[foundationIdx].add(cardNumber);
     }
   }
-
-  kings() {
-    return [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
-      Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
-  }
-
-  aces() {
-    return [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
-      Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
-  }
 }
