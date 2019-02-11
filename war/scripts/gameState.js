@@ -8,7 +8,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-class GameState {
+import {Alea} from "./alea.js";
+import {CardList} from "./cardList.js";
+import {Rules} from "./rules.js";
+
+export class GameState {
   restore(data) {
     this.deck = new CardList(data.deck);
     this.stock = new CardList(data.stock);

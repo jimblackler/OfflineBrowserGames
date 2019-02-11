@@ -8,6 +8,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
+import {GameState} from "./gameState.js";
+import {Renderer} from "./renderer.js";
+
 const renderer = new Renderer(document.getElementById("gameDiv"));
 
 window.redraw = () => {
