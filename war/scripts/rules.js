@@ -24,5 +24,26 @@ export const Rules = {
   },
   getCard: function(suit, type) {
     return suit * Rules.NUMBER_CARDS_IN_SUIT + type;
+  },
+  canPlaceOnInTableau(cardNumber) {
+    const suit = Rules.getSuit(cardNumber);
+    const type = Rules.getType(cardNumber);
+    if (type === Rules.ACE_TYPE) {
+      return []; // Nothing goes on aces.
+    }
+    if (suit < 2) {
+      return [Rules.getCard(2, type - 1), Rules.getCard(3, type - 1)];
+    } else {
+      return [Rules.getCard(0, type - 1), Rules.getCard(1, type - 1)];
+    }
+  },
+
+  canPlaceOnInFoundation(cardNumber) {
+    const suit = Rules.getSuit(cardNumber);
+    const type = Rules.getType(cardNumber);
+    if (type === Rules.KING_TYPE) {
+      return []; // Nothing goes on kings.
+    }
+    return [Rules.getCard(suit, type + 1)];
   }
 };

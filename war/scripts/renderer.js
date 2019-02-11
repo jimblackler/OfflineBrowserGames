@@ -384,7 +384,7 @@ export class Renderer {
               });
             };
           }(cards, cardImage, cardNumber);
-          const canPlaceOn = gameState.canPlaceOnInFoundation(cardNumber);
+          const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
           for (let k in canPlaceOn) {
             const other = canPlaceOn[k];
             const slotsFor = other in outer.slotsFor ? outer.slotsFor[other] : [];
@@ -454,7 +454,7 @@ export class Renderer {
         let onArrive;
         const cards = tableau.asArray().slice(position);
         if (position === tableauLength - 1) {
-          const canPlaceOn = gameState.canPlaceOnInTableau(cardNumber);
+          const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
           for (let k in canPlaceOn) {
             const other = canPlaceOn[k];
             const slotsFor = other in outer.slotsFor ? outer.slotsFor[other] : [];
