@@ -10,7 +10,7 @@
 
 const renderer = new Renderer(document.getElementById("gameDiv"));
 
-window["redraw"] = () => {
+window.redraw = () => {
   const gameState = new GameState();
   gameState.newGame(JSON.parse(localStorage["rules"]));
   renderer.render(gameState); // Render twice to not animate everything (only draw).
@@ -19,12 +19,12 @@ window["redraw"] = () => {
   renderer.render(gameState);
 };
 
-window["newGame"] = rules => {
+window.newGame = rules => {
   localStorage["gamePosition"] = 0;
   localStorage["version"] = 2;
   localStorage["seed"] = Math.floor(Math.random() * 100000);
   localStorage["rules"] = JSON.stringify(rules);
-  window["redraw"]();
+  window.redraw();
 };
 
 document.oncontextmenu = () => {
@@ -38,11 +38,11 @@ if (localStorage["gamePosition"] > 0 && localStorage["version"] === 2) {
     renderer.render(gameState); // Render twice to not animate everything (only draw).
     renderer.render(gameState);    
   } else {
-    window["newGame"]({"cardsToDraw":3});
+    window.newGame({"cardsToDraw":3});
   }
  
 } else {
-  window["newGame"]({"cardsToDraw":3});
+  window.newGame({"cardsToDraw":3});
 }
 
 function canUndo() {
@@ -50,7 +50,7 @@ function canUndo() {
       localStorage["gamePosition" + (localStorage["gamePosition"] - 1)];
 }
 
-window["undo"] = function() {
+window.undo = function() {
   if (canUndo()) {
     localStorage["gamePosition"]--;
     const gameState = new GameState();
@@ -95,6 +95,6 @@ document.addEventListener("mouseover", function(evt) {
 
 document.addEventListener("keypress", function(evt) {
   if (evt.ctrlKey && evt.which === 26) {
-    window["undo"]();
+    window.undo();
   }
 }, false);
