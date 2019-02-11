@@ -8,7 +8,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-var CardList = function(data) {
+const CardList = function(data) {
   if (data) {
     this["cards"] = data["cards"];
   } else {
@@ -42,23 +42,23 @@ CardList.prototype.pop = function() {
 
 CardList.prototype.indexOf = function(cardNumber) {
   return this["cards"].indexOf(cardNumber);
-}
+};
 
 CardList.prototype.remove = function(cardNumber) {
-  var idx = this.indexOf(cardNumber);
-  if (idx == -1) {
+  const idx = this.indexOf(cardNumber);
+  if (idx === -1) {
     return false;
   } else {
     this["cards"].splice(idx, 1);
     return true;
   }
-}
+};
 
 CardList.prototype.shuffle = function(random) {
-  var array = this["cards"];
-  var tmp;
-  var current;
-  var top = array.length;
+  const array = this["cards"];
+  let tmp;
+  let current;
+  let top = array.length;
 
   if (top) {
     while (--top) {
