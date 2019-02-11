@@ -8,7 +8,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-var MathUtils = {
+const MathUtils = {
   toT : function(start, end, value) {
     return (value - start) / (end - start);
   },

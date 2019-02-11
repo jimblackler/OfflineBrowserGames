@@ -8,7 +8,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-var renderer = new Renderer(document.getElementById("gameDiv"));
+const renderer = new Renderer(document.getElementById("gameDiv"));
 
 window["redraw"] = function() {
   gameState = new GameState();
@@ -31,9 +31,9 @@ document.oncontextmenu = function() {
   return false;
 };
 
-var gameState;
-if (localStorage["gamePosition"] > 0 && localStorage["version"] == 2) {
-  gameState = new GameState();
+
+if (localStorage["gamePosition"] > 0 && localStorage["version"] === 2) {
+  const gameState = new GameState();
   if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
     renderer.render(gameState); // Render twice to not animate everything (only draw).
     renderer.render(gameState);    
@@ -53,17 +53,19 @@ function canUndo() {
 window["undo"] = function() {
   if (canUndo()) {
     localStorage["gamePosition"]--;
-    gameState = new GameState();
+    const gameState = new GameState();
     gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]));
     renderer.render(gameState);
   }
 };
 
-var menu = document.getElementById('menu');
-var gears = document.getElementById('gears');
+let menuFocused = false;
+
+const menu = document.getElementById('menu');
+const gears = document.getElementById('gears');
 gears.onmouseover = function(evt) {
-  if (menu.className != "visible") {
-    var undoItem = document.getElementById('undoItem');
+  if (menu.className !== "visible") {
+    const undoItem = document.getElementById('undoItem');
     if (canUndo()) {
       undoItem.style.display = "block";
     } else {
@@ -74,12 +76,12 @@ gears.onmouseover = function(evt) {
     menuFocused = false;
   }
 };
-var menuFocused = false;
+
 
 document.addEventListener("mouseover", function(evt) {
-  var element = evt.target;
-  while (element && element != document.body) {
-    if (element == menu || element == gears) {
+  let element = evt.target;
+  if (element && element !== document.body) {
+    if (element === menu || element === gears) {
       menuFocused = true;
       return;
     }
@@ -87,7 +89,6 @@ document.addEventListener("mouseover", function(evt) {
   }
   if (menuFocused) {
     menu.className = "";
-    return;
   }
 
 }, false);
