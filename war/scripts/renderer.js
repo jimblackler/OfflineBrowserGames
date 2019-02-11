@@ -352,7 +352,8 @@ export class Renderer {
       const foundationLength = foundation.length();
       if (foundationLength === 0) {
         // Empty foundation ... will take Aces
-        const canPlaceOn = gameState.aces();
+        const canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
+          Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
         for (let k in canPlaceOn) {
           const other = canPlaceOn[k];
           const slotsFor = other in outer.slotsFor ? outer.slotsFor[other] : [];
@@ -429,7 +430,8 @@ export class Renderer {
       const tableauLength = tableau.length();
       if (tableauLength === 0) {
         // Empty tableau ... will take Kings
-        const canPlaceOn = gameState.kings();
+        const canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
+          Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
         for (let k in canPlaceOn) {
           const other = canPlaceOn[k];
           const slotsFor = other in outer.slotsFor ? outer.slotsFor[other] : [];
