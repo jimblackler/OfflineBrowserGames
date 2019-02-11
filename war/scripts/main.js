@@ -10,8 +10,8 @@
 
 const renderer = new Renderer(document.getElementById("gameDiv"));
 
-window["redraw"] = function() {
-  gameState = new GameState();
+window["redraw"] = () => {
+  const gameState = new GameState();
   gameState.newGame(JSON.parse(localStorage["rules"]));
   renderer.render(gameState); // Render twice to not animate everything (only draw).
   gameState.draw(); // Initial draw.
@@ -19,7 +19,7 @@ window["redraw"] = function() {
   renderer.render(gameState);
 };
 
-window["newGame"] = function(rules) {
+window["newGame"] = rules => {
   localStorage["gamePosition"] = 0;
   localStorage["version"] = 2;
   localStorage["seed"] = Math.floor(Math.random() * 100000);
@@ -27,7 +27,7 @@ window["newGame"] = function(rules) {
   window["redraw"]();
 };
 
-document.oncontextmenu = function() {
+document.oncontextmenu = () => {
   return false;
 };
 
@@ -63,7 +63,7 @@ let menuFocused = false;
 
 const menu = document.getElementById('menu');
 const gears = document.getElementById('gears');
-gears.onmouseover = function(evt) {
+gears.onmouseover = evt => {
   if (menu.className !== "visible") {
     const undoItem = document.getElementById('undoItem');
     if (canUndo()) {
@@ -80,7 +80,7 @@ gears.onmouseover = function(evt) {
 
 document.addEventListener("mouseover", function(evt) {
   let element = evt.target;
-  if (element && element !== document.body) {
+  while (element && element !== document.body) {
     if (element === menu || element === gears) {
       menuFocused = true;
       return;

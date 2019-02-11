@@ -8,12 +8,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-const MathUtils = {
-  toT : function(start, end, value) {
+class MathUtils {
+  static toT(start, end, value) {
     return (value - start) / (end - start);
-  },
+  }
 
-  tInRange : function(start, end, t) {
+  static tInRange(start, end, t) {
     return t * (end - start) + start;
   }
-};
+}

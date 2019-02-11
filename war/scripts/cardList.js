@@ -8,64 +8,66 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-const CardList = function(data) {
-  if (data) {
-    this["cards"] = data["cards"];
-  } else {
-    this["cards"] = [];
-  }
-};
-
-CardList.prototype.add = function(cardNumber) {
-  this["cards"].push(cardNumber);
-};
-
-CardList.prototype.pushFront = function(cardNumber) {
-  return this["cards"].splice(0, 0, cardNumber);
-};
-
-CardList.prototype.asArray = function() {
-  return this["cards"];
-};
-
-CardList.prototype.get = function(idx) {
-  return this["cards"][idx];
-};
-
-CardList.prototype.length = function() {
-  return this["cards"].length;
-};
-
-CardList.prototype.pop = function() {
-  return this["cards"].pop();
-};
-
-CardList.prototype.indexOf = function(cardNumber) {
-  return this["cards"].indexOf(cardNumber);
-};
-
-CardList.prototype.remove = function(cardNumber) {
-  const idx = this.indexOf(cardNumber);
-  if (idx === -1) {
-    return false;
-  } else {
-    this["cards"].splice(idx, 1);
-    return true;
-  }
-};
-
-CardList.prototype.shuffle = function(random) {
-  const array = this["cards"];
-  let tmp;
-  let current;
-  let top = array.length;
-
-  if (top) {
-    while (--top) {
-      current = Math.floor(random() * (top + 1));
-      tmp = array[current];
-      array[current] = array[top];
-      array[top] = tmp;
+class CardList {
+  constructor(data) {
+    if (data) {
+      this["cards"] = data["cards"];
+    } else {
+      this["cards"] = [];
     }
   }
-};
+
+  add(cardNumber) {
+    this["cards"].push(cardNumber);
+  }
+
+  pushFront(cardNumber) {
+    return this["cards"].splice(0, 0, cardNumber);
+  }
+
+  asArray() {
+    return this["cards"];
+  }
+
+  get(idx) {
+    return this["cards"][idx];
+  }
+
+  length() {
+    return this["cards"].length;
+  }
+
+  pop() {
+    return this["cards"].pop();
+  }
+
+  indexOf(cardNumber) {
+    return this["cards"].indexOf(cardNumber);
+  }
+
+  remove(cardNumber) {
+    const idx = this.indexOf(cardNumber);
+    if (idx === -1) {
+      return false;
+    } else {
+      this["cards"].splice(idx, 1);
+      return true;
+    }
+  }
+
+  shuffle(random) {
+    const array = this["cards"];
+    let tmp;
+    let current;
+    let top = array.length;
+
+    if (top) {
+      while (--top) {
+        current = Math.floor(random() * (top + 1));
+        tmp = array[current];
+        array[current] = array[top];
+        array[top] = tmp;
+      }
+    }
+  }
+}
