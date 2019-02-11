@@ -8,7 +8,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-const Rules = {
+export const Rules = {
   NUMBER_CARDS: 52,
   NUMBER_TABLEAUS: 7,
   ACE_TYPE: 0,

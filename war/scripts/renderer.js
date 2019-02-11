@@ -8,7 +8,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-class Renderer {
+import {MathUtils} from "./mathUtils.js";
+import {Rules} from "./rules.js";
+
+export class Renderer {
   constructor(gameDiv) {
     this.gameDiv = gameDiv;
     this.CARD_WIDTH = 103;

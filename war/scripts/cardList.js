@@ -8,41 +8,41 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-class CardList {
+export class CardList {
   constructor(data) {
     if (data) {
-      this["cards"] = data["cards"];
+      this.cards = data.cards;
     } else {
-      this["cards"] = [];
+      this.cards = [];
     }
   }
 
   add(cardNumber) {
-    this["cards"].push(cardNumber);
+    this.cards.push(cardNumber);
   }
 
   pushFront(cardNumber) {
-    return this["cards"].splice(0, 0, cardNumber);
+    return this.cards.splice(0, 0, cardNumber);
   }
 
   asArray() {
-    return this["cards"];
+    return this.cards;
   }
 
   get(idx) {
-    return this["cards"][idx];
+    return this.cards[idx];
   }
 
   length() {
-    return this["cards"].length;
+    return this.cards.length;
   }
 
   pop() {
-    return this["cards"].pop();
+    return this.cards.pop();
   }
 
   indexOf(cardNumber) {
-    return this["cards"].indexOf(cardNumber);
+    return this.cards.indexOf(cardNumber);
   }
 
   remove(cardNumber) {
@@ -50,13 +50,13 @@ class CardList {
     if (idx === -1) {
       return false;
     } else {
-      this["cards"].splice(idx, 1);
+      this.cards.splice(idx, 1);
       return true;
     }
   }
 
   shuffle(random) {
-    const array = this["cards"];
+    const array = this.cards;
     let tmp;
     let current;
     let top = array.length;
