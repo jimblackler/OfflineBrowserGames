@@ -35,7 +35,7 @@ document.oncontextmenu = () => {
 };
 
 
-if (localStorage["gamePosition"] > 0 && localStorage["version"] === 2) {
+if (localStorage["gamePosition"] > 0 && localStorage["version"] === "2") {
   const gameState = new GameState();
   if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
     renderer.render(gameState); // Render twice to not animate everything (only draw).
