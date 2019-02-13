@@ -41,8 +41,8 @@ export class Renderer {
     this.ANIMATION_RATE = 60;
 
     this.cards = [];
-    this.curves = {};
-    this.cardHistory = {};
+    this.curves = new Map();
+    this.cardHistory = new Map();
 
     this.placeholdersDiv = document.createElement("div");
     this.gameDiv.appendChild(this.placeholdersDiv);
@@ -62,18 +62,17 @@ export class Renderer {
     const animate = () => {
       window.setTimeout(animate, 1000 / this.ANIMATION_RATE);
       const timeNow = new Date().getTime();
-      for (let k in this.curves) {
-        const curve = this.curves[k];
+      for (const [k, curve] of this.curves) {
         const cardImage = this.cards[k];
         const t = MathUtils.toT(curve.startTime, curve.endTime, timeNow);
         if (t > 1) {
           cardImage.style.left = curve.endX + "px";
           cardImage.style.top = curve.endY + "px";
           this.arrived(cardImage, curve);
-          delete this.curves[k];
+          this.curves.delete(k);
         } else {
-          const mutliplier0 = Math.sin(MathUtils.tInRange(Math.PI / 4, Math.PI / 2, t));
-          const multiplier1 = MathUtils.toT(0.5, 1, mutliplier0);
+          const multiplier0 = Math.sin(MathUtils.tInRange(Math.PI / 4, Math.PI / 2, t));
+          const multiplier1 = MathUtils.toT(0.5, 1, multiplier0);
 
           cardImage.style.left = MathUtils.tInRange(curve.startX, curve.endX, multiplier1) + "px";
           cardImage.style.top = MathUtils.tInRange(curve.startY, curve.endY, multiplier1) + "px";
@@ -145,8 +144,8 @@ export class Renderer {
   }
 
   faceDown(cardImage) {
-    cardImage.style.backgroundPosition = this.CARD_WIDTH * this.CARDBACK_COLUMN + "px -" +
-        this.CARD_HEIGHT * this.BLANK_ROW + "px";
+    cardImage.style.backgroundPosition =
+        this.CARD_WIDTH * this.CARDBACK_COLUMN + "px -" + this.CARD_HEIGHT * this.BLANK_ROW + "px";
   }
 
   faceUp(cardImage, cardNumber) {
@@ -156,10 +155,10 @@ export class Renderer {
   }
 
   placeCard(cardNumber, x, y, onArrive) {
-    if (!this.cardHistory.hasOwnProperty(cardNumber)) {
-      this.cardHistory[cardNumber] = {};
+    if (!this.cardHistory.has(cardNumber)) {
+      this.cardHistory.set(cardNumber, new Map());
     }
-    this.cardHistory[cardNumber][x + "/" + y] = new Date().getTime();
+    this.cardHistory.get(cardNumber).set([x, y], new Date().getTime());
     const cardImage = this.cards[cardNumber];
     this.setClickable(cardImage, null, null);
     if (Math.round(cardImage.offsetLeft) === Math.round(x) && Math.round(cardImage.offsetTop) === Math.round(y)) {
@@ -171,7 +170,7 @@ export class Renderer {
     }
     cardImage.style.zIndex = 1;
     const timeNow = new Date().getTime();
-    this.curves[cardNumber] = {
+    this.curves.set(cardNumber, {
       startTime: timeNow,
       endTime: timeNow + this.CURVE_TIME,
       startX: cardImage.offsetLeft,
@@ -179,7 +178,7 @@ export class Renderer {
       endX: x,
       endY: y,
       onArrive: onArrive
-    };
+    });
   }
 
 
@@ -199,15 +198,15 @@ export class Renderer {
     const mousemove = evt => {
       if (this.firstDrag) {
         this.firstDrag = false;
-        for (const k in cards) {
-          const cardImage = this.cards[cards[k]];
+        for (const card of cards) {
+          const cardImage = this.cards[card];
           cardImage.style.zIndex = 1;
           cardImage.style.boxShadow =
               "rgba(0, 0, 0, 0.497656) -3px -3px 12px inset, rgba(0, 0, 0, 0.398438) 4px 5px 5px";
         }
       } else {
-        for (let k in cards) {
-          const cardImage = this.cards[cards[k]];
+        for (const card of cards) {
+          const cardImage = this.cards[card];
           cardImage.style.left = cardImage.offsetLeft + evt.clientX - this.lastClientX + "px";
           cardImage.style.top = cardImage.offsetTop + evt.clientY - this.lastClientY + "px";
         }
@@ -222,20 +221,18 @@ export class Renderer {
       const click = (this.firstClientX === evt.clientX && this.firstClientY === evt.clientY);
       const cardNumber = cards[0];
       const cardImage = this.cards[cardNumber];
-      let slots = this.slotsFor[cardNumber];
+      let slots = this.slotsFor.get(cardNumber);
       if (slots) {
         // if click ... priority is (age-> usefulness -> proximity)
         // otherwise it is proximity
         if (click) {
           let oldest = Number.MAX_VALUE;
           let oldestSlots = [];
-          for (let k in slots) {
-            const slot = slots[k];
+          for (const slot of slots) {
             if (cards.length === 1 || slot.takesTableauStack) {
-              let time = this.cardHistory[cardNumber][slot.x + "/" + slot.y];
-              if (!time) {
-                time = Number.MIN_VALUE;
-              }
+              const cardHistory = this.cardHistory.get(cardNumber);
+              const key = [slot.x, slot.y];
+              const time = cardHistory.has(key) ? cardHistory.get(key) : Number.MIN_VALUE;
               if (time === oldest) {
                 oldestSlots.push(slot);
               } else if (time < oldest) {
@@ -250,8 +247,7 @@ export class Renderer {
 
           let mostUseful = Number.MIN_VALUE;
           let mostUsefulSlots = [];
-          for (let k in slots) {
-            const slot = slots[k];
+          for (const slot of slots) {
             if (cards.length === 1 || slot.takesTableauStack) {
               const useful = slot.useful;
               if (useful === mostUseful) {
@@ -270,8 +266,7 @@ export class Renderer {
         const cy = cardImage.offsetTop;
         let closest = Number.MAX_VALUE;
         let closetSlot;
-        for (let k in slots) {
-          const slot = slots[k];
+        for (const slot of slots) {
           if (cards.length === 1 || slot.takesTableauStack) {
             const distance = Math.pow(cx - slot.x, 2) + Math.pow(cy - slot.y, 2);
             if (distance < closest) {
@@ -325,16 +320,15 @@ export class Renderer {
   }
 
   render(gameState) {
-    this.slotsFor = {};
+    this.slotsFor = new Map();
 
     // Stop all animations immediately (old onArrive functions are invalid)
-    for (let k in this.curves) {
-      const curve = this.curves[k];
+    for (const [k, curve] of this.curves) {
       const cardImage = this.cards[k];
       cardImage.style.left = curve.endX + "px";
       cardImage.style.top = curve.endY + "px";
       this.arrived(cardImage, curve);
-      delete this.curves[k];
+      this.curves.delete(k);
     }
 
     // Position foundation cards.
@@ -346,9 +340,8 @@ export class Renderer {
         // Empty foundation ... will take Aces
         const canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
           Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
-        for (let k in canPlaceOn) {
-          const other = canPlaceOn[k];
-          const slotsFor = other in this.slotsFor ? this.slotsFor[other] : [];
+        for (const other of canPlaceOn) {
+          const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
           slotsFor.push({
             x: x,
             y: this.FOUNDATION_Y,
@@ -357,7 +350,7 @@ export class Renderer {
             takesTableauStack: false
           });
 
-          this.slotsFor[other] = slotsFor;
+          this.slotsFor.set(other, slotsFor);
         }
       } else for (let position = 0; position < foundationLength; position++) {
         const cardNumber = foundation.get(position);
@@ -372,9 +365,8 @@ export class Renderer {
           };
 
           const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
-          for (let k in canPlaceOn) {
-            const other = canPlaceOn[k];
-            const slotsFor = other in this.slotsFor ? this.slotsFor[other] : [];
+          for (const other of canPlaceOn) {
+            const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
             slotsFor.push({
               x: x,
               y: this.FOUNDATION_Y,
@@ -382,10 +374,11 @@ export class Renderer {
               useful: 3,
               takesTableauStack: false
             });
-            this.slotsFor[other] = slotsFor;
+            this.slotsFor.set(other, slotsFor);
           }
         } else {
-          onArrive = () => {};
+          onArrive = () => {
+          };
         }
 
         this.placeCard(cardNumber, x, this.FOUNDATION_Y, onArrive);
@@ -402,7 +395,8 @@ export class Renderer {
         const cardNumber = tableau.get(position);
         const cardImage = this.cards[cardNumber];
         this.placeCard(cardNumber, this.TABLEAU_X + this.TABLEAU_X_SPACING * tableauIdx,
-            this.TABLEAU_Y + this.TABLEAU_Y_SPACING * position, () => {});
+            this.TABLEAU_Y + this.TABLEAU_Y_SPACING * position, () => {
+            });
         this.faceDown(cardImage, cardNumber);
         this.raise(cardImage);
       }
@@ -413,9 +407,8 @@ export class Renderer {
         // Empty tableau ... will take Kings
         const canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
           Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
-        for (let k in canPlaceOn) {
-          const other = canPlaceOn[k];
-          const slotsFor = other in this.slotsFor ? this.slotsFor[other] : [];
+        for (const other of canPlaceOn) {
+          const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
           slotsFor.push({
             x: this.TABLEAU_X + this.TABLEAU_X_SPACING * tableauIdx,
             y: this.TABLEAU_Y,
@@ -423,7 +416,7 @@ export class Renderer {
             useful: 2,
             takesTableauStack: true
           });
-          this.slotsFor[other] = slotsFor;
+          this.slotsFor.set(other, slotsFor);
         }
       } else for (let position = 0; position < tableauLength; position++) {
         const cardNumber = tableau.get(position);
@@ -432,9 +425,8 @@ export class Renderer {
         const cards = tableau.asArray().slice(position);
         if (position === tableauLength - 1) {
           const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
-          for (let k in canPlaceOn) {
-            const other = canPlaceOn[k];
-            const slotsFor = other in this.slotsFor ? this.slotsFor[other] : [];
+          for (const other of canPlaceOn) {
+            const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
             slotsFor.push({
               x: this.TABLEAU_X + this.TABLEAU_X_SPACING * tableauIdx,
               y: this.TABLEAU_Y + this.TABLEAU_Y_SPACING * (position + faceDownLength + 1),
@@ -442,7 +434,7 @@ export class Renderer {
               useful: 2,
               takesTableauStack: true
             });
-            this.slotsFor[other] = slotsFor;
+            this.slotsFor.set(other, slotsFor);
           }
         }
 
@@ -466,7 +458,8 @@ export class Renderer {
       const cardImage = this.cards[cardNumber];
       this.faceDown(cardImage);
       this.raise(cardImage);
-      this.placeCard(cardNumber, this.STOCK_X, this.STOCK_Y, () => {});
+      this.placeCard(cardNumber, this.STOCK_X, this.STOCK_Y, () => {
+      });
     }
 
     this.setClickable(this.stockOverlay, null, () => {
@@ -518,13 +511,11 @@ export class Renderer {
             }
             const position = tableau.length() - 1;
             const cardNumber = tableau.get(position);
-            const cardImage = this.cards[cardNumber];
-            const slots = this.slotsFor[cardNumber];
+            const slots = this.slotsFor.get(cardNumber);
             if (!slots) {
               continue;
             }
-            for (const k in slots) {
-              const slot = slots[k];
+            for (const slot of slots) {
               if (slot.takesTableauStack) {
                 continue;
               }
