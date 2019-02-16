@@ -32,7 +32,7 @@ export function Alea() {
     let s2 = 0;
     let c = 1;
 
-    if (args.length == 0) {
+    if (args.length === 0) {
       args = [ +new Date ];
     }
     let mash = Mash();
