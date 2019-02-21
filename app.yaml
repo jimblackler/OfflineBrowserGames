@@ -19,6 +19,12 @@ handlers:
   static_files: common/serviceworker.js
   upload: common/serviceworker.js
 
+# Legacy - remove when possible
+- url: /manifest.jsp
+  static_files: common/manifest.jsp
+  upload: common/manifest.jsp
+  mime_type: text/cache-manifest
+
 - url: /manifest.json
   static_files: common/manifest.json
   upload: common/manifest.json
