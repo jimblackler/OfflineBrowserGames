@@ -81,7 +81,7 @@ gears.onmouseover = evt => {
 };
 
 
-document.addEventListener("mouseover", function(evt) {
+document.addEventListener("mouseover", evt => {
   let element = evt.target;
   while (element && element !== document.body) {
     if (element === menu || element === gears) {
@@ -96,7 +96,7 @@ document.addEventListener("mouseover", function(evt) {
 
 }, false);
 
-document.addEventListener("keypress", function(evt) {
+document.addEventListener("keypress", evt => {
   if (evt.ctrlKey && evt.which === 26) {
     window.undo();
   }
