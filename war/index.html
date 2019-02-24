@@ -21,15 +21,7 @@
 	</div>
 
 	<script src="scripts/main.js" type="module"></script>
+	<script src="commonScripts/installServiceWorker.js" type="module"></script>
 
-	<script type="text/javascript">
-		addEventListener('load', () => {
-			navigator.serviceWorker.register('serviceworker.js', {scope: './'}).then(registration => {
-				console.log("Service worker registered successfully.");
-			}, function (error) {
-				console.log("Error registering service worker: " + error);
-			});
-		});
-	</script>
 </body>
 </html>
