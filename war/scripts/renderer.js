@@ -177,7 +177,7 @@ export class Renderer extends BaseRenderer {
       startY: cardImage.offsetTop,
       endX: x,
       endY: y,
-      onArrive: onArrive
+      onArrive
     });
   }
 
@@ -352,37 +352,39 @@ export class Renderer extends BaseRenderer {
 
           this.slotsFor.set(other, slotsFor);
         }
-      } else for (let position = 0; position < foundationLength; position++) {
-        const cardNumber = foundation.get(position);
-        const cardImage = this.cards[cardNumber];
-        let onArrive;
-        if (position === foundationLength - 1) {
-          const cards = [cardNumber];
+      } else {
+        for (let position = 0; position < foundationLength; position++) {
+          const cardNumber = foundation.get(position);
+          const cardImage = this.cards[cardNumber];
+          let onArrive;
+          if (position === foundationLength - 1) {
+            const cards = [cardNumber];
 
-          onArrive = () => {
-            this.faceUp(cardImage, cardNumber);
-            this.setClickable(cardImage, evt => this.startDrag(cards, gameState, evt));
-          };
+            onArrive = () => {
+              this.faceUp(cardImage, cardNumber);
+              this.setClickable(cardImage, evt => this.startDrag(cards, gameState, evt));
+            };
 
-          const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
-          for (const other of canPlaceOn) {
-            const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
-            slotsFor.push({
-              x: x,
-              y: this.FOUNDATION_Y,
-              action: () => gameState.moveToFoundation(other, foundationIdx),
-              useful: 3,
-              takesTableauStack: false
-            });
-            this.slotsFor.set(other, slotsFor);
+            const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
+            for (const other of canPlaceOn) {
+              const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
+              slotsFor.push({
+                x,
+                y: this.FOUNDATION_Y,
+                action: () => gameState.moveToFoundation(other, foundationIdx),
+                useful: 3,
+                takesTableauStack: false
+              });
+              this.slotsFor.set(other, slotsFor);
+            }
+          } else {
+            onArrive = () => {
+            };
           }
-        } else {
-          onArrive = () => {
-          };
-        }
 
-        this.placeCard(cardNumber, x, this.FOUNDATION_Y, onArrive);
-        this.raise(cardImage);
+          this.placeCard(cardNumber, x, this.FOUNDATION_Y, onArrive);
+          this.raise(cardImage);
+        }
       }
     }
 
@@ -418,36 +420,36 @@ export class Renderer extends BaseRenderer {
           });
           this.slotsFor.set(other, slotsFor);
         }
-      } else for (let position = 0; position < tableauLength; position++) {
-        const cardNumber = tableau.get(position);
-        const cardImage = this.cards[cardNumber];
-        let onArrive;
-        const cards = tableau.asArray().slice(position);
-        if (position === tableauLength - 1) {
-          const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
-          for (const other of canPlaceOn) {
-            const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
-            slotsFor.push({
-              x: this.TABLEAU_X + this.TABLEAU_X_SPACING * tableauIdx,
-              y: this.TABLEAU_Y + this.TABLEAU_Y_SPACING * (position + faceDownLength + 1),
-              action: () => gameState.moveToTableau(other, tableauIdx),
-              useful: 2,
-              takesTableauStack: true
-            });
-            this.slotsFor.set(other, slotsFor);
+      } else {
+        for (let position = 0; position < tableauLength; position++) {
+          const cardNumber = tableau.get(position);
+          const cardImage = this.cards[cardNumber];
+          const cards = tableau.asArray().slice(position);
+          if (position === tableauLength - 1) {
+            const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
+            for (const other of canPlaceOn) {
+              const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
+              slotsFor.push({
+                x: this.TABLEAU_X + this.TABLEAU_X_SPACING * tableauIdx,
+                y: this.TABLEAU_Y + this.TABLEAU_Y_SPACING * (position + faceDownLength + 1),
+                action: () => gameState.moveToTableau(other, tableauIdx),
+                useful: 2,
+                takesTableauStack: true
+              });
+              this.slotsFor.set(other, slotsFor);
+            }
           }
+
+          const onArrive = () => {
+            this.faceUp(cardImage, cardNumber);
+            this.setClickable(cardImage, evt => this.startDrag(cards, gameState, evt));
+          };
+
+          this.placeCard(cardNumber, this.TABLEAU_X + this.TABLEAU_X_SPACING * tableauIdx,
+              this.TABLEAU_Y + this.TABLEAU_Y_SPACING * (position + faceDownLength), onArrive);
+          this.raise(cardImage);
         }
-
-        onArrive = () => {
-          this.faceUp(cardImage, cardNumber);
-          this.setClickable(cardImage, evt => this.startDrag(cards, gameState, evt));
-        };
-
-        this.placeCard(cardNumber, this.TABLEAU_X + this.TABLEAU_X_SPACING * tableauIdx,
-            this.TABLEAU_Y + this.TABLEAU_Y_SPACING * (position + faceDownLength), onArrive);
-        this.raise(cardImage);
       }
-
     }
 
     // Position stock cards.
@@ -478,9 +480,9 @@ export class Renderer extends BaseRenderer {
         const cards = [];
         cards.push(cardNumber);
         onArrive = () => {
-          this.setClickable(cardImage, (evt) => this.startDrag(cards, gameState, evt));
+          this.setClickable(cardImage, evt => this.startDrag(cards, gameState, evt));
           this.faceUp(cardImage, cardNumber);
-        }
+        };
       } else {
         onArrive = () => this.faceUp(cardImage, cardNumber);
       }
