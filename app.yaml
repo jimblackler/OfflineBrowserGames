@@ -15,10 +15,6 @@ handlers:
 - url: /
   script: main.app
 
-- url: /serviceworker.js
-  static_files: common/serviceworker.js
-  upload: common/serviceworker.js
-
 # Legacy - remove when possible
 - url: /manifest.jsp
   static_files: common/manifest.jsp
@@ -32,10 +28,6 @@ handlers:
 - url: /icon_128.png
   static_files: common/icon_128.png
   upload: common/icon_128.png
-
-- url: /v2/(.*)
-  static_files: v2/\1
-  upload: v2/(.*)
 
 - url: /(.*)
   static_files: war/\1

@@ -4,7 +4,7 @@ const fetchInit = {cache: 'reload'};
 addEventListener('fetch', event => {
 
   event.respondWith(
-      caches.open('static-024').then(cache => {
+      caches.open('static-025').then(cache => {
         return cache.match(event.request).then(response => {
           if (response) {
             console.log(`${event.request.url} cached`);
