@@ -7,11 +7,8 @@ import {Vector2} from "../threejs/src/math/Vector2.js";
 import {WebGLRenderer} from "../threejs/src/renderers/WebGLRenderer.js";
 
 export class V2Renderer extends BaseRenderer {
-  constructor() {
+  constructor(container) {
     super();
-
-    const container = document.createElement('div');
-    document.body.appendChild(container);
 
     const scene = new Scene();
 
