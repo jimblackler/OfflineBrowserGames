@@ -49,7 +49,6 @@ export class V2Renderer extends BaseRenderer {
         const controls = new OrbitControls(camera);
         controls.target = card.position.clone();
 
-        controls.maxPolarAngle = 0.9 * Math.PI / 2;
         controls.update();
 
         function setAspect() {
