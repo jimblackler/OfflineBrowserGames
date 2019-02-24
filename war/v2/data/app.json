@@ -34,6 +34,38 @@
     }, 
     {
       "repeat": [
+        1, 
+        1
+      ], 
+      "center": [
+        0, 
+        0
+      ], 
+      "format": 1023, 
+      "flipY": true, 
+      "magFilter": 1006, 
+      "encoding": 3000, 
+      "mapping": 300, 
+      "unpackAlignment": 4, 
+      "name": "", 
+      "premultiplyAlpha": false, 
+      "minFilter": 1008, 
+      "image": "9444641B-A698-46E4-9523-07547F56838F", 
+      "offset": [
+        0, 
+        0
+      ], 
+      "wrap": [
+        1001, 
+        1001
+      ], 
+      "rotation": 0, 
+      "type": 1009, 
+      "anisotropy": 1, 
+      "uuid": "DDF73A36-F14E-48A3-9098-BAFDE42190AC"
+    }, 
+    {
+      "repeat": [
         0.1, 
         0.1
       ], 
@@ -127,7 +159,7 @@
           5, 
           1
         ], 
-        "name": "Lights", 
+        "name": "Top Lights", 
         "type": "Group", 
         "children": [
           {
@@ -265,7 +297,7 @@
           1, 
           0, 
           36.52, 
-          4.16, 
+          11.664291, 
           36, 
           1
         ], 
@@ -329,6 +361,46 @@
           }
         ], 
         "uuid": "F497DFD7-B287-44CC-8A28-1E7EEC962FC4"
+      }, 
+      {
+        "layers": 1, 
+        "matrix": [
+          -0.353238, 
+          0.562986, 
+          0.747175, 
+          0, 
+          -0.766908, 
+          0.283149, 
+          -0.575916, 
+          0, 
+          -0.535794, 
+          -0.77645, 
+          0.331739, 
+          0, 
+          0, 
+          -1, 
+          0, 
+          1
+        ], 
+        "color": 16777215, 
+        "name": "DirectionalLight", 
+        "intensity": 1, 
+        "shadow": {
+          "camera": {
+            "layers": 1, 
+            "right": 5, 
+            "uuid": "5C4ECEC3-ED75-4F31-BD66-738C87DE74F9", 
+            "bottom": -5, 
+            "far": 500, 
+            "top": 5, 
+            "zoom": 1, 
+            "near": 0.5, 
+            "type": "OrthographicCamera", 
+            "left": -5
+          }
+        }, 
+        "type": "DirectionalLight", 
+        "uuid": "48C7AC02-0EE3-440C-8503-3FCC6D8678F7"
       }
     ], 
     "uuid": "76092D26-EB1A-42A4-9A8E-5EAF4BA945AE"
@@ -348,14 +420,16 @@
       "depthWrite": true
     }, 
     {
+      "map": "DDF73A36-F14E-48A3-9098-BAFDE42190AC", 
       "depthFunc": 3, 
       "uuid": "4FE08499-5BC1-4672-A9E8-25BE273CFDD8", 
-      "color": 16711680, 
+      "color": 16777215, 
       "metalness": 0.5, 
       "depthTest": true, 
       "emissive": 0, 
       "roughness": 0.5, 
       "type": "MeshStandardMaterial", 
+      "transparent": true, 
       "depthWrite": true
     }, 
     {
@@ -376,6 +450,10 @@
     {
       "url": "images/1C744810-821F-42A2-B3D5-256BB4FE6293.png", 
       "uuid": "EE42C3F7-8516-4462-877C-5CD1EC954745"
+    }, 
+    {
+      "url": "images/8E38148E-764B-43E4-9C5F-E1C460E95690.png", 
+      "uuid": "9444641B-A698-46E4-9523-07547F56838F"
     }, 
     {
       "url": "images/8E38148E-764B-43E4-9C5F-E1C460E95690.png", 
