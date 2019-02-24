@@ -5,10 +5,6 @@ api_version: 1
 threadsafe: yes
 
 handlers:
-- url: /favicon\.ico
-  static_files: favicon.ico
-  upload: favicon\.ico
-
 - url: /main
   script: main.app
 
@@ -20,14 +16,6 @@ handlers:
   static_files: common/manifest.jsp
   upload: common/manifest.jsp
   mime_type: text/cache-manifest
-
-- url: /manifest.json
-  static_files: common/manifest.json
-  upload: common/manifest.json
-
-- url: /icon_128.png
-  static_files: common/icon_128.png
-  upload: common/icon_128.png
 
 - url: /(.*)
   static_files: war/\1
