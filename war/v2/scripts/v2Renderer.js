@@ -9,8 +9,6 @@ import {WebGLRenderer} from "../threejs/src/renderers/WebGLRenderer.js";
 export class V2Renderer extends BaseRenderer {
   constructor() {
     super();
-    const SCREEN_WIDTH = window.innerWidth;
-    const SCREEN_HEIGHT = window.innerHeight;
 
     const container = document.createElement('div');
     document.body.appendChild(container);
@@ -19,7 +17,7 @@ export class V2Renderer extends BaseRenderer {
 
     const renderer = new WebGLRenderer({antialias: true});
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap; // default THREE.PCFShadowMap
