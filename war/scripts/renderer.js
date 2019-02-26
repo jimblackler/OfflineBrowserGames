@@ -38,7 +38,6 @@ export class Renderer extends BaseRenderer {
     this.CARDBACK_COLUMN = 0;
     this.PLACEHOLDER_COLUMN = 1;
     this.CURVE_TIME = 250;
-    this.ANIMATION_RATE = 60;
 
     this.cards = [];
     this.curves = new Map();
@@ -60,7 +59,7 @@ export class Renderer extends BaseRenderer {
     this.selectionIndicator = this.makeSelectionIndicator();
 
     const animate = () => {
-      window.setTimeout(animate, 1000 / this.ANIMATION_RATE);
+      requestAnimationFrame(animate);
       const timeNow = new Date().getTime();
       for (const [k, curve] of this.curves) {
         const cardImage = this.cards[k];
@@ -80,7 +79,7 @@ export class Renderer extends BaseRenderer {
       }
     };
 
-    window.setTimeout(animate, 1000 / this.ANIMATION_RATE);
+    requestAnimationFrame(animate);
 
     // Placeholder; stock
     this.stockHolder = this.placeHolder(this.STOCK_X, this.STOCK_Y);
