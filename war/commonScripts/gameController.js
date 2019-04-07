@@ -103,7 +103,7 @@ export class GameController {
 
             onArrive = () => {
               renderer.faceUp(cardNumber);
-              renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState));
+              renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState, renderer));
             };
 
             const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
