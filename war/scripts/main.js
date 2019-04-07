@@ -19,10 +19,10 @@ const baseRenderer = new GameController(renderer);
 window.redraw = () => {
   const gameState = new GameState();
   gameState.newGame(JSON.parse(localStorage["rules"]));
-  baseRenderer.render(renderer, gameState); // Render twice to not animate everything (only draw).
+  baseRenderer.render(gameState); // Render twice to not animate everything (only draw).
   gameState.draw(); // Initial draw.
   GameStore.store(gameState);
-  baseRenderer.render(renderer, gameState);
+  baseRenderer.render(gameState);
 };
 
 window.newGame = rules => {
