@@ -41,8 +41,8 @@ document.oncontextmenu = () => {
 if (localStorage["gamePosition"] > 0 && localStorage["version"] === "2") {
   const gameState = new GameState();
   if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
-    baseRenderer.render(renderer, gameState); // Render twice to not animate everything (only draw).
-    baseRenderer.render(renderer, gameState);
+    baseRenderer.render(gameState); // Render twice to not animate everything (only draw).
+    baseRenderer.render(gameState);
   } else {
     window.newGame({"cardsToDraw":3});
   }

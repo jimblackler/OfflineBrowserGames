@@ -18,6 +18,7 @@ const CURVE_TIME = 250;
 
 export class GameController {
   constructor(renderer) {
+    this.renderer = renderer;
     this.curves = new Map();
     this.cardHistory = new Map();
 
@@ -62,13 +63,13 @@ export class GameController {
     }
   }
 
-  render(renderer, gameState) {
+  render(gameState) {
     this.slotsFor = new Map();
 
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const [k, curve] of this.curves) {
-      renderer.positionCard(k, curve.endX, curve.endY);
-      renderer.dropCard(k);
+      this.renderer.positionCard(k, curve.endX, curve.endY);
+      this.renderer.dropCard(k);
       curve.onArrive();
       this.curves.delete(k);
     }
@@ -102,8 +103,8 @@ export class GameController {
             const cards = [cardNumber];
 
             onArrive = () => {
-              renderer.faceUp(cardNumber);
-              renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState, renderer));
+              this.renderer.faceUp(cardNumber);
+              this.renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState));
             };
 
             const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
@@ -123,7 +124,7 @@ export class GameController {
             };
           }
 
-          this.placeCard(cardNumber, x, FOUNDATION_Y, onArrive, renderer);
+          this.placeCard(cardNumber, x, FOUNDATION_Y, onArrive);
         }
       }
     }
@@ -137,8 +138,8 @@ export class GameController {
         const cardNumber = tableau.get(position);
         this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             TABLEAU_Y + TABLEAU_Y_SPACING * position, () => {
-            }, renderer);
-        renderer.faceDown(cardNumber);
+            });
+        this.renderer.faceDown(cardNumber);
       }
 
       tableau = gameState.tableausFaceUp[tableauIdx];
@@ -178,12 +179,12 @@ export class GameController {
           }
 
           const onArrive = () => {
-            renderer.faceUp(cardNumber);
-            renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState, renderer));
+            this.renderer.faceUp(cardNumber);
+            this.renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState));
           };
 
           this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-              TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive, renderer);
+              TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive);
         }
       }
     }
@@ -193,15 +194,15 @@ export class GameController {
 
     for (let idx = 0; idx !== stockLength; idx++) {
       const cardNumber = gameState.stock.get(idx);
-      renderer.faceDown(cardNumber);
+      this.renderer.faceDown(cardNumber);
       this.placeCard(cardNumber, STOCK_X, STOCK_Y, () => {
-      }, renderer);
+      });
     }
 
-    renderer.setClick(this.stockOverlay, () => {
+    this.renderer.setClick(this.stockOverlay, () => {
       gameState.draw();
       GameStore.store(gameState);
-      this.render(renderer, gameState);
+      this.render(gameState);
     });
 
     // Position waste cards.
@@ -213,17 +214,17 @@ export class GameController {
         const cards = [];
         cards.push(cardNumber);
         onArrive = () => {
-          renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState, renderer));
-          renderer.faceUp(cardNumber);
+          this.renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState));
+          this.renderer.faceUp(cardNumber);
         };
       } else {
-        onArrive = () => renderer.faceUp(cardNumber);
+        onArrive = () => this.renderer.faceUp(cardNumber);
       }
       let position = idx - (wasteLength - Math.min(gameState.rules.cardsToDraw, wasteLength));
       if (position < 0) {
         position = 0;
       }
-      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive, renderer);
+      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive);
     }
 
     // Auto play
@@ -264,23 +265,23 @@ export class GameController {
     }
   }
 
-  placeCard(cardNumber, x, y, onArrive, renderer) {
+  placeCard(cardNumber, x, y, onArrive) {
     const timeNow = new Date().getTime();
     if (!this.cardHistory.has(cardNumber)) {
       this.cardHistory.set(cardNumber, new Map());
     }
     this.cardHistory.get(cardNumber).set([x, y], timeNow);
-    renderer.setCardNotDraggable(cardNumber);
+    this.renderer.setCardNotDraggable(cardNumber);
 
-    const position = renderer.getCardPosition(cardNumber);
+    const position = this.renderer.getCardPosition(cardNumber);
     if (Math.round(position[0]) === Math.round(x) && Math.round(position[1]) === Math.round(y)) {
-      renderer.dropCard(cardNumber);
+      this.renderer.dropCard(cardNumber);
       // There already!
       onArrive();
       return;
     }
 
-    renderer.setFloating(cardNumber);
+    this.renderer.setFloating(cardNumber);
 
     this.curves.set(cardNumber, {
       startTime: timeNow,
@@ -293,7 +294,7 @@ export class GameController {
     });
   }
 
-  release(cards, click, gameState, renderer) {
+  release(cards, click, gameState) {
     const cardNumber = cards[0];
     let slots = this.slotsFor.get(cardNumber);
     if (slots) {
@@ -336,7 +337,7 @@ export class GameController {
           slots = mostUsefulSlots;
         }
       }
-      const position = renderer.getCardPosition(cardNumber);
+      const position = this.renderer.getCardPosition(cardNumber);
       let closest = Number.MAX_VALUE;
       let closetSlot;
       for (const slot of slots) {
@@ -353,6 +354,6 @@ export class GameController {
       }
     }
     GameStore.store(gameState);
-    this.render(renderer, gameState);
+    this.render(gameState);
   }
 }
