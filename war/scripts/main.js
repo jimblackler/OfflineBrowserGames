@@ -14,8 +14,7 @@ import {GameStore} from "../commonScripts/gameStore.js";
 import {Renderer} from "./renderer.js";
 
 const renderer = new Renderer(document.getElementById("gameDiv"));
-const baseRenderer = new GameController();
-baseRenderer.init(renderer);
+const baseRenderer = new GameController(renderer);
 
 window.redraw = () => {
   const gameState = new GameState();

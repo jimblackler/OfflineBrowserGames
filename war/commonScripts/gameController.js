@@ -17,7 +17,7 @@ const WASTE_Y = STOCK_Y;
 const CURVE_TIME = 250;
 
 export class GameController {
-  init(renderer) {
+  constructor(renderer) {
     this.curves = new Map();
     this.cardHistory = new Map();
 
