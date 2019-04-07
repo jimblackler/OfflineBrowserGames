@@ -61,7 +61,7 @@ window.undo = function() {
     localStorage["gamePosition"]--;
     const gameState = new GameState();
     gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]));
-    baseRenderer.render(renderer, gameState);
+    baseRenderer.render(gameState);
   }
 };
 
