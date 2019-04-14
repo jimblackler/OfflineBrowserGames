@@ -15,6 +15,8 @@ const WASTE_X = 196;
 const WASTE_X_SPACING = 22;
 const WASTE_Y = STOCK_Y;
 const CURVE_TIME = 250;
+const RAISE_DURATION = 80;
+const RAISE_DISTANCE = 15;
 
 export class GameController {
   constructor(renderer) {
@@ -32,7 +34,7 @@ export class GameController {
       for (const [k, curve] of this.curves) {
         const t = MathUtils.toT(curve.startTime, curve.endTime, timeNow);
         if (t > 1) {
-          renderer.positionCard(k, curve.endX, curve.endY);
+          renderer.positionCard(k, curve.endX, curve.endY, 0);
           renderer.dropCard(k);
           curve.onArrive();
           this.curves.delete(k);
@@ -41,7 +43,7 @@ export class GameController {
           const multiplier1 = MathUtils.toT(0.5, 1, multiplier0);
 
           renderer.positionCard(k, MathUtils.tInRange(curve.startX, curve.endX, multiplier1),
-              MathUtils.tInRange(curve.startY, curve.endY, multiplier1));
+              MathUtils.tInRange(curve.startY, curve.endY, multiplier1), curve.startV * (1 - t));
         }
       }
     };
@@ -68,7 +70,7 @@ export class GameController {
 
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const [k, curve] of this.curves) {
-      this.renderer.positionCard(k, curve.endX, curve.endY);
+      this.renderer.positionCard(k, curve.endX, curve.endY, 0);
       this.renderer.dropCard(k);
       curve.onArrive();
       this.curves.delete(k);
@@ -104,7 +106,7 @@ export class GameController {
 
             onArrive = () => {
               this.renderer.faceUp(cardNumber);
-              this.renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState));
+              this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
             };
 
             const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
@@ -180,7 +182,7 @@ export class GameController {
 
           const onArrive = () => {
             this.renderer.faceUp(cardNumber);
-            this.renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState));
+            this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
           };
 
           this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
@@ -214,7 +216,7 @@ export class GameController {
         const cards = [];
         cards.push(cardNumber);
         onArrive = () => {
-          this.renderer.setCardDraggable(cardNumber, cards, (click) => this.release(cards, click, gameState));
+          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
           this.renderer.faceUp(cardNumber);
         };
       } else {
@@ -274,7 +276,7 @@ export class GameController {
     this.renderer.setCardNotDraggable(cardNumber);
 
     const position = this.renderer.getCardPosition(cardNumber);
-    if (Math.round(position[0]) === Math.round(x) && Math.round(position[1]) === Math.round(y)) {
+    if (Math.round(position[0]) === Math.round(x) && Math.round(position[1]) === Math.round(y) && position[2] === 0) {
       this.renderer.dropCard(cardNumber);
       // There already!
       onArrive();
@@ -288,10 +290,35 @@ export class GameController {
       endTime: timeNow + CURVE_TIME,
       startX: position[0],
       startY: position[1],
+      startV: position[2], // TODO .. just store the vector
       endX: x,
       endY: y,
       onArrive
     });
+  }
+
+  startDrag(cards, gameState) {
+    const timeNow = new Date().getTime();
+    let aborted = false;
+
+    const raise = () => {
+      if (aborted) {
+        return;
+      }
+      let t = (new Date().getTime() - timeNow) / RAISE_DURATION;
+      if (t > 1) {
+        t = 1;
+      }
+      for (const cardNumber of cards) {
+        const position = this.renderer.getCardPosition(cardNumber);
+        this.renderer.positionCard(cardNumber, position[0], position[1], RAISE_DISTANCE * t);
+      }
+      if (t < 1) {
+        requestAnimationFrame(raise);
+      }
+    };
+    requestAnimationFrame(raise);
+    return (click) => {aborted = true; return this.release(cards, click, gameState)};
   }
 
   release(cards, click, gameState) {

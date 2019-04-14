@@ -26,6 +26,7 @@ export class Renderer {
   constructor(gameDiv) {
     this.gameDiv = gameDiv;
     this.cardImages = [];
+    this.cardVPos = [];
     this.placeholdersDiv = document.createElement("div");
     this.gameDiv.appendChild(this.placeholdersDiv);
     this.cardsDiv = document.createElement("div");
@@ -36,6 +37,7 @@ export class Renderer {
     for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
       const cardImage = this.makeCard(idx);
       this.cardImages[idx] = cardImage;
+      this.cardVPos[idx] = 0;
       this.cardsDiv.appendChild(cardImage);
     }
 
@@ -99,11 +101,6 @@ export class Renderer {
     cardImage.style.backgroundPosition = "-" + CARD_WIDTH * type + "px " + "-" + CARD_HEIGHT * suit + "px";
   }
 
-  getCardPosition(cardNumber) {
-    const cardImage = this.cardImages[cardNumber];
-    return [cardImage.offsetLeft, cardImage.offsetTop];
-  }
-
   startDrag(cards, release, evt) {
     let lastClientX = evt.clientX;
     let lastClientY = evt.clientY;
@@ -123,7 +120,7 @@ export class Renderer {
     const mousemove = evt => {
       for (const card of cards) {
         const position = this.getCardPosition(card);
-        this.positionCard(card, position[0] + evt.clientX - lastClientX, position[1] + evt.clientY - lastClientY);
+        this.positionCard(card, position[0] + evt.clientX - lastClientX, position[1] + evt.clientY - lastClientY, position[2]);
       }
       lastClientX = evt.clientX;
       lastClientY = evt.clientY;
@@ -164,8 +161,8 @@ export class Renderer {
     }
   }
 
-  setCardDraggable(cardNumber, cards, release) {
-    this.setCardClickable(cardNumber, evt => this.startDrag(cards, release, evt));
+  setCardDraggable(cardNumber, cards, start) {
+    this.setCardClickable(cardNumber, evt => this.startDrag(cards, start(), evt));
   }
 
   setCardNotDraggable(cardNumber) {
@@ -179,7 +176,6 @@ export class Renderer {
 
   setFloating(cardNumber) {
     const cardImage = this.cardImages[cardNumber];
-    cardImage.style.boxShadow = "rgba(0, 0, 0, 0.497656) -3px -3px 12px inset, rgba(0, 0, 0, 0.398438) 4px 5px 5px";
     cardImage.style.zIndex = 1;
     this.cardsDiv.removeChild(cardImage);
     this.cardsDiv.appendChild(cardImage);
@@ -191,9 +187,21 @@ export class Renderer {
     cardImage.style.zIndex = 0;
   }
 
-  positionCard(cardNumber, x, y) {
+  getCardPosition(cardNumber) {
     const cardImage = this.cardImages[cardNumber];
+    const vPos = this.cardVPos[cardNumber];
+    return [cardImage.offsetLeft, cardImage.offsetTop + vPos,  vPos];
+  }
+
+  positionCard(cardNumber, x, y, v) { // TODO: take vector not components ?
+    const cardImage = this.cardImages[cardNumber];
+    this.cardVPos[cardNumber] = v;
     cardImage.style.left = x + "px";
-    cardImage.style.top = y + "px";
+    cardImage.style.top = (y - v) + "px";
+    if (v) {
+      cardImage.style.boxShadow = `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, 0.398438) 4px ${v}px 5px`;
+    } else {
+      cardImage.style.boxShadow = "";
+    }
   }
 }
