@@ -42,6 +42,10 @@ export class Renderer {
     }
 
     this.selectionIndicator = this.makeSelectionIndicator();
+    document.addEventListener("mousemove", (evt) => {
+      this.mouseX = evt.clientX;
+      this.mouseY = evt.clientY
+    });
   }
 
   placeHolder(x, y) {
@@ -109,7 +113,7 @@ export class Renderer {
     // Remove all mouseover handlers.
     for (let idx = 0; idx !== this.cardImages.length; idx++) {
       const cardImage = this.cardImages[idx];
-      cardImage.onmousemove = null;
+      cardImage.onmouseover = null;
       cardImage.onclick = null;
     }
     this.hideIndicator();
@@ -142,8 +146,9 @@ export class Renderer {
   }
 
   setClickable(image, mouseDownFunction, clickFunction) {
+
     if (clickFunction || mouseDownFunction) {
-      image.onmousemove = evt => {
+      const highlight = () => {
         this.selectionIndicator.style.left = image.offsetLeft + INDICATOR_OFFSET_X + "px";
         this.selectionIndicator.style.top = image.offsetTop + INDICATOR_OFFSET_Y + "px";
         image.parentNode.insertBefore(this.selectionIndicator, image.nextSibling);
@@ -154,6 +159,13 @@ export class Renderer {
         image.onclick = clickFunction;
         this.selectionIndicator.onmouseout = evt => this.hideIndicator();
       };
+
+      const rect = image.getBoundingClientRect();
+      if (this.mouseX >= rect.left && this.mouseX <= rect.right &&
+          this.mouseY >= rect.top && this.mouseY <= rect.bottom) {
+        highlight();
+      }
+      image.onmouseover = highlight;
     } else {
       image.onclick = null;
       image.onmousemove = null;
@@ -171,7 +183,7 @@ export class Renderer {
 
   setCardClickable(cardNumber, mouseDownFunction) {
     const cardImage = this.cardImages[cardNumber];
-    this.setClickable(cardImage, mouseDownFunction);
+    this.setClickable(cardImage, mouseDownFunction, null);
   }
 
   setFloating(cardNumber) {
@@ -190,7 +202,7 @@ export class Renderer {
   getCardPosition(cardNumber) {
     const cardImage = this.cardImages[cardNumber];
     const vPos = this.cardVPos[cardNumber];
-    return [cardImage.offsetLeft, cardImage.offsetTop + vPos,  vPos];
+    return [cardImage.offsetLeft, cardImage.offsetTop + vPos, vPos];
   }
 
   positionCard(cardNumber, x, y, v) { // TODO: take vector not components ?
