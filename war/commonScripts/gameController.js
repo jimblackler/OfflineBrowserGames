@@ -16,7 +16,7 @@ const WASTE_X_SPACING = 22;
 const WASTE_Y = STOCK_Y;
 const CURVE_TIME = 250;
 const RAISE_DURATION = 80;
-const RAISE_DISTANCE = 15;
+const RAISE_DISTANCE = 10;
 
 export class GameController {
   constructor(renderer) {
