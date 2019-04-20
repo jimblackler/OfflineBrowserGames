@@ -16,7 +16,8 @@ const WASTE_X_SPACING = 22;
 const WASTE_Y = STOCK_Y;
 const CURVE_TIME = 250;
 const RAISE_DURATION = 80;
-const RAISE_DISTANCE = 10;
+const RAISE_HEIGHT = 10;
+const FLIGHT_HEIGHT = 10;
 
 export class GameController {
   constructor(renderer) {
@@ -41,9 +42,16 @@ export class GameController {
         } else {
           const multiplier0 = Math.sin(MathUtils.tInRange(Math.PI / 4, Math.PI / 2, t));
           const multiplier1 = MathUtils.toT(0.5, 1, multiplier0);
+          let v;
+          if (curve.startV === 0 && curve.fly) {
+            const a = MathUtils.tInRange(Math.PI, 0, t);
+            v = Math.sin(a) * FLIGHT_HEIGHT;
+          } else {
+            v = curve.startV * (1 - t);
+          }
 
           renderer.positionCard(k, MathUtils.tInRange(curve.startX, curve.endX, multiplier1),
-              MathUtils.tInRange(curve.startY, curve.endY, multiplier1), curve.startV * (1 - t));
+              MathUtils.tInRange(curve.startY, curve.endY, multiplier1), v);
         }
       }
     };
@@ -126,7 +134,7 @@ export class GameController {
             };
           }
 
-          this.placeCard(cardNumber, x, FOUNDATION_Y, onArrive);
+          this.placeCard(cardNumber, x, FOUNDATION_Y, true, onArrive);
         }
       }
     }
@@ -139,7 +147,7 @@ export class GameController {
       for (let position = 0; position < faceDownLength; position++) {
         const cardNumber = tableau.get(position);
         this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-            TABLEAU_Y + TABLEAU_Y_SPACING * position, () => {
+            TABLEAU_Y + TABLEAU_Y_SPACING * position, true, () => {
             });
         this.renderer.faceDown(cardNumber);
       }
@@ -186,7 +194,7 @@ export class GameController {
           };
 
           this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-              TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive);
+              TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), true, onArrive);
         }
       }
     }
@@ -197,7 +205,7 @@ export class GameController {
     for (let idx = 0; idx !== stockLength; idx++) {
       const cardNumber = gameState.stock.get(idx);
       this.renderer.faceDown(cardNumber);
-      this.placeCard(cardNumber, STOCK_X, STOCK_Y, () => {
+      this.placeCard(cardNumber, STOCK_X, STOCK_Y, true, () => {
       });
     }
 
@@ -223,10 +231,14 @@ export class GameController {
         onArrive = () => this.renderer.faceUp(cardNumber);
       }
       let position = idx - (wasteLength - Math.min(gameState.rules.cardsToDraw, wasteLength));
+      let fly;
       if (position < 0) {
         position = 0;
+        fly = false;
+      } else {
+        fly = true;
       }
-      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive);
+      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, fly, onArrive);
     }
 
     // Auto play
@@ -267,7 +279,7 @@ export class GameController {
     }
   }
 
-  placeCard(cardNumber, x, y, onArrive) {
+  placeCard(cardNumber, x, y, fly, onArrive) {
     const timeNow = new Date().getTime();
     if (!this.cardHistory.has(cardNumber)) {
       this.cardHistory.set(cardNumber, new Map());
@@ -293,6 +305,7 @@ export class GameController {
       startV: position[2], // TODO .. just store the vector
       endX: x,
       endY: y,
+      fly,
       onArrive
     });
   }
@@ -311,7 +324,7 @@ export class GameController {
       }
       for (const cardNumber of cards) {
         const position = this.renderer.getCardPosition(cardNumber);
-        this.renderer.positionCard(cardNumber, position[0], position[1], RAISE_DISTANCE * t);
+        this.renderer.positionCard(cardNumber, position[0], position[1], RAISE_HEIGHT * t);
       }
       if (t < 1) {
         requestAnimationFrame(raise);
