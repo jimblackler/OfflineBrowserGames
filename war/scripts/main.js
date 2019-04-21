@@ -14,15 +14,15 @@ import {GameStore} from "../commonScripts/gameStore.js";
 import {Renderer} from "./renderer.js";
 
 const renderer = new Renderer(document.getElementById("gameDiv"));
-const baseRenderer = new GameController(renderer);
+const controller = new GameController(renderer);
 
 window.redraw = () => {
   const gameState = new GameState();
   gameState.newGame(JSON.parse(localStorage["rules"]));
-  baseRenderer.render(gameState); // Render twice to not animate everything (only draw).
+  controller.render(gameState); // Render twice to not animate everything (only draw).
   gameState.draw(); // Initial draw.
   GameStore.store(gameState);
-  baseRenderer.render(gameState);
+  controller.render(gameState);
 };
 
 window.newGame = rules => {
@@ -41,8 +41,8 @@ document.oncontextmenu = () => {
 if (localStorage["gamePosition"] > 0 && localStorage["version"] === "2") {
   const gameState = new GameState();
   if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
-    baseRenderer.render(gameState); // Render twice to not animate everything (only draw).
-    baseRenderer.render(gameState);
+    controller.render(gameState); // Render twice to not animate everything (only draw).
+    controller.render(gameState);
   } else {
     window.newGame({"cardsToDraw":3});
   }
@@ -61,7 +61,7 @@ window.undo = function() {
     localStorage["gamePosition"]--;
     const gameState = new GameState();
     gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]));
-    baseRenderer.render(gameState);
+    controller.render(gameState);
   }
 };
 
