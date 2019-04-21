@@ -123,7 +123,8 @@ export class Renderer {
     const mousemove = evt => {
       for (const card of cards) {
         const position = this.getCardPosition(card);
-        this.positionCard(card, position[0] + evt.clientX - lastClientX, position[1] + evt.clientY - lastClientY, position[2]);
+        this.positionCard(card, position[0] + evt.clientX - lastClientX,
+            position[1] + evt.clientY - lastClientY, position[2]);
       }
       lastClientX = evt.clientX;
       lastClientY = evt.clientY;
