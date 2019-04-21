@@ -226,15 +226,16 @@ export class GameController {
     for (let idx = 0; idx !== wasteLength; idx++) {
       const cardNumber = gameState.waste.get(idx);
       let onArrive;
+      this.renderer.faceUp(cardNumber);
       if (idx === wasteLength - 1) {
         const cards = [];
         cards.push(cardNumber);
         onArrive = () => {
           this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
-          this.renderer.faceUp(cardNumber);
+
         };
       } else {
-        onArrive = () => this.renderer.faceUp(cardNumber);
+        onArrive = () => {};
       }
       let position = idx - (wasteLength - Math.min(gameState.rules.cardsToDraw, wasteLength));
       if (position < 0) {
