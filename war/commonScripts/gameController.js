@@ -17,7 +17,8 @@ const WASTE_Y = STOCK_Y;
 const CURVE_TIME = 250;
 const RAISE_DURATION = 80;
 const RAISE_HEIGHT = 10;
-const FLIGHT_HEIGHT = 10;
+const FLY_DISTANCE_MAX = 650;
+const FLY_HEIGHT = 40;
 
 export class GameController {
   constructor(renderer) {
@@ -36,16 +37,22 @@ export class GameController {
         const t = MathUtils.toT(curve.startTime, curve.endTime, timeNow);
         if (t > 1) {
           renderer.positionCard(k, curve.endX, curve.endY, 0);
-          renderer.dropCard(k);
           curve.onArrive();
           this.curves.delete(k);
         } else {
-          const multiplier0 = Math.sin(MathUtils.tInRange(Math.PI / 4, Math.PI / 2, t));
-          const multiplier1 = MathUtils.toT(0.5, 1, multiplier0);
+          const multiplier1 = Math.sin(t * Math.PI / 2);
           let v;
-          if (curve.startV === 0 && curve.fly) {
-            const a = MathUtils.tInRange(Math.PI, 0, t);
-            v = Math.sin(a) * FLIGHT_HEIGHT;
+          const deltaX = curve.startX - curve.endX;
+          const deltaY = curve.startY - curve.endY;
+          let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+          if (distance > FLY_DISTANCE_MAX) {
+            distance = FLY_DISTANCE_MAX;
+          }
+          const flyHeight = FLY_HEIGHT * distance / FLY_DISTANCE_MAX;
+          if (curve.startV < flyHeight) {
+            const start = Math.PI - Math.asin(curve.startV / flyHeight);
+            const a = MathUtils.tInRange(start, 0, t);
+            v = Math.sin(a) * flyHeight;
           } else {
             v = curve.startV * (1 - t);
           }
@@ -79,7 +86,6 @@ export class GameController {
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const [k, curve] of this.curves) {
       this.renderer.positionCard(k, curve.endX, curve.endY, 0);
-      this.renderer.dropCard(k);
       curve.onArrive();
       this.curves.delete(k);
     }
@@ -134,7 +140,7 @@ export class GameController {
             };
           }
 
-          this.placeCard(cardNumber, x, FOUNDATION_Y, true, onArrive);
+          this.placeCard(cardNumber, x, FOUNDATION_Y, onArrive);
         }
       }
     }
@@ -147,7 +153,7 @@ export class GameController {
       for (let position = 0; position < faceDownLength; position++) {
         const cardNumber = tableau.get(position);
         this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-            TABLEAU_Y + TABLEAU_Y_SPACING * position, true, () => {
+            TABLEAU_Y + TABLEAU_Y_SPACING * position, () => {
             });
         this.renderer.faceDown(cardNumber);
       }
@@ -194,7 +200,7 @@ export class GameController {
           };
 
           this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-              TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), true, onArrive);
+              TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive);
         }
       }
     }
@@ -205,7 +211,7 @@ export class GameController {
     for (let idx = 0; idx !== stockLength; idx++) {
       const cardNumber = gameState.stock.get(idx);
       this.renderer.faceDown(cardNumber);
-      this.placeCard(cardNumber, STOCK_X, STOCK_Y, true, () => {
+      this.placeCard(cardNumber, STOCK_X, STOCK_Y, () => {
       });
     }
 
@@ -231,14 +237,10 @@ export class GameController {
         onArrive = () => this.renderer.faceUp(cardNumber);
       }
       let position = idx - (wasteLength - Math.min(gameState.rules.cardsToDraw, wasteLength));
-      let fly;
       if (position < 0) {
         position = 0;
-        fly = false;
-      } else {
-        fly = true;
       }
-      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, fly, onArrive);
+      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive);
     }
 
     // Auto play
@@ -279,24 +281,16 @@ export class GameController {
     }
   }
 
-  placeCard(cardNumber, x, y, fly, onArrive) {
+  placeCard(cardNumber, x, y, onArrive) {
     const timeNow = new Date().getTime();
     if (!this.cardHistory.has(cardNumber)) {
       this.cardHistory.set(cardNumber, new Map());
     }
     this.cardHistory.get(cardNumber).set([x, y], timeNow);
     this.renderer.setCardNotDraggable(cardNumber);
+    this.renderer.raiseCard(cardNumber);
 
     const position = this.renderer.getCardPosition(cardNumber);
-    if (Math.round(position[0]) === Math.round(x) && Math.round(position[1]) === Math.round(y) && position[2] === 0) {
-      this.renderer.dropCard(cardNumber);
-      // There already!
-      onArrive();
-      return;
-    }
-
-    this.renderer.setFloating(cardNumber);
-
     this.curves.set(cardNumber, {
       startTime: timeNow,
       endTime: timeNow + CURVE_TIME,
@@ -305,7 +299,6 @@ export class GameController {
       startV: position[2], // TODO .. just store the vector
       endX: x,
       endY: y,
-      fly,
       onArrive
     });
   }

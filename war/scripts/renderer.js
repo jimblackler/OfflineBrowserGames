@@ -42,6 +42,8 @@ export class Renderer {
     }
 
     this.selectionIndicator = this.makeSelectionIndicator();
+    this.hideIndicator();
+    this.gameDiv.append(this.selectionIndicator);
     document.addEventListener("mousemove", (evt) => {
       this.mouseX = evt.clientX;
       this.mouseY = evt.clientY
@@ -117,9 +119,6 @@ export class Renderer {
       cardImage.onclick = null;
     }
     this.hideIndicator();
-    for (const card of cards) {
-      this.setFloating(card);
-    }
 
     const mousemove = evt => {
       for (const card of cards) {
@@ -186,17 +185,10 @@ export class Renderer {
     this.setClickable(cardImage, mouseDownFunction, null);
   }
 
-  setFloating(cardNumber) {
+  raiseCard(cardNumber) {
     const cardImage = this.cardImages[cardNumber];
-    cardImage.style.zIndex = 1;
     this.cardsDiv.removeChild(cardImage);
     this.cardsDiv.appendChild(cardImage);
-  }
-
-  dropCard(cardNumber) {
-    const cardImage = this.cardImages[cardNumber];
-    cardImage.style.boxShadow = "none";
-    cardImage.style.zIndex = 0;
   }
 
   getCardPosition(cardNumber) {
@@ -212,8 +204,10 @@ export class Renderer {
     cardImage.style.top = (y - v) + "px";
     if (v) {
       cardImage.style.boxShadow = `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, 0.398438) 4px ${v}px 5px`;
+      cardImage.style.zIndex = 1;
     } else {
-      cardImage.style.boxShadow = "";
+      cardImage.style.boxShadow = "none";
+      cardImage.style.zIndex = 0;
     }
   }
 }
