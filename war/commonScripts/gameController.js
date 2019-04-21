@@ -248,7 +248,7 @@ export class GameController {
           break;
         }
       }
-      if (anyFaceDown) {
+      if (!anyFaceDown) {
         window.setTimeout(() => {
           for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
             const tableau = gameState.tableausFaceUp[tableauIdx];
@@ -271,9 +271,9 @@ export class GameController {
               return;
             }
           }
+          // All complete. If the user hits refresh, start a new game.
+          GameStore.erase();
         }, 400);
-      } else {
-        GameStore.erase();
       }
     }
   }
