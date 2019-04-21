@@ -245,7 +245,7 @@ export class GameController {
     }
 
     // Auto play
-    if (gameState.stock.length() === 0 && gameState.waste.length() <= 1) {
+    if (gameState.stock.length() === 0 && gameState.waste.length() === 0) {
       let anyFaceDown = false;
       for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
         const tableau = gameState.tableausFaceDown[tableauIdx];
