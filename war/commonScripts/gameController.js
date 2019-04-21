@@ -14,11 +14,15 @@ const FOUNDATION_Y = STOCK_Y;
 const WASTE_X = 196;
 const WASTE_X_SPACING = 22;
 const WASTE_Y = STOCK_Y;
-const CURVE_TIME = 250;
 const RAISE_DURATION = 80;
 const RAISE_HEIGHT = 8;
+
+const ANIMATION_TIME = 400;
+const ANIMATION_DISTANCE_MAX = 750;
+const ANIMATION_TIME_SUPPLEMENT = 125;
+
+const FLY_HEIGHT = 50;
 const FLY_DISTANCE_MAX = 1000;
-const FLY_HEIGHT = 40;
 
 export class GameController {
   constructor(renderer) {
@@ -286,16 +290,18 @@ export class GameController {
     this.renderer.raiseCard(cardNumber);
 
     const position = this.renderer.getCardPosition(cardNumber);
+
     const deltaX = position[0] - x;
     const deltaY = position[1] - y;
-    let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    if (distance > FLY_DISTANCE_MAX) {
-      distance = FLY_DISTANCE_MAX;
-    }
-    const flyHeight = FLY_HEIGHT * distance / FLY_DISTANCE_MAX;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const flyDistance = Math.min(distance, FLY_DISTANCE_MAX);
+    const flyHeight = FLY_HEIGHT * flyDistance / FLY_DISTANCE_MAX;
+    const animationDistance = Math.min(distance, ANIMATION_DISTANCE_MAX);
+    const animationTime = ANIMATION_TIME * flyDistance / ANIMATION_DISTANCE_MAX + ANIMATION_TIME_SUPPLEMENT;
+
     this.curves.set(cardNumber, {
       startTime: timeNow,
-      endTime: timeNow + CURVE_TIME,
+      endTime: timeNow + animationTime,
       startX: position[0],
       startY: position[1],
       startV: position[2], // TODO .. just store the vector
