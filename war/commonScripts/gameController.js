@@ -250,7 +250,7 @@ export class GameController {
           break;
         }
       }
-      if (!anyFaceDown) {
+      if (anyFaceDown) {
         window.setTimeout(() => {
           for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
             const tableau = gameState.tableausFaceUp[tableauIdx];
@@ -274,6 +274,8 @@ export class GameController {
             }
           }
         }, 400);
+      } else {
+        GameStore.erase();
       }
     }
   }

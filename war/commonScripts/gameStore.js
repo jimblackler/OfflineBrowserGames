@@ -7,4 +7,7 @@ export class GameStore {
     localStorage["gamePosition"]++;
     localStorage["gamePosition" + localStorage["gamePosition"]] = JSON.stringify(gameState);
   }
+  static erase() {
+    delete localStorage["gamePosition"];
+  }
 }
