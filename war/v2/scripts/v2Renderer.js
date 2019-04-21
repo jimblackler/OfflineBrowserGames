@@ -1,4 +1,3 @@
-import {BaseRenderer} from "../../commonScripts/baseRenderer.js";
 import {ObjectLoader} from "../threejs/src/loaders/ObjectLoader.js";
 import {OrbitControls} from "../threejs/controls/OrbitControls.js";
 import {PCFSoftShadowMap} from "../threejs/src/constants.js";
@@ -10,10 +9,12 @@ import {WebGLRenderer} from "../threejs/src/renderers/WebGLRenderer.js";
 const TEXTURE_WIDTH = 1339;
 const TEXTURE_HEIGHT = 900;
 
-export class V2Renderer extends BaseRenderer {
+const CARD_WIDTH = 103;
+const CARD_HEIGHT = 143;
+
+export class V2Renderer {
 
   constructor(container) {
-    super();
 
     const scene = new Scene();
 
@@ -73,9 +74,44 @@ export class V2Renderer extends BaseRenderer {
   }
 
   paintCard(map, suit, type) {
-    map.repeat = new Vector2(this.CARD_WIDTH / TEXTURE_WIDTH, this.CARD_HEIGHT / TEXTURE_HEIGHT);
-    map.offset = new Vector2((this.CARD_WIDTH * type) / TEXTURE_WIDTH,
-        1 - (this.CARD_HEIGHT * suit + this.CARD_HEIGHT) / TEXTURE_HEIGHT);
+    map.repeat = new Vector2(CARD_WIDTH / TEXTURE_WIDTH, CARD_HEIGHT / TEXTURE_HEIGHT);
+    map.offset = new Vector2((CARD_WIDTH * type) / TEXTURE_WIDTH,
+        1 - (CARD_HEIGHT * suit + CARD_HEIGHT) / TEXTURE_HEIGHT);
     map.needsUpdate = true;
   }
+
+  placeHolder(x, y) {
+
+  }
+
+  makeOverlay(x, y) {
+
+  }
+
+  faceDown(cardNumber) {
+  }
+
+  faceUp(cardNumber) {
+  }
+
+  setClick(element, clickFunction) {
+  }
+
+  setCardDraggable(cardNumber, cards, start) {
+  }
+
+  setCardNotDraggable(cardNumber) {
+  }
+
+  raiseCard(cardNumber) {
+  }
+
+  getCardPosition(cardNumber) {
+    return [0, 0, 0];
+  }
+
+  positionCard(cardNumber, x, y, v) {
+  }
+
+
 }
