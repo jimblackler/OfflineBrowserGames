@@ -17,8 +17,10 @@ const WASTE_Y = STOCK_Y;
 const RAISE_DURATION = 80;
 const RAISE_HEIGHT = 8;
 const ANIMATION_TIME = 400;
-const ANIMATION_DISTANCE_MAX = 750;
+const ANIMATION_DISTANCE_MAX = 800;
 const ANIMATION_TIME_SUPPLEMENT = 125;
+const WASTE_DRAW_STAGGER = 20;
+const ANIMATION_TEST_SLOWDOWN = 1;
 const FLY_HEIGHT = 30;
 const FLY_DISTANCE_MAX = 800;
 
@@ -36,6 +38,9 @@ export class GameController {
       requestAnimationFrame(animate);
       const timeNow = new Date().getTime();
       for (const [k, curve] of this.curves) {
+        if (timeNow < curve.startTime) {
+          continue;
+        }
         const t = MathUtils.toT(curve.startTime, curve.endTime, timeNow);
         if (t > 1) {
           renderer.positionCard(k, curve.endX, curve.endY, 0);
@@ -93,7 +98,7 @@ export class GameController {
       const cardNumber = gameState.stock.get(idx);
       this.renderer.faceDown(cardNumber);
       this.placeCard(cardNumber, STOCK_X, STOCK_Y, () => {
-      });
+      }, 0);
     }
 
     this.renderer.setClick(this.stockOverlay, () => {
@@ -108,12 +113,13 @@ export class GameController {
       const cardNumber = gameState.waste.get(idx);
       let onArrive;
       this.renderer.faceUp(cardNumber);
+      const staggerOrder =  Math.max(idx - wasteLength + gameState.rules.cardsToDraw, 0);
+      const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
       if (idx === wasteLength - 1) {
         const cards = [];
         cards.push(cardNumber);
         onArrive = () => {
           this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
-
         };
       } else {
         onArrive = () => {};
@@ -122,7 +128,7 @@ export class GameController {
       if (position < 0) {
         position = 0;
       }
-      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive);
+      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive, delay);
     }
 
     // Position foundation cards.
@@ -174,7 +180,7 @@ export class GameController {
             };
           }
 
-          this.placeCard(cardNumber, x, FOUNDATION_Y, onArrive);
+          this.placeCard(cardNumber, x, FOUNDATION_Y, onArrive, 0);
         }
       }
     }
@@ -188,7 +194,7 @@ export class GameController {
         const cardNumber = tableau.get(position);
         this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             TABLEAU_Y + TABLEAU_Y_SPACING * position, () => {
-            });
+            }, 0);
         this.renderer.faceDown(cardNumber);
       }
 
@@ -233,7 +239,7 @@ export class GameController {
           };
 
           this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-              TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive);
+              TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive, 0);
         }
       }
     }
@@ -278,7 +284,7 @@ export class GameController {
     }
   }
 
-  placeCard(cardNumber, x, y, onArrive) {
+  placeCard(cardNumber, x, y, onArrive, delay) {
     const timeNow = new Date().getTime();
     if (!this.cardHistory.has(cardNumber)) {
       this.cardHistory.set(cardNumber, new Map());
@@ -295,11 +301,13 @@ export class GameController {
     const flyDistance = Math.min(distance, FLY_DISTANCE_MAX);
     const flyHeight = FLY_HEIGHT * flyDistance / FLY_DISTANCE_MAX;
     const animationDistance = Math.min(distance, ANIMATION_DISTANCE_MAX);
-    const animationTime = ANIMATION_TIME * flyDistance / ANIMATION_DISTANCE_MAX + ANIMATION_TIME_SUPPLEMENT;
+
+    const animationTime = ANIMATION_TEST_SLOWDOWN *
+        (ANIMATION_TIME * animationDistance / ANIMATION_DISTANCE_MAX + ANIMATION_TIME_SUPPLEMENT);
 
     this.curves.set(cardNumber, {
-      startTime: timeNow,
-      endTime: timeNow + animationTime,
+      startTime: timeNow + delay,
+      endTime: timeNow + animationTime + delay,
       start: position,
       endX: x,
       endY: y,
