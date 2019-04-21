@@ -1,4 +1,6 @@
+import {PerspectiveCamera} from '../threejs/src/cameras/PerspectiveCamera.js';
 import {ObjectLoader} from "../threejs/src/loaders/ObjectLoader.js";
+import {Object3D} from '../threejs/src/core/Object3D.js';
 import {OrbitControls} from "../threejs/controls/OrbitControls.js";
 import {PCFSoftShadowMap} from "../threejs/src/constants.js";
 import {Scene} from "../threejs/src/scenes/Scene.js";
@@ -15,9 +17,6 @@ const CARD_HEIGHT = 143;
 export class V2Renderer {
 
   constructor(container) {
-
-    const scene = new Scene();
-
     const renderer = new WebGLRenderer({antialias: true});
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -29,48 +28,59 @@ export class V2Renderer {
 
     renderer.gammaInput = true;
     renderer.gammaOutput = true;
+    this.renderer = renderer;
+  }
 
+  init() {
+    const scene = new Scene();
     const loader = new ObjectLoader();
-    loader.load('data/app.json', object => {
-      scene.add(object);
-      const originalCard = scene.getObjectByName('Card');
-      this.paintCard(originalCard.getObjectByName('Back').material.map, 4, 0);
-      const card = originalCard.clone();
+    return new Promise((resolve, reject) => {
+      loader.load('data/app.json', object => {
+        scene.add(object);
+        const originalCard = scene.getObjectByName('Card');
+        const back = originalCard.getObjectByName('Back');
+        this.paintCard(back.material.map, 4, 0);
+        const card = originalCard.clone();
 
-      const front = card.getObjectByName('Front');
-      front.material = front.material.clone();
-      front.material.map = front.material.map.clone();
-      this.paintCard(front.material.map, 3, 12);
+        const front = card.getObjectByName('Front');
+        front.material = front.material.clone();
+        front.material.map = front.material.map.clone();
+        this.paintCard(front.material.map, 3, 12);
 
-      card.position.x = 10;
-      card.position.z = 10;
-      scene.add(card);
+        card.position.x = 10;
+        card.position.z = 10;
+        scene.add(card);
 
-      originalCard.visible = false;
+        originalCard.visible = false;
 
-      loader.load('data/camera.json', camera => {
-        scene.add(camera);
-        const controls = new OrbitControls(camera);
-        controls.target = card.position.clone();
+        loader.load('data/camera.json', objecct => {
+          const camera = object;
+          scene.add(camera);
+          const controls = new OrbitControls(camera);
+          controls.target = card.position.clone();
 
-        controls.update();
+          controls.update();
 
-        function setAspect() {
-          camera.aspect = window.innerWidth / window.innerHeight;
-          camera.updateProjectionMatrix();
-          renderer.setSize(window.innerWidth, window.innerHeight);
-        }
+          const setAspect = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+          };
 
-        function animate() {
-          requestAnimationFrame(animate);
-          renderer.render(scene, camera);
-        }
+          const animate = () => {
+            requestAnimationFrame(animate);
+            this.renderer.render(scene, camera);
+          };
 
-        window.addEventListener('resize', setAspect, false);
-        setAspect();
-        animate();
+          window.addEventListener('resize', setAspect, false);
+          setAspect();
+          animate();
+          resolve();
+        });
       });
     });
+
+
   }
 
   paintCard(map, suit, type) {

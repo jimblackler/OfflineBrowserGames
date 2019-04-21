@@ -13,12 +13,16 @@ import {GameState} from "../../commonScripts/gameState.js";
 import {V2Renderer} from './v2Renderer.js';
 
 const renderer = new V2Renderer(document.getElementById("gameDiv"));
-const controller = new GameController(renderer);
+renderer.init().then(() => {
+  const controller = new GameController(renderer);
+  const gameState = new GameState();
+  if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
+    controller.render(gameState); // Render twice to not animate everything (only draw).
+    controller.render(gameState);
+  } else {
+    window.newGame({"cardsToDraw": 3});
+  }
 
-const gameState = new GameState();
-if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
-  controller.render(gameState); // Render twice to not animate everything (only draw).
-  controller.render(gameState);
-} else {
-  window.newGame({"cardsToDraw":3});
-}
+});
+
+
