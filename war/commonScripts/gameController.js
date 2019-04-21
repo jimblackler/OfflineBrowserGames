@@ -240,8 +240,6 @@ export class GameController {
       }
     }
 
-
-
     // Auto play
     if (gameState.stock.length() === 0 && gameState.waste.length() <= 1) {
       let anyFaceDown = false;
@@ -270,7 +268,7 @@ export class GameController {
                 continue;
               }
               slot.action();
-              GameController.store(gameState);
+              GameStore.store(gameState);
               this.render(gameState);
               return;
             }
