@@ -42,17 +42,11 @@ export class GameController {
         } else {
           const multiplier1 = Math.sin(t * Math.PI / 2);
           let v;
-          const deltaX = curve.startX - curve.endX;
-          const deltaY = curve.startY - curve.endY;
-          let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-          if (distance > FLY_DISTANCE_MAX) {
-            distance = FLY_DISTANCE_MAX;
-          }
-          const flyHeight = FLY_HEIGHT * distance / FLY_DISTANCE_MAX;
-          if (curve.startV < flyHeight) {
-            const start = Math.PI - Math.asin(curve.startV / flyHeight);
+
+          if (curve.startV < curve.flyHeight) {
+            const start = Math.PI - Math.asin(curve.startV / curve.flyHeight);
             const a = MathUtils.tInRange(start, 0, t);
-            v = Math.sin(a) * flyHeight;
+            v = Math.sin(a) * curve.flyHeight;
           } else {
             v = curve.startV * (1 - t);
           }
@@ -292,6 +286,13 @@ export class GameController {
     this.renderer.raiseCard(cardNumber);
 
     const position = this.renderer.getCardPosition(cardNumber);
+    const deltaX = position[0] - x;
+    const deltaY = position[1] - y;
+    let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    if (distance > FLY_DISTANCE_MAX) {
+      distance = FLY_DISTANCE_MAX;
+    }
+    const flyHeight = FLY_HEIGHT * distance / FLY_DISTANCE_MAX;
     this.curves.set(cardNumber, {
       startTime: timeNow,
       endTime: timeNow + CURVE_TIME,
@@ -300,6 +301,7 @@ export class GameController {
       startV: position[2], // TODO .. just store the vector
       endX: x,
       endY: y,
+      flyHeight,
       onArrive
     });
   }
