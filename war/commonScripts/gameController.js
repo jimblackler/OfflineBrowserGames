@@ -19,8 +19,8 @@ const RAISE_HEIGHT = 8;
 const ANIMATION_TIME = 400;
 const ANIMATION_DISTANCE_MAX = 750;
 const ANIMATION_TIME_SUPPLEMENT = 125;
-const FLY_HEIGHT = 50;
-const FLY_DISTANCE_MAX = 1000;
+const FLY_HEIGHT = 30;
+const FLY_DISTANCE_MAX = 800;
 
 export class GameController {
   constructor(renderer) {
