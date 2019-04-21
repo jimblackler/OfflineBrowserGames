@@ -16,11 +16,9 @@ const WASTE_X_SPACING = 22;
 const WASTE_Y = STOCK_Y;
 const RAISE_DURATION = 80;
 const RAISE_HEIGHT = 8;
-
 const ANIMATION_TIME = 400;
 const ANIMATION_DISTANCE_MAX = 750;
 const ANIMATION_TIME_SUPPLEMENT = 125;
-
 const FLY_HEIGHT = 50;
 const FLY_DISTANCE_MAX = 1000;
 
@@ -47,16 +45,16 @@ export class GameController {
           const multiplier1 = Math.sin(t * Math.PI / 2);
           let v;
 
-          if (curve.startV < curve.flyHeight) {
-            const start = Math.PI - Math.asin(curve.startV / curve.flyHeight);
+          if (curve.start[2] < curve.flyHeight) {
+            const start = Math.PI - Math.asin(curve.start[2] / curve.flyHeight);
             const a = MathUtils.tInRange(start, 0, t);
             v = Math.sin(a) * curve.flyHeight;
           } else {
-            v = curve.startV * (1 - t);
+            v = curve.start[2] * (1 - t);
           }
 
-          renderer.positionCard(k, MathUtils.tInRange(curve.startX, curve.endX, multiplier1),
-              MathUtils.tInRange(curve.startY, curve.endY, multiplier1), v);
+          renderer.positionCard(k, MathUtils.tInRange(curve.start[0], curve.endX, multiplier1),
+              MathUtils.tInRange(curve.start[1], curve.endY, multiplier1), v);
         }
       }
     };
@@ -302,9 +300,7 @@ export class GameController {
     this.curves.set(cardNumber, {
       startTime: timeNow,
       endTime: timeNow + animationTime,
-      startX: position[0],
-      startY: position[1],
-      startV: position[2], // TODO .. just store the vector
+      start: position,
       endX: x,
       endY: y,
       flyHeight,
