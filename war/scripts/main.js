@@ -37,16 +37,10 @@ document.oncontextmenu = () => {
   return false;
 };
 
-
-if (localStorage["gamePosition"] > 0 && localStorage["version"] === "2") {
-  const gameState = new GameState();
-  if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
-    controller.render(gameState); // Render twice to not animate everything (only draw).
-    controller.render(gameState);
-  } else {
-    window.newGame({"cardsToDraw":3});
-  }
- 
+const gameState = new GameState();
+if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
+  controller.render(gameState); // Render twice to not animate everything (only draw).
+  controller.render(gameState);
 } else {
   window.newGame({"cardsToDraw":3});
 }
