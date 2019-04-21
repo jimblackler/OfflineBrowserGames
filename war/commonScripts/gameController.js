@@ -16,8 +16,8 @@ const WASTE_X_SPACING = 22;
 const WASTE_Y = STOCK_Y;
 const CURVE_TIME = 250;
 const RAISE_DURATION = 80;
-const RAISE_HEIGHT = 10;
-const FLY_DISTANCE_MAX = 650;
+const RAISE_HEIGHT = 8;
+const FLY_DISTANCE_MAX = 1000;
 const FLY_HEIGHT = 40;
 
 export class GameController {
@@ -90,6 +90,45 @@ export class GameController {
       this.curves.delete(k);
     }
 
+    // Position stock cards.
+    const stockLength = gameState.stock.length();
+
+    for (let idx = 0; idx !== stockLength; idx++) {
+      const cardNumber = gameState.stock.get(idx);
+      this.renderer.faceDown(cardNumber);
+      this.placeCard(cardNumber, STOCK_X, STOCK_Y, () => {
+      });
+    }
+
+    this.renderer.setClick(this.stockOverlay, () => {
+      gameState.draw();
+      GameStore.store(gameState);
+      this.render(gameState);
+    });
+
+    // Position waste cards.
+    const wasteLength = gameState.waste.length();
+    for (let idx = 0; idx !== wasteLength; idx++) {
+      const cardNumber = gameState.waste.get(idx);
+      let onArrive;
+      this.renderer.faceUp(cardNumber);
+      if (idx === wasteLength - 1) {
+        const cards = [];
+        cards.push(cardNumber);
+        onArrive = () => {
+          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
+
+        };
+      } else {
+        onArrive = () => {};
+      }
+      let position = idx - (wasteLength - Math.min(gameState.rules.cardsToDraw, wasteLength));
+      if (position < 0) {
+        position = 0;
+      }
+      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive);
+    }
+
     // Position foundation cards.
     for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
       const foundation = gameState.foundations[foundationIdx];
@@ -114,12 +153,11 @@ export class GameController {
       } else {
         for (let position = 0; position < foundationLength; position++) {
           const cardNumber = foundation.get(position);
+          this.renderer.faceUp(cardNumber);
           let onArrive;
           if (position === foundationLength - 1) {
             const cards = [cardNumber];
-
             onArrive = () => {
-              this.renderer.faceUp(cardNumber);
               this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
             };
 
@@ -193,9 +231,8 @@ export class GameController {
               this.slotsFor.set(other, slotsFor);
             }
           }
-
+          this.renderer.faceUp(cardNumber);
           const onArrive = () => {
-            this.renderer.faceUp(cardNumber);
             this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
           };
 
@@ -205,44 +242,7 @@ export class GameController {
       }
     }
 
-    // Position stock cards.
-    const stockLength = gameState.stock.length();
 
-    for (let idx = 0; idx !== stockLength; idx++) {
-      const cardNumber = gameState.stock.get(idx);
-      this.renderer.faceDown(cardNumber);
-      this.placeCard(cardNumber, STOCK_X, STOCK_Y, () => {
-      });
-    }
-
-    this.renderer.setClick(this.stockOverlay, () => {
-      gameState.draw();
-      GameStore.store(gameState);
-      this.render(gameState);
-    });
-
-    // Position waste cards.
-    const wasteLength = gameState.waste.length();
-    for (let idx = 0; idx !== wasteLength; idx++) {
-      const cardNumber = gameState.waste.get(idx);
-      let onArrive;
-      this.renderer.faceUp(cardNumber);
-      if (idx === wasteLength - 1) {
-        const cards = [];
-        cards.push(cardNumber);
-        onArrive = () => {
-          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
-
-        };
-      } else {
-        onArrive = () => {};
-      }
-      let position = idx - (wasteLength - Math.min(gameState.rules.cardsToDraw, wasteLength));
-      if (position < 0) {
-        position = 0;
-      }
-      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive);
-    }
 
     // Auto play
     if (gameState.stock.length() === 0 && gameState.waste.length() <= 1) {
