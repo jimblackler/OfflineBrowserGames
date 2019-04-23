@@ -18,7 +18,6 @@ export class V2Renderer {
 
   constructor(container) {
     this.cardObjects = [];
-    this.cardVPos = []; // needed??
 
     const renderer = new WebGLRenderer({antialias: true});
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -51,7 +50,6 @@ export class V2Renderer {
           const card = originalCard.clone();
 
           this.cardObjects[cardNumber] = card;
-          this.cardVPos[cardNumber] = 0;
 
           const front = card.getObjectByName('Front');
           front.material = front.material.clone();
@@ -131,12 +129,13 @@ export class V2Renderer {
 
   getCardPosition(cardNumber) {
     const card = this.cardObjects[cardNumber];
-    return [card.position.x * 10, card.position.z * 10, 0];
+    return [card.position.x * 10, card.position.z * 10, card.position.y * 10];
   }
 
   positionCard(cardNumber, x, y, v) {
     const card = this.cardObjects[cardNumber];
     card.position.x = x / 10;
+    card.position.y = v / 10;
     card.position.z = y / 10;
   }
 }
