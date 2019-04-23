@@ -63,38 +63,6 @@
       "type": 1009, 
       "anisotropy": 1, 
       "uuid": "DDF73A36-F14E-48A3-9098-BAFDE42190AC"
-    }, 
-    {
-      "repeat": [
-        0.1, 
-        0.1
-      ], 
-      "center": [
-        0, 
-        0
-      ], 
-      "format": 1023, 
-      "flipY": true, 
-      "magFilter": 1006, 
-      "encoding": 3000, 
-      "mapping": 300, 
-      "unpackAlignment": 4, 
-      "name": "", 
-      "premultiplyAlpha": false, 
-      "minFilter": 1008, 
-      "image": "C70BEF77-4570-4810-A502-613591AD4EEC", 
-      "offset": [
-        0, 
-        0
-      ], 
-      "wrap": [
-        1001, 
-        1001
-      ], 
-      "rotation": 0, 
-      "type": 1009, 
-      "anisotropy": 1, 
-      "uuid": "B3BFAC21-2FED-4325-B884-C918D71FA7D1"
     }
   ], 
   "geometries": [
@@ -326,7 +294,7 @@
               1
             ], 
             "geometry": "E9A52076-24FF-43E5-A0A6-B0A3C82F51A2", 
-            "material": "4FE08499-5BC1-4672-A9E8-25BE273CFDD8", 
+            "material": "4FE08499-5BC1-4672-A9E8-25BE273CFDD8",
             "name": "Back", 
             "castShadow": true, 
             "type": "Mesh", 
@@ -417,10 +385,10 @@
       "bumpMap": "8CB64EDD-908A-49D2-9694-7004B838B68A", 
       "roughness": 0.32, 
       "type": "MeshStandardMaterial", 
-      "depthWrite": true
+      "depthWrite": false
     }, 
     {
-      "map": "DDF73A36-F14E-48A3-9098-BAFDE42190AC", 
+      "map": "DDF73A36-F14E-48A3-9098-BAFDE42190AC",
       "depthFunc": 3, 
       "uuid": "4FE08499-5BC1-4672-A9E8-25BE273CFDD8", 
       "color": 16777215, 
@@ -430,20 +398,20 @@
       "roughness": 0.5, 
       "type": "MeshStandardMaterial", 
       "transparent": true, 
-      "depthWrite": true
-    }, 
+      "depthWrite": false
+    },
     {
-      "map": "B3BFAC21-2FED-4325-B884-C918D71FA7D1", 
-      "depthFunc": 3, 
-      "uuid": "F539D09D-0A16-4C40-932C-F8D7529C25BE", 
-      "color": 16318459, 
-      "metalness": 0.5, 
-      "depthTest": true, 
-      "emissive": 0, 
-      "roughness": 0.5, 
-      "type": "MeshStandardMaterial", 
-      "transparent": true, 
-      "depthWrite": true
+      "map": "DDF73A36-F14E-48A3-9098-BAFDE42190AC",
+      "depthFunc": 3,
+      "uuid": "F539D09D-0A16-4C40-932C-F8D7529C25BE",
+      "color": 16318459,
+      "metalness": 0.5,
+      "depthTest": true,
+      "emissive": 0,
+      "roughness": 0.5,
+      "type": "MeshStandardMaterial",
+      "transparent": true,
+      "depthWrite": false
     }
   ], 
   "images": [
@@ -454,12 +422,8 @@
     {
       "url": "images/8E38148E-764B-43E4-9C5F-E1C460E95690.png", 
       "uuid": "9444641B-A698-46E4-9523-07547F56838F"
-    }, 
-    {
-      "url": "images/8E38148E-764B-43E4-9C5F-E1C460E95690.png", 
-      "uuid": "C70BEF77-4570-4810-A502-613591AD4EEC"
     }
-  ], 
+  ],
   "metadata": {
     "version": 4.5, 
     "type": "Object", 

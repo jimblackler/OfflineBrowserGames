@@ -20,7 +20,6 @@ export class V2Renderer {
     this.cardObjects = [];
     this.cardVPos = []; // needed??
 
-
     const renderer = new WebGLRenderer({antialias: true});
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -109,10 +108,13 @@ export class V2Renderer {
   }
 
   faceDown(cardNumber) {
+    const card = this.cardObjects[cardNumber];
+    card.rotation.z = Math.PI;
   }
 
   faceUp(cardNumber) {
-
+    const card = this.cardObjects[cardNumber];
+    card.rotation.z = 0;
   }
 
   setClick(element, clickFunction) {
