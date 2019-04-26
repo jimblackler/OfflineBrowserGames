@@ -18,6 +18,13 @@ const CARD_HEIGHT = 143;
 
 const HEIGHT_MULTIPLIER = 4;
 
+const INDICATOR_WIDTH = 109;
+const INDICATOR_HEIGHT = 149;
+const INDICATOR_X = 1;
+const INDICATOR_Y = 716;
+const INDICATOR_OFFSET_X = -4;
+const INDICATOR_OFFSET_Y = -3;
+
 export class V2Renderer {
 
   constructor(container) {
@@ -44,20 +51,32 @@ export class V2Renderer {
     const scene = new Scene();
     this.scene = scene;
     this.cardGroup = new Group();
+    this.cardGroup.position.set(CARD_WIDTH / 2 / 10, 0, CARD_HEIGHT / 2 / 10);
+    this.cardGroup.scale.set(1 / 10, 1 / HEIGHT_MULTIPLIER, 1 / 10);
+
     scene.add(this.cardGroup);
     const loader = new ObjectLoader();
     return new Promise((resolve, reject) => {
       loader.load('data/app.json', object => {
         scene.add(object);
-        const originalCard = scene.getObjectByName('Card');
 
+        const originalIndicator = scene.getObjectByName('Indicator');
+        originalIndicator.material.map = originalIndicator.material.map.clone();
+        const map = originalIndicator.material.map;
+        map.repeat = new Vector2(INDICATOR_WIDTH / TEXTURE_WIDTH, INDICATOR_HEIGHT / TEXTURE_HEIGHT);
+        map.offset = new Vector2(INDICATOR_X / TEXTURE_WIDTH, 1 - (INDICATOR_Y + INDICATOR_HEIGHT) / TEXTURE_HEIGHT);
+        map.needsUpdate = true;
+        this.originalIndicator = originalIndicator;
+        //originalIndicator.visible = false;
+
+        const originalCard = scene.getObjectByName('Card');
         originalCard.visible = false;
         const back = originalCard.getObjectByName('Back');
         this.paintCard(back.material.map, 4, 0);
 
         for (let cardNumber = 0; cardNumber !== Rules.NUMBER_CARDS; cardNumber++) {
           const card = originalCard.clone();
-
+          card.scale.set(10, HEIGHT_MULTIPLIER, 10);
           this.cardObjects[cardNumber] = card;
 
           const front = card.getObjectByName('Front');
@@ -104,7 +123,9 @@ export class V2Renderer {
             const cardObject = this.findFirstCardObject(intersects);
             if (cardObject) {
               const cardNumber = this.cardObjects.indexOf(cardObject);
-              this.clicks[cardNumber]()();
+              const click = this.clicks[cardNumber];
+              const release = click();
+              release();
             }
 
           };
@@ -189,13 +210,13 @@ export class V2Renderer {
 
   getCardPosition(cardNumber) {
     const card = this.cardObjects[cardNumber];
-    return [card.position.x * 10, card.position.z * 10, card.position.y * HEIGHT_MULTIPLIER];
+    return [card.position.x, card.position.z, card.position.y];
   }
 
   positionCard(cardNumber, x, y, v) {
     const card = this.cardObjects[cardNumber];
-    card.position.x = x / 10;
-    card.position.y = v / HEIGHT_MULTIPLIER;
-    card.position.z = y / 10;
+    card.position.x = x;
+    card.position.y = v;
+    card.position.z = y;
   }
 }
