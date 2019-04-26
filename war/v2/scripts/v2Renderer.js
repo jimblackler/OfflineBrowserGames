@@ -119,11 +119,14 @@ export class V2Renderer {
             const cardObject = this.findFirstCardObject(intersects);
             if (cardObject) {
               const cardNumber = this.cardObjects.indexOf(cardObject);
-              const position = this.getCardPosition(cardNumber);
-              indicator.position.x = (position[0] + INDICATOR_WIDTH / 2 + INDICATOR_OFFSET_X) / 10;
-              indicator.position.y = 0;
-              indicator.position.z = (position[1] + INDICATOR_HEIGHT / 2 + INDICATOR_OFFSET_Y) / 10;
-              indicator.visible = true;
+              const click = this.clicks[cardNumber];
+              if (click) {
+                const position = this.getCardPosition(cardNumber);
+                indicator.position.x = (position[0] + INDICATOR_WIDTH / 2 + INDICATOR_OFFSET_X) / 10;
+                indicator.position.y = 0;
+                indicator.position.z = (position[1] + INDICATOR_HEIGHT / 2 + INDICATOR_OFFSET_Y) / 10;
+                indicator.visible = true;
+              }
             }
           };
 
