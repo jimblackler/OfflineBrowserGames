@@ -60,14 +60,13 @@ export class V2Renderer {
       loader.load('data/app.json', object => {
         scene.add(object);
 
-        const originalIndicator = scene.getObjectByName('Indicator');
-        originalIndicator.material.map = originalIndicator.material.map.clone();
-        const map = originalIndicator.material.map;
+        const indicator = scene.getObjectByName('Indicator');
+        indicator.material.map = indicator.material.map.clone();
+        const map = indicator.material.map;
         map.repeat = new Vector2(INDICATOR_WIDTH / TEXTURE_WIDTH, INDICATOR_HEIGHT / TEXTURE_HEIGHT);
         map.offset = new Vector2(INDICATOR_X / TEXTURE_WIDTH, 1 - (INDICATOR_Y + INDICATOR_HEIGHT) / TEXTURE_HEIGHT);
         map.needsUpdate = true;
-        this.originalIndicator = originalIndicator;
-        //originalIndicator.visible = false;
+        indicator.visible = false;
 
         const originalCard = scene.getObjectByName('Card');
         originalCard.visible = false;
@@ -112,6 +111,20 @@ export class V2Renderer {
           animate();
 
           const onDocumentMouseMove = event => {
+            event.preventDefault();
+            const mouse = new Vector2((event.clientX / window.innerWidth) * 2 - 1,
+                -(event.clientY / window.innerHeight) * 2 + 1);
+            this.raycaster.setFromCamera(mouse, camera);
+            const intersects = this.raycaster.intersectObjects(this.cardObjects, true);
+            const cardObject = this.findFirstCardObject(intersects);
+            if (cardObject) {
+              const cardNumber = this.cardObjects.indexOf(cardObject);
+              const position = this.getCardPosition(cardNumber);
+              indicator.position.x = (position[0] + INDICATOR_WIDTH / 2 + INDICATOR_OFFSET_X) / 10;
+              indicator.position.y = 0;
+              indicator.position.z = (position[1] + INDICATOR_HEIGHT / 2 + INDICATOR_OFFSET_Y) / 10;
+              indicator.visible = true;
+            }
           };
 
           const onDocumentMouseDown = event => {
@@ -127,7 +140,6 @@ export class V2Renderer {
               const release = click();
               release();
             }
-
           };
 
           const onDocumentMouseUp = event => {
@@ -205,7 +217,6 @@ export class V2Renderer {
     const card = this.cardObjects[cardNumber];
     this.cardGroup.remove(card);
     this.cardGroup.add(card);
-    // NOT WORKING
   }
 
   getCardPosition(cardNumber) {
