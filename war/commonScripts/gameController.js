@@ -154,7 +154,7 @@ export class GameController {
             x: x,
             y: FOUNDATION_Y,
             action: () => gameState.moveToFoundation(other, foundationIdx),
-            useful: MOVE_TYPE.TO_FOUNDATION,
+            moveType: MOVE_TYPE.TO_FOUNDATION,
             takesTableauStack: false
           });
         }
@@ -176,13 +176,14 @@ export class GameController {
                 slots = this.slotsFor.get(other)
               } else {
                 slots = new Set();
-                this.slotsFor.set(other, slots);
+                this.slotsFor
+                    .set(other, slots);
               }
               slots.add({
                 x,
                 y: FOUNDATION_Y,
                 action: () => gameState.moveToFoundation(other, foundationIdx),
-                useful: MOVE_TYPE.TO_FOUNDATION,
+                moveType: MOVE_TYPE.TO_FOUNDATION,
                 takesTableauStack: false
               });
             }
@@ -227,7 +228,7 @@ export class GameController {
             x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             y: TABLEAU_Y,
             action: () => gameState.moveToTableau(other, tableauIdx),
-            useful: MOVE_TYPE.TO_TABLEU,
+            moveType: MOVE_TYPE.TO_TABLEU,
             takesTableauStack: true
           });
         }
@@ -249,7 +250,7 @@ export class GameController {
                 x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                 y: TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength + 1),
                 action: () => gameState.moveToTableau(other, tableauIdx),
-                useful: MOVE_TYPE.TO_TABLEU,
+                moveType: MOVE_TYPE.TO_TABLEU,
                 takesTableauStack: true
               });
             }
@@ -389,7 +390,7 @@ export class GameController {
           let mostUsefulSlots = [];
           for (const slot of slots) {
             if (cards.length === 1 || slot.takesTableauStack) {
-              const useful = slot.useful;
+              const useful = slot.moveType;
               if (useful === mostUseful) {
                 mostUsefulSlots.push(slot);
               } else if (useful > mostUseful) {
