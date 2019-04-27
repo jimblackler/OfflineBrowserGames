@@ -136,7 +136,6 @@ export class GameController {
     // Position foundation cards.
     for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
       const foundation = gameState.foundations[foundationIdx];
-      const x = FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx;
       const foundationLength = foundation.length();
       if (foundationLength === 0) {
         // Empty foundation ... will take Aces
@@ -151,7 +150,6 @@ export class GameController {
             this.slotsFor.set(other, slots);
           }
           slots.add({
-            x: x,
             y: FOUNDATION_Y,
             card: other,
             moveType: MOVE_TYPE.TO_FOUNDATION,
@@ -180,7 +178,6 @@ export class GameController {
                     .set(other, slots);
               }
               slots.add({
-                x,
                 y: FOUNDATION_Y,
                 card: other,
                 moveType: MOVE_TYPE.TO_FOUNDATION,
@@ -225,7 +222,6 @@ export class GameController {
             this.slotsFor.set(other, slots);
           }
           slots.add({
-            x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             y: TABLEAU_Y,
             card: other,
             moveType: MOVE_TYPE.TO_TABLEU,
@@ -247,7 +243,6 @@ export class GameController {
                 this.slotsFor.set(other, slots);
               }
               slots.add({
-                x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                 y: TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength + 1),
                 card: other,
                 moveType: MOVE_TYPE.TO_TABLEU,
@@ -408,7 +403,15 @@ export class GameController {
         let closetSlot;
         for (const slot of slots) {
           if (cards.length === 1 || slot.moveType === MOVE_TYPE.TO_TABLEU) {
-            const distance = Math.pow(position[0] - slot.x, 2) + Math.pow(position[1] - slot.y, 2);
+            let x;
+            if (slot.moveType === MOVE_TYPE.TO_TABLEU) {
+              x = TABLEAU_X + TABLEAU_X_SPACING * slot.destinationIdx;
+            } else if (slot.moveType === MOVE_TYPE.TO_FOUNDATION) {
+              x = FOUNDATION_X + FOUNDATION_X_SPACING * slot.destinationIdx;
+            }
+            let y = slot.y;
+
+            const distance = Math.pow(position[0] - x, 2) + Math.pow(position[1] - slot.y, 2);
             if (distance < closest) {
               closest = distance;
               closetSlot = slot;
