@@ -113,7 +113,7 @@ export class GameController {
       const cardNumber = gameState.waste.get(idx);
       let onArrive;
       this.renderer.faceUp(cardNumber);
-      const staggerOrder =  Math.max(idx - wasteLength + gameState.rules.cardsToDraw, 0);
+      const staggerOrder = Math.max(idx - wasteLength + gameState.rules.cardsToDraw, 0);
       const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
       if (idx === wasteLength - 1) {
         const cards = [];
@@ -122,7 +122,8 @@ export class GameController {
           this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
         };
       } else {
-        onArrive = () => {};
+        onArrive = () => {
+        };
       }
       let position = idx - (wasteLength - Math.min(gameState.rules.cardsToDraw, wasteLength));
       if (position < 0) {
@@ -141,16 +142,20 @@ export class GameController {
         const canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
           Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
         for (const other of canPlaceOn) {
-          const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
-          slotsFor.push({
+          let slots;
+          if (this.slotsFor.has(other)) {
+            slots = this.slotsFor.get(other)
+          } else {
+            slots = [];
+            this.slotsFor.set(other, slots);
+          }
+          slots.push({
             x: x,
             y: FOUNDATION_Y,
             action: () => gameState.moveToFoundation(other, foundationIdx),
             useful: 3,
             takesTableauStack: false
           });
-
-          this.slotsFor.set(other, slotsFor);
         }
       } else {
         for (let position = 0; position < foundationLength; position++) {
@@ -165,15 +170,20 @@ export class GameController {
 
             const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
             for (const other of canPlaceOn) {
-              const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
-              slotsFor.push({
+              let slots;
+              if (this.slotsFor.has(other)) {
+                slots = this.slotsFor.get(other)
+              } else {
+                slots = [];
+                this.slotsFor.set(other, slots);
+              }
+              slots.push({
                 x,
                 y: FOUNDATION_Y,
                 action: () => gameState.moveToFoundation(other, foundationIdx),
                 useful: 3,
                 takesTableauStack: false
               });
-              this.slotsFor.set(other, slotsFor);
             }
           } else {
             onArrive = () => {
@@ -205,15 +215,20 @@ export class GameController {
         const canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
           Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
         for (const other of canPlaceOn) {
-          const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
-          slotsFor.push({
+          let slots;
+          if (this.slotsFor.has(other)) {
+            slots = this.slotsFor.get(other)
+          } else {
+            slots = [];
+            this.slotsFor.set(other, slots);
+          }
+          slots.push({
             x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             y: TABLEAU_Y,
             action: () => gameState.moveToTableau(other, tableauIdx),
             useful: 2,
             takesTableauStack: true
           });
-          this.slotsFor.set(other, slotsFor);
         }
       } else {
         for (let position = 0; position < tableauLength; position++) {
@@ -222,15 +237,20 @@ export class GameController {
           if (position === tableauLength - 1) {
             const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
             for (const other of canPlaceOn) {
-              const slotsFor = this.slotsFor.has(other) ? this.slotsFor.get(other) : [];
-              slotsFor.push({
+              let slots;
+              if (this.slotsFor.has(other)) {
+                slots = this.slotsFor.get(other)
+              } else {
+                slots = [];
+                this.slotsFor.set(other, slots);
+              }
+              slots.push({
                 x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                 y: TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength + 1),
                 action: () => gameState.moveToTableau(other, tableauIdx),
                 useful: 2,
                 takesTableauStack: true
               });
-              this.slotsFor.set(other, slotsFor);
             }
           }
           this.renderer.faceUp(cardNumber);
@@ -337,7 +357,10 @@ export class GameController {
       }
     };
     requestAnimationFrame(raise);
-    return (click) => {aborted = true; return this.release(cards, click, gameState)};
+    return (click) => {
+      aborted = true;
+      return this.release(cards, click, gameState)
+    };
   }
 
   release(cards, click, gameState) {
