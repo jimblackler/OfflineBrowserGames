@@ -181,10 +181,10 @@ export class GameController {
       }
 
     }
-    this.actionsFor = gameState.getActions();
 
     // Auto play
     if (gameState.stock.length() === 0 && gameState.waste.length() === 0) {
+      const actionsFor = gameState.getActions();
       let anyFaceDown = false;
       for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
         const tableau = gameState.tableausFaceDown[tableauIdx];
@@ -202,7 +202,7 @@ export class GameController {
             }
             const position = tableau.length() - 1;
             const cardNumber = tableau.get(position);
-            const actions = this.actionsFor.get(cardNumber);
+            const actions = actionsFor.get(cardNumber);
             if (!actions) {
               continue;
             }
@@ -279,7 +279,8 @@ export class GameController {
     return (click) => {
       aborted = true;
       const cardNumber = cards[0];
-      let actions = this.actionsFor.get(cardNumber);
+      const actionsFor = gameState.getActions();
+      let actions = actionsFor.get(cardNumber);
       if (actions) {
         // if click ... priority is (age-> usefulness -> proximity)
         // otherwise it is proximity
