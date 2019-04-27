@@ -146,10 +146,10 @@ export class GameController {
           if (this.slotsFor.has(other)) {
             slots = this.slotsFor.get(other)
           } else {
-            slots = [];
+            slots = new Set();
             this.slotsFor.set(other, slots);
           }
-          slots.push({
+          slots.add({
             x: x,
             y: FOUNDATION_Y,
             action: () => gameState.moveToFoundation(other, foundationIdx),
@@ -174,10 +174,10 @@ export class GameController {
               if (this.slotsFor.has(other)) {
                 slots = this.slotsFor.get(other)
               } else {
-                slots = [];
+                slots = new Set();
                 this.slotsFor.set(other, slots);
               }
-              slots.push({
+              slots.add({
                 x,
                 y: FOUNDATION_Y,
                 action: () => gameState.moveToFoundation(other, foundationIdx),
@@ -219,10 +219,10 @@ export class GameController {
           if (this.slotsFor.has(other)) {
             slots = this.slotsFor.get(other)
           } else {
-            slots = [];
+            slots = new Set();
             this.slotsFor.set(other, slots);
           }
-          slots.push({
+          slots.add({
             x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             y: TABLEAU_Y,
             action: () => gameState.moveToTableau(other, tableauIdx),
@@ -241,10 +241,10 @@ export class GameController {
               if (this.slotsFor.has(other)) {
                 slots = this.slotsFor.get(other)
               } else {
-                slots = [];
+                slots = new Set();
                 this.slotsFor.set(other, slots);
               }
-              slots.push({
+              slots.add({
                 x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                 y: TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength + 1),
                 action: () => gameState.moveToTableau(other, tableauIdx),
