@@ -372,7 +372,7 @@ export class GameController {
           for (const slot of slots) {
             if (cards.length === 1 || slot.moveType === MOVE_TYPE.TO_TABLEU) {
               const cardHistory = this.cardHistory.get(cardNumber);
-              const key = [slot.x, slot.y];
+              const key = [slot.moveType, slot.destinationIdx];
               const time = cardHistory.has(key) ? cardHistory.get(key) : Number.MIN_VALUE;
               if (time === oldest) {
                 oldestSlots.push(slot);
