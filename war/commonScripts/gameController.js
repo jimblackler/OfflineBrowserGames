@@ -83,8 +83,6 @@ export class GameController {
   }
 
   render(gameState) {
-    this.actionsFor = new Map();
-
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const [k, curve] of this.curves) {
       this.renderer.positionCard(k, curve.endX, curve.endY, 0);
@@ -133,68 +131,31 @@ export class GameController {
       this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive, delay);
     }
 
+
     // Position foundation cards.
     for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
       const foundation = gameState.foundations[foundationIdx];
       const foundationLength = foundation.length();
-      if (foundationLength === 0) {
-        // Empty foundation ... will take Aces
-        const canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
-          Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
-        for (const other of canPlaceOn) {
-          let actions;
-          if (this.actionsFor.has(other)) {
-            actions = this.actionsFor.get(other)
-          } else {
-            actions = new Set();
-            this.actionsFor.set(other, actions);
-          }
-          actions.add({
-            card: other,
-            moveType: MOVE_TYPE.TO_FOUNDATION,
-            destinationIdx: foundationIdx
-          });
-        }
-      } else {
-        for (let position = 0; position < foundationLength; position++) {
-          const cardNumber = foundation.get(position);
-          this.renderer.faceUp(cardNumber);
-          let onArrive;
-          if (position === foundationLength - 1) {
-            const cards = [cardNumber];
-            onArrive = () => {
-              this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
-            };
 
-            const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
-            for (const other of canPlaceOn) {
-              let actions;
-              if (this.actionsFor.has(other)) {
-                actions = this.actionsFor.get(other)
-              } else {
-                actions = new Set();
-                this.actionsFor
-                    .set(other, actions);
-              }
-              actions.add({
-                card: other,
-                moveType: MOVE_TYPE.TO_FOUNDATION,
-                destinationIdx: foundationIdx,
-              });
-            }
-          } else {
-            onArrive = () => {
-            };
-          }
-
-          this.placeCard(cardNumber, FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, onArrive, 0);
+      for (let position = 0; position < foundationLength; position++) {
+        const cardNumber = foundation.get(position);
+        this.renderer.faceUp(cardNumber);
+        let onArrive;
+        if (position === foundationLength - 1) {
+          const cards = [cardNumber];
+          onArrive = () => {
+            this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
+          };
+        } else {
+          onArrive = () => {
+          };
         }
+        this.placeCard(cardNumber, FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, onArrive, 0);
       }
     }
 
     // Position tableau cards.
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-
       let tableau = gameState.tableausFaceDown[tableauIdx];
       const faceDownLength = tableau.length();
       for (let position = 0; position < faceDownLength; position++) {
@@ -207,56 +168,20 @@ export class GameController {
 
       tableau = gameState.tableausFaceUp[tableauIdx];
       const tableauLength = tableau.length();
-      if (tableauLength === 0) {
-        // Empty tableau ... will take Kings
-        const canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
-          Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
-        for (const other of canPlaceOn) {
-          let actions;
-          if (this.actionsFor.has(other)) {
-            actions = this.actionsFor.get(other)
-          } else {
-            actions = new Set();
-            this.actionsFor.set(other, actions);
-          }
-          actions.add({
-            card: other,
-            moveType: MOVE_TYPE.TO_TABLEU,
-            destinationIdx: tableauIdx,
-          });
-        }
-      } else {
-        for (let position = 0; position < tableauLength; position++) {
-          const cardNumber = tableau.get(position);
-          const cards = tableau.asArray().slice(position);
-          if (position === tableauLength - 1) {
-            const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
-            for (const other of canPlaceOn) {
-              let actions;
-              if (this.actionsFor.has(other)) {
-                actions = this.actionsFor.get(other)
-              } else {
-                actions = new Set();
-                this.actionsFor.set(other, actions);
-              }
-              actions.add({
 
-                card: other,
-                moveType: MOVE_TYPE.TO_TABLEU,
-                destinationIdx: tableauIdx,
-              });
-            }
-          }
-          this.renderer.faceUp(cardNumber);
-          const onArrive = () => {
-            this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
-          };
-
-          this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-              TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive, 0);
-        }
+      for (let position = 0; position < tableauLength; position++) {
+        const cardNumber = tableau.get(position);
+        const cards = tableau.asArray().slice(position);
+        this.renderer.faceUp(cardNumber);
+        const onArrive = () => {
+          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
+        };
+        this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
+            TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive, 0);
       }
+
     }
+    this.actionsFor = gameState.getActions();
 
     // Auto play
     if (gameState.stock.length() === 0 && gameState.waste.length() === 0) {
