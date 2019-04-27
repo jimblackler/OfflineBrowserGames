@@ -359,70 +359,66 @@ export class GameController {
     requestAnimationFrame(raise);
     return (click) => {
       aborted = true;
-      return this.release(cards, click, gameState)
+      const cardNumber = cards[0];
+      let slots = this.slotsFor.get(cardNumber);
+      if (slots) {
+        // if click ... priority is (age-> usefulness -> proximity)
+        // otherwise it is proximity
+        if (click) {
+          let oldest = Number.MAX_VALUE;
+          let oldestSlots = [];
+          for (const slot of slots) {
+            if (cards.length === 1 || slot.takesTableauStack) {
+              const cardHistory = this.cardHistory.get(cardNumber);
+              const key = [slot.x, slot.y];
+              const time = cardHistory.has(key) ? cardHistory.get(key) : Number.MIN_VALUE;
+              if (time === oldest) {
+                oldestSlots.push(slot);
+              } else if (time < oldest) {
+                oldest = time;
+                oldestSlots = [slot];
+              }
+            }
+          }
+          if (oldestSlots) {
+            slots = oldestSlots;
+          }
+
+          let mostUseful = Number.MIN_VALUE;
+          let mostUsefulSlots = [];
+          for (const slot of slots) {
+            if (cards.length === 1 || slot.takesTableauStack) {
+              const useful = slot.useful;
+              if (useful === mostUseful) {
+                mostUsefulSlots.push(slot);
+              } else if (useful > mostUseful) {
+                mostUseful = useful;
+                mostUsefulSlots = [slot];
+              }
+            }
+          }
+          if (mostUsefulSlots) {
+            slots = mostUsefulSlots;
+          }
+        }
+        const position = this.renderer.getCardPosition(cardNumber);
+        let closest = Number.MAX_VALUE;
+        let closetSlot;
+        for (const slot of slots) {
+          if (cards.length === 1 || slot.takesTableauStack) {
+            const distance = Math.pow(position[0] - slot.x, 2) + Math.pow(position[1] - slot.y, 2);
+            if (distance < closest) {
+              closest = distance;
+              closetSlot = slot;
+            }
+          }
+        }
+        if (closetSlot) {
+          closetSlot.action();
+        }
+      }
+      GameStore.store(gameState);
+      this.render(gameState);
     };
-  }
-
-  release(cards, click, gameState) {
-    const cardNumber = cards[0];
-    let slots = this.slotsFor.get(cardNumber);
-    if (slots) {
-      // if click ... priority is (age-> usefulness -> proximity)
-      // otherwise it is proximity
-      if (click) {
-        let oldest = Number.MAX_VALUE;
-        let oldestSlots = [];
-        for (const slot of slots) {
-          if (cards.length === 1 || slot.takesTableauStack) {
-            const cardHistory = this.cardHistory.get(cardNumber);
-            const key = [slot.x, slot.y];
-            const time = cardHistory.has(key) ? cardHistory.get(key) : Number.MIN_VALUE;
-            if (time === oldest) {
-              oldestSlots.push(slot);
-            } else if (time < oldest) {
-              oldest = time;
-              oldestSlots = [slot];
-            }
-          }
-        }
-        if (oldestSlots) {
-          slots = oldestSlots;
-        }
-
-        let mostUseful = Number.MIN_VALUE;
-        let mostUsefulSlots = [];
-        for (const slot of slots) {
-          if (cards.length === 1 || slot.takesTableauStack) {
-            const useful = slot.useful;
-            if (useful === mostUseful) {
-              mostUsefulSlots.push(slot);
-            } else if (useful > mostUseful) {
-              mostUseful = useful;
-              mostUsefulSlots = [slot];
-            }
-          }
-        }
-        if (mostUsefulSlots) {
-          slots = mostUsefulSlots;
-        }
-      }
-      const position = this.renderer.getCardPosition(cardNumber);
-      let closest = Number.MAX_VALUE;
-      let closetSlot;
-      for (const slot of slots) {
-        if (cards.length === 1 || slot.takesTableauStack) {
-          const distance = Math.pow(position[0] - slot.x, 2) + Math.pow(position[1] - slot.y, 2);
-          if (distance < closest) {
-            closest = distance;
-            closetSlot = slot;
-          }
-        }
-      }
-      if (closetSlot) {
-        closetSlot.action();
-      }
-    }
-    GameStore.store(gameState);
-    this.render(gameState);
   }
 }
