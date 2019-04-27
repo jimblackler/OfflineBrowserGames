@@ -155,7 +155,6 @@ export class GameController {
             y: FOUNDATION_Y,
             action: () => gameState.moveToFoundation(other, foundationIdx),
             moveType: MOVE_TYPE.TO_FOUNDATION,
-            takesTableauStack: false
           });
         }
       } else {
@@ -184,7 +183,6 @@ export class GameController {
                 y: FOUNDATION_Y,
                 action: () => gameState.moveToFoundation(other, foundationIdx),
                 moveType: MOVE_TYPE.TO_FOUNDATION,
-                takesTableauStack: false
               });
             }
           } else {
@@ -229,7 +227,6 @@ export class GameController {
             y: TABLEAU_Y,
             action: () => gameState.moveToTableau(other, tableauIdx),
             moveType: MOVE_TYPE.TO_TABLEU,
-            takesTableauStack: true
           });
         }
       } else {
@@ -251,7 +248,6 @@ export class GameController {
                 y: TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength + 1),
                 action: () => gameState.moveToTableau(other, tableauIdx),
                 moveType: MOVE_TYPE.TO_TABLEU,
-                takesTableauStack: true
               });
             }
           }
@@ -290,7 +286,7 @@ export class GameController {
               continue;
             }
             for (const slot of slots) {
-              if (slot.takesTableauStack) {
+              if (slot.moveType === MOVE_TYPE.TO_TABLEU) {
                 continue;
               }
               slot.action();
@@ -370,7 +366,7 @@ export class GameController {
           let oldest = Number.MAX_VALUE;
           let oldestSlots = [];
           for (const slot of slots) {
-            if (cards.length === 1 || slot.takesTableauStack) {
+            if (cards.length === 1 || slot.moveType === MOVE_TYPE.TO_TABLEU) {
               const cardHistory = this.cardHistory.get(cardNumber);
               const key = [slot.x, slot.y];
               const time = cardHistory.has(key) ? cardHistory.get(key) : Number.MIN_VALUE;
@@ -389,7 +385,7 @@ export class GameController {
           let mostUseful = Number.MIN_VALUE;
           let mostUsefulSlots = [];
           for (const slot of slots) {
-            if (cards.length === 1 || slot.takesTableauStack) {
+            if (cards.length === 1 || slot.moveType === MOVE_TYPE.TO_TABLEU) {
               const useful = slot.moveType;
               if (useful === mostUseful) {
                 mostUsefulSlots.push(slot);
@@ -407,7 +403,7 @@ export class GameController {
         let closest = Number.MAX_VALUE;
         let closetSlot;
         for (const slot of slots) {
-          if (cards.length === 1 || slot.takesTableauStack) {
+          if (cards.length === 1 || slot.moveType === MOVE_TYPE.TO_TABLEU) {
             const distance = Math.pow(position[0] - slot.x, 2) + Math.pow(position[1] - slot.y, 2);
             if (distance < closest) {
               closest = distance;
