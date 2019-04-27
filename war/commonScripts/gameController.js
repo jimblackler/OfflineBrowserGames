@@ -153,8 +153,9 @@ export class GameController {
           slots.add({
             x: x,
             y: FOUNDATION_Y,
-            action: () => gameState.moveToFoundation(other, foundationIdx),
+            card: other,
             moveType: MOVE_TYPE.TO_FOUNDATION,
+            destinationIdx: foundationIdx
           });
         }
       } else {
@@ -181,8 +182,9 @@ export class GameController {
               slots.add({
                 x,
                 y: FOUNDATION_Y,
-                action: () => gameState.moveToFoundation(other, foundationIdx),
+                card: other,
                 moveType: MOVE_TYPE.TO_FOUNDATION,
+                destinationIdx: foundationIdx,
               });
             }
           } else {
@@ -225,8 +227,9 @@ export class GameController {
           slots.add({
             x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             y: TABLEAU_Y,
-            action: () => gameState.moveToTableau(other, tableauIdx),
+            card: other,
             moveType: MOVE_TYPE.TO_TABLEU,
+            destinationIdx: tableauIdx,
           });
         }
       } else {
@@ -246,8 +249,9 @@ export class GameController {
               slots.add({
                 x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                 y: TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength + 1),
-                action: () => gameState.moveToTableau(other, tableauIdx),
+                card: other,
                 moveType: MOVE_TYPE.TO_TABLEU,
+                destinationIdx: tableauIdx,
               });
             }
           }
@@ -289,7 +293,7 @@ export class GameController {
               if (slot.moveType === MOVE_TYPE.TO_TABLEU) {
                 continue;
               }
-              slot.action();
+              gameState.execute(slot);
               GameStore.store(gameState);
               this.render(gameState);
               return;
@@ -412,7 +416,7 @@ export class GameController {
           }
         }
         if (closetSlot) {
-          closetSlot.action();
+          gameState.execute(closetSlot);
         }
       }
       GameStore.store(gameState);

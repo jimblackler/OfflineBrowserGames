@@ -141,7 +141,7 @@ export class GameState {
     return null;
   }
 
-  moveToTableau(cardNumber, tableauIdx) {
+  _moveToTableau(cardNumber, tableauIdx) {
     let movingCard = cardNumber;
 
     while (movingCard) {
@@ -153,9 +153,19 @@ export class GameState {
     }
   }
 
-  moveToFoundation(cardNumber, foundationIdx) {
+  _moveToFoundation(cardNumber, foundationIdx) {
     if (this.remove(cardNumber)) {
       this.foundations[foundationIdx].add(cardNumber);
     }
+  }
+
+  execute(action) {
+
+    if (action.moveType === MOVE_TYPE.TO_TABLEU) {
+      this._moveToTableau(action.card, action.destinationIdx);
+    } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
+      this._moveToFoundation(action.card, action.destinationIdx);
+    }
+
   }
 }
