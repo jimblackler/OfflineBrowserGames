@@ -1,6 +1,7 @@
 import {GameStore} from "../commonScripts/gameStore.js";
 import {MathUtils} from "../commonScripts/mathUtils.js";
 import {Rules} from "../commonScripts/rules.js";
+import {MOVE_TYPE} from "../commonScripts/gameState.js";
 
 const STOCK_X = 42;
 const STOCK_Y = 42;
@@ -153,7 +154,7 @@ export class GameController {
             x: x,
             y: FOUNDATION_Y,
             action: () => gameState.moveToFoundation(other, foundationIdx),
-            useful: 3,
+            useful: MOVE_TYPE.TO_FOUNDATION,
             takesTableauStack: false
           });
         }
@@ -181,7 +182,7 @@ export class GameController {
                 x,
                 y: FOUNDATION_Y,
                 action: () => gameState.moveToFoundation(other, foundationIdx),
-                useful: 3,
+                useful: MOVE_TYPE.TO_FOUNDATION,
                 takesTableauStack: false
               });
             }
@@ -226,7 +227,7 @@ export class GameController {
             x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             y: TABLEAU_Y,
             action: () => gameState.moveToTableau(other, tableauIdx),
-            useful: 2,
+            useful: MOVE_TYPE.TO_TABLEU,
             takesTableauStack: true
           });
         }
@@ -248,7 +249,7 @@ export class GameController {
                 x: TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                 y: TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength + 1),
                 action: () => gameState.moveToTableau(other, tableauIdx),
-                useful: 2,
+                useful: MOVE_TYPE.TO_TABLEU,
                 takesTableauStack: true
               });
             }

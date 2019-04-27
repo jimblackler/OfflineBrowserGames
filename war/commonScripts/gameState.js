@@ -12,6 +12,12 @@ import {Alea} from "./alea.js";
 import {CardList} from "./cardList.js";
 import {Rules} from "./rules.js";
 
+export const MOVE_TYPE = {
+  TO_TABLEU : 2,
+  TO_FOUNDATION : 3,
+
+};
+
 export class GameState {
   restore(data) {
     this.deck = new CardList(data.deck);
