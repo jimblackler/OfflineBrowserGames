@@ -83,7 +83,7 @@ export class GameController {
   }
 
   render(gameState) {
-    this.slotsFor = new Map();
+    this.actionsFor = new Map();
 
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const [k, curve] of this.curves) {
@@ -142,14 +142,14 @@ export class GameController {
         const canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
           Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
         for (const other of canPlaceOn) {
-          let slots;
-          if (this.slotsFor.has(other)) {
-            slots = this.slotsFor.get(other)
+          let actions;
+          if (this.actionsFor.has(other)) {
+            actions = this.actionsFor.get(other)
           } else {
-            slots = new Set();
-            this.slotsFor.set(other, slots);
+            actions = new Set();
+            this.actionsFor.set(other, actions);
           }
-          slots.add({
+          actions.add({
             card: other,
             moveType: MOVE_TYPE.TO_FOUNDATION,
             destinationIdx: foundationIdx
@@ -168,15 +168,15 @@ export class GameController {
 
             const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
             for (const other of canPlaceOn) {
-              let slots;
-              if (this.slotsFor.has(other)) {
-                slots = this.slotsFor.get(other)
+              let actions;
+              if (this.actionsFor.has(other)) {
+                actions = this.actionsFor.get(other)
               } else {
-                slots = new Set();
-                this.slotsFor
-                    .set(other, slots);
+                actions = new Set();
+                this.actionsFor
+                    .set(other, actions);
               }
-              slots.add({
+              actions.add({
                 card: other,
                 moveType: MOVE_TYPE.TO_FOUNDATION,
                 destinationIdx: foundationIdx,
@@ -212,14 +212,14 @@ export class GameController {
         const canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
           Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
         for (const other of canPlaceOn) {
-          let slots;
-          if (this.slotsFor.has(other)) {
-            slots = this.slotsFor.get(other)
+          let actions;
+          if (this.actionsFor.has(other)) {
+            actions = this.actionsFor.get(other)
           } else {
-            slots = new Set();
-            this.slotsFor.set(other, slots);
+            actions = new Set();
+            this.actionsFor.set(other, actions);
           }
-          slots.add({
+          actions.add({
             card: other,
             moveType: MOVE_TYPE.TO_TABLEU,
             destinationIdx: tableauIdx,
@@ -232,14 +232,14 @@ export class GameController {
           if (position === tableauLength - 1) {
             const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
             for (const other of canPlaceOn) {
-              let slots;
-              if (this.slotsFor.has(other)) {
-                slots = this.slotsFor.get(other)
+              let actions;
+              if (this.actionsFor.has(other)) {
+                actions = this.actionsFor.get(other)
               } else {
-                slots = new Set();
-                this.slotsFor.set(other, slots);
+                actions = new Set();
+                this.actionsFor.set(other, actions);
               }
-              slots.add({
+              actions.add({
 
                 card: other,
                 moveType: MOVE_TYPE.TO_TABLEU,
@@ -277,15 +277,15 @@ export class GameController {
             }
             const position = tableau.length() - 1;
             const cardNumber = tableau.get(position);
-            const slots = this.slotsFor.get(cardNumber);
-            if (!slots) {
+            const actions = this.actionsFor.get(cardNumber);
+            if (!actions) {
               continue;
             }
-            for (const slot of slots) {
-              if (slot.moveType === MOVE_TYPE.TO_TABLEU) {
+            for (const action of actions) {
+              if (action.moveType === MOVE_TYPE.TO_TABLEU) {
                 continue;
               }
-              gameState.execute(slot);
+              gameState.execute(action);
               GameStore.store(gameState);
               this.render(gameState);
               return;
@@ -354,72 +354,72 @@ export class GameController {
     return (click) => {
       aborted = true;
       const cardNumber = cards[0];
-      let slots = this.slotsFor.get(cardNumber);
-      if (slots) {
+      let actions = this.actionsFor.get(cardNumber);
+      if (actions) {
         // if click ... priority is (age-> usefulness -> proximity)
         // otherwise it is proximity
         if (click) {
           let oldest = Number.MAX_VALUE;
-          let oldestSlots = [];
-          for (const slot of slots) {
-            if (cards.length === 1 || slot.moveType === MOVE_TYPE.TO_TABLEU) {
+          let oldestActions = [];
+          for (const action of actions) {
+            if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEU) {
               const cardHistory = this.cardHistory.get(cardNumber);
-              const key = [slot.moveType, slot.destinationIdx];
+              const key = [action.moveType, action.destinationIdx];
               const time = cardHistory.has(key) ? cardHistory.get(key) : Number.MIN_VALUE;
               if (time === oldest) {
-                oldestSlots.push(slot);
+                oldestActions.push(action);
               } else if (time < oldest) {
                 oldest = time;
-                oldestSlots = [slot];
+                oldestActions = [action];
               }
             }
           }
-          if (oldestSlots) {
-            slots = oldestSlots;
+          if (oldestActions) {
+            actions = oldestActions;
           }
 
           let mostUseful = Number.MIN_VALUE;
-          let mostUsefulSlots = [];
-          for (const slot of slots) {
-            if (cards.length === 1 || slot.moveType === MOVE_TYPE.TO_TABLEU) {
-              const useful = slot.moveType;
+          let mostUsefulActions = [];
+          for (const action of actions) {
+            if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEU) {
+              const useful = action.moveType;
               if (useful === mostUseful) {
-                mostUsefulSlots.push(slot);
+                mostUsefulActions.push(action);
               } else if (useful > mostUseful) {
                 mostUseful = useful;
-                mostUsefulSlots = [slot];
+                mostUsefulActions = [action];
               }
             }
           }
-          if (mostUsefulSlots) {
-            slots = mostUsefulSlots;
+          if (mostUsefulActions) {
+            actions = mostUsefulActions;
           }
         }
         const position = this.renderer.getCardPosition(cardNumber);
         let closest = Number.MAX_VALUE;
-        let closetSlot;
-        for (const slot of slots) {
-          if (cards.length === 1 || slot.moveType === MOVE_TYPE.TO_TABLEU) {
+        let closetAction;
+        for (const action of actions) {
+          if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEU) {
             let x;
             let y;
-            if (slot.moveType === MOVE_TYPE.TO_TABLEU) {
-              x = TABLEAU_X + TABLEAU_X_SPACING * slot.destinationIdx;
-              y = TABLEAU_Y + (gameState.tableausFaceUp[slot.destinationIdx].length() +
-                  gameState.tableausFaceDown[slot.destinationIdx].length()) * TABLEAU_Y_SPACING;
-            } else if (slot.moveType === MOVE_TYPE.TO_FOUNDATION) {
-              x = FOUNDATION_X + FOUNDATION_X_SPACING * slot.destinationIdx;
+            if (action.moveType === MOVE_TYPE.TO_TABLEU) {
+              x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
+              y = TABLEAU_Y + (gameState.tableausFaceUp[action.destinationIdx].length() +
+                  gameState.tableausFaceDown[action.destinationIdx].length()) * TABLEAU_Y_SPACING;
+            } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
+              x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;
               y = FOUNDATION_Y;
             }
 
             const distance = Math.pow(position[0] - x, 2) + Math.pow(position[1] - y, 2);
             if (distance < closest) {
               closest = distance;
-              closetSlot = slot;
+              closetAction = action;
             }
           }
         }
-        if (closetSlot) {
-          gameState.execute(closetSlot);
+        if (closetAction) {
+          gameState.execute(closetAction);
         }
       }
       GameStore.store(gameState);
