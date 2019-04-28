@@ -357,22 +357,10 @@ export class GameController {
   autoPlay(gameState) {
 
     const playOne = () => {
-      const actionsFor = gameState.getActions();
-      const actions = new Set();
-      actions.add({
-        moveType: MOVE_TYPE.DRAW,
-      });
-      for (const entries of actionsFor.values()) {
-        for (const action of entries) {
-          actions.add(action);
-        }
-      }
-
-      const numberActions = actions.size;
-
+      const actions = gameState.getAllActions();
       const actionArray = Array.from(actions);
-      const action = actionArray[Math.floor(Math.random() * numberActions)];
-
+      const action = actionArray[Math.floor(Math.random() * actions.size)];
+      console.log(gameState.normalKey());
       gameState.execute(action);
       GameStore.store(gameState);
       this.render(gameState);

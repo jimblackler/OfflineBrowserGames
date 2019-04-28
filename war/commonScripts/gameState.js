@@ -264,4 +264,29 @@ export class GameState {
     }
     return actionsFor;
   }
+
+  getAllActions() {
+    const actionsFor = this.getActions();
+    const actions = new Set();
+    actions.add({
+      moveType: MOVE_TYPE.DRAW,
+    });
+    for (const entries of actionsFor.values()) {
+      for (const action of entries) {
+        actions.add(action);
+      }
+    }
+    return actions;
+  }
+
+
+  normalKey() {
+    const tableauStrings = [];
+    for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+        tableauStrings.push(JSON.stringify(this.tableausFaceDown[tableauIdx].cards) +
+            JSON.stringify(this.tableausFaceUp[tableauIdx].cards));
+    }
+    tableauStrings.sort();
+    return JSON.stringify(tableauStrings) + JSON.stringify(this.stock.cards) + JSON.stringify(this.waste.cards);
+  }
 }
