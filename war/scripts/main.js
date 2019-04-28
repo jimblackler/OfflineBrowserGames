@@ -2,7 +2,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -12,6 +12,7 @@ import {GameController} from "../commonScripts/gameController.js";
 import {GameState} from "../commonScripts/gameState.js";
 import {GameStore} from "../commonScripts/gameStore.js";
 import {Renderer} from "./renderer.js";
+import {MOVE_TYPE} from "../commonScripts/gameState.js";
 
 const renderer = new Renderer(document.getElementById("gameDiv"));
 const controller = new GameController(renderer);
@@ -20,7 +21,10 @@ window.redraw = () => {
   const gameState = new GameState();
   gameState.newGame(JSON.parse(localStorage["rules"]));
   controller.render(gameState); // Render twice to not animate everything (only draw).
-  gameState.draw(); // Initial draw.
+  gameState.execute({
+        moveType: MOVE_TYPE.DRAW,
+      });
+  // Initial draw.
   GameStore.store(gameState);
   controller.render(gameState);
 };
