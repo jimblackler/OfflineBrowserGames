@@ -322,7 +322,7 @@ export class GameController {
         // Find closet action.
         const position = this.renderer.getCardPosition(cardNumber);
         let closest = Number.MAX_VALUE;
-        let closetAction;
+        let closestAction;
         for (const action of actions) {
           if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEU) {
             let x;
@@ -339,13 +339,13 @@ export class GameController {
             const distance = Math.pow(position[0] - x, 2) + Math.pow(position[1] - y, 2);
             if (distance < closest) {
               closest = distance;
-              closetAction = action;
+              closestAction = action;
             }
           }
         }
-        if (closetAction) {
-          this.cardHistory.set(JSON.stringify(closetAction), timeNow);
-          gameState.execute(closetAction);
+        if (closestAction) {
+          this.cardHistory.set(JSON.stringify(closestAction), timeNow);
+          gameState.execute(closestAction);
         }
       }
       GameStore.store(gameState);
