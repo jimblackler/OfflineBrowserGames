@@ -197,18 +197,14 @@ export class GameState {
           });
         }
       } else {
-        for (let position = 0; position < foundationLength; position++) {
-          const cardNumber = foundation.get(position);
-          if (position === foundationLength - 1) {
-            const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
-            for (const other of canPlaceOn) {
-              addAction({
-                card: other,
-                moveType: MOVE_TYPE.TO_FOUNDATION,
-                destinationIdx: foundationIdx,
-              });
-            }
-          }
+        const cardNumber = foundation.get(foundationLength - 1);
+        const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
+        for (const other of canPlaceOn) {
+          addAction({
+            card: other,
+            moveType: MOVE_TYPE.TO_FOUNDATION,
+            destinationIdx: foundationIdx,
+          });
         }
       }
     }
