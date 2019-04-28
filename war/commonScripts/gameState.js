@@ -185,27 +185,21 @@ export class GameState {
     for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
       const foundation = this.foundations[foundationIdx];
       const foundationLength = foundation.length();
+      let canPlaceOn;
       if (foundationLength === 0) {
         // Empty foundation ... will take Aces
-        const canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
+        canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
           Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
-        for (const other of canPlaceOn) {
-          addAction({
-            card: other,
-            moveType: MOVE_TYPE.TO_FOUNDATION,
-            destinationIdx: foundationIdx
-          });
-        }
       } else {
         const cardNumber = foundation.get(foundationLength - 1);
-        const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
-        for (const other of canPlaceOn) {
-          addAction({
-            card: other,
-            moveType: MOVE_TYPE.TO_FOUNDATION,
-            destinationIdx: foundationIdx,
-          });
-        }
+        canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
+      }
+      for (const other of canPlaceOn) {
+        addAction({
+          card: other,
+          moveType: MOVE_TYPE.TO_FOUNDATION,
+          destinationIdx: foundationIdx
+        });
       }
     }
 
@@ -213,27 +207,21 @@ export class GameState {
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
       const tableau = this.tableausFaceUp[tableauIdx];
       const tableauLength = tableau.length();
+      let canPlaceOn;
       if (tableauLength === 0) {
         // Empty tableau ... will take Kings
-        const canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
+        canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
           Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
-        for (const other of canPlaceOn) {
-          addAction({
-            card: other,
-            moveType: MOVE_TYPE.TO_TABLEU,
-            destinationIdx: tableauIdx,
-          });
-        }
       } else {
         const cardNumber = tableau.get(tableauLength - 1);
-        const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
-        for (const other of canPlaceOn) {
-          addAction({
-            card: other,
-            moveType: MOVE_TYPE.TO_TABLEU,
-            destinationIdx: tableauIdx,
-          });
-        }
+        canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
+      }
+      for (const other of canPlaceOn) {
+        addAction({
+          card: other,
+          moveType: MOVE_TYPE.TO_TABLEU,
+          destinationIdx: tableauIdx,
+        });
       }
     }
     return actionsFor;
