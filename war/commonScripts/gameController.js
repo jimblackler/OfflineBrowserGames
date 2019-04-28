@@ -132,7 +132,6 @@ export class GameController {
       this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive, delay);
     }
 
-
     // Position foundation cards.
     for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
       const foundation = gameState.foundations[foundationIdx];
