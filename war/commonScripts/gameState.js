@@ -215,7 +215,6 @@ export class GameState {
 
     // Position tableau cards.
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-
       const tableau = this.tableausFaceUp[tableauIdx];
       const tableauLength = tableau.length();
       if (tableauLength === 0) {
@@ -230,18 +229,14 @@ export class GameState {
           });
         }
       } else {
-        for (let position = 0; position < tableauLength; position++) {
-          const cardNumber = tableau.get(position);
-          if (position === tableauLength - 1) {
-            const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
-            for (const other of canPlaceOn) {
-              addAction({
-                card: other,
-                moveType: MOVE_TYPE.TO_TABLEU,
-                destinationIdx: tableauIdx,
-              });
-            }
-          }
+        const cardNumber = tableau.get(tableauLength - 1);
+        const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
+        for (const other of canPlaceOn) {
+          addAction({
+            card: other,
+            moveType: MOVE_TYPE.TO_TABLEU,
+            destinationIdx: tableauIdx,
+          });
         }
       }
     }
