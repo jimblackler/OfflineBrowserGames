@@ -144,13 +144,13 @@ export class GameState {
   _moveToTableau(cardNumber, tableauIdx) {
     let movingCard = cardNumber;
 
-    while (movingCard !== null) {
+    do {
       const stackedOn = this.stackedOn(movingCard);
       if (this.remove(movingCard)) {
         this.tableausFaceUp[tableauIdx].add(movingCard);
       }
       movingCard = stackedOn;
-    }
+    } while (movingCard !== null);
   }
 
   _moveToFoundation(cardNumber, foundationIdx) {
