@@ -206,15 +206,15 @@ export class Renderer {
     cardImage.style.top = (y - v) + "px";
     if (v) {
       if (!cardImage.style.boxShadow) {
-         this.activeShadows++;
+        this.activeShadows++;
       }
       cardImage.style.boxShadow =
           `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, ${0.4 / this.activeShadows}) 4px ${v}px 5px`;
       cardImage.style.zIndex = 1;
     } else {
       if (cardImage.style.boxShadow) {
-         this.activeShadows--;
-         cardImage.style.boxShadow = "";
+        this.activeShadows--;
+        cardImage.style.boxShadow = "";
       }
       cardImage.style.zIndex = 0;
     }
