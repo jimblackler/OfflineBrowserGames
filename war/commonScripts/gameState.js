@@ -199,10 +199,7 @@ export class GameState {
       } else {
         for (let position = 0; position < foundationLength; position++) {
           const cardNumber = foundation.get(position);
-
-          let onArrive;
           if (position === foundationLength - 1) {
-            const cards = [cardNumber];
             const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
             for (const other of canPlaceOn) {
               addAction({
@@ -219,10 +216,7 @@ export class GameState {
     // Position tableau cards.
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
 
-      let tableau = this.tableausFaceDown[tableauIdx];
-      const faceDownLength = tableau.length();
-
-      tableau = this.tableausFaceUp[tableauIdx];
+      const tableau = this.tableausFaceUp[tableauIdx];
       const tableauLength = tableau.length();
       if (tableauLength === 0) {
         // Empty tableau ... will take Kings
@@ -238,7 +232,6 @@ export class GameState {
       } else {
         for (let position = 0; position < tableauLength; position++) {
           const cardNumber = tableau.get(position);
-          const cards = tableau.asArray().slice(position);
           if (position === tableauLength - 1) {
             const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
             for (const other of canPlaceOn) {
