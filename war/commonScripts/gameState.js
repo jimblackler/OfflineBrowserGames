@@ -167,17 +167,52 @@ export class GameState {
     }
   }
 
+  getMoveableCards() {
+    const movableCards = new Set();
+
+    const wasteLength = this.waste.length();
+    if (wasteLength !== 0) {
+      const cardNumber = this.waste.get(wasteLength - 1);
+      movableCards.add(cardNumber);
+    }
+
+    for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
+      const foundation = this.foundations[foundationIdx];
+      const foundationLength = foundation.length();
+      if (foundationLength !== 0) {
+        const cardNumber = foundation.get(foundationLength - 1);
+        movableCards.add(cardNumber);
+      }
+    }
+
+    for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+      const tableau = this.tableausFaceUp[tableauIdx];
+      const tableauLength = tableau.length();
+      for (let position = 0; position < tableauLength; position++) {
+        const cardNumber = tableau.get(position);
+        movableCards.add(cardNumber);
+      }
+    }
+
+    return movableCards;
+  }
+
   getActions() {
     const actionsFor = new Map();
+    const movableCards = this.getMoveableCards();
 
     function addAction(action) {
+
+      const card = action.card;
+      if (!movableCards.has(card)) {
+        return;
+      }
       let actions;
-      const other = action.card;
-      if (actionsFor.has(other)) {
-        actions = actionsFor.get(other)
+      if (actionsFor.has(card)) {
+        actions = actionsFor.get(card)
       } else {
         actions = new Set();
-        actionsFor.set(other, actions);
+        actionsFor.set(card, actions);
       }
       actions.add(action);
     }
