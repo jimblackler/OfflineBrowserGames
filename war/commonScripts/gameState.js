@@ -144,7 +144,7 @@ export class GameState {
   _moveToTableau(cardNumber, tableauIdx) {
     let movingCard = cardNumber;
 
-    while (movingCard) {
+    while (movingCard !== null) {
       const stackedOn = this.stackedOn(movingCard);
       if (this.remove(movingCard)) {
         this.tableausFaceUp[tableauIdx].add(movingCard);
