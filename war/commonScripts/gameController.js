@@ -116,8 +116,7 @@ export class GameController {
       const staggerOrder = Math.max(idx - wasteLength + gameState.rules.cardsToDraw, 0);
       const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
       if (idx === wasteLength - 1) {
-        const cards = [];
-        cards.push(cardNumber);
+        const cards = [cardNumber];
         onArrive = () => {
           this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
         };
