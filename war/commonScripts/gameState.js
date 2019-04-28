@@ -13,8 +13,8 @@ import {CardList} from "./cardList.js";
 import {Rules} from "./rules.js";
 
 export const MOVE_TYPE = {
-  TO_TABLEU : 2,
-  TO_FOUNDATION : 3,
+  TO_TABLEU: 2,
+  TO_FOUNDATION: 3,
 
 };
 
@@ -160,17 +160,27 @@ export class GameState {
   }
 
   execute(action) {
-
     if (action.moveType === MOVE_TYPE.TO_TABLEU) {
       this._moveToTableau(action.card, action.destinationIdx);
     } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
       this._moveToFoundation(action.card, action.destinationIdx);
     }
-
   }
-  
+
   getActions() {
     const actionsFor = new Map();
+
+    function addAction(action) {
+      let actions;
+      const other = action.card;
+      if (actionsFor.has(other)) {
+        actions = actionsFor.get(other)
+      } else {
+        actions = new Set();
+        actionsFor.set(other, actions);
+      }
+      actions.add(action);
+    }
 
     for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
       const foundation = this.foundations[foundationIdx];
@@ -180,14 +190,7 @@ export class GameState {
         const canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
           Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
         for (const other of canPlaceOn) {
-          let actions;
-          if (actionsFor.has(other)) {
-            actions = actionsFor.get(other)
-          } else {
-            actions = new Set();
-            actionsFor.set(other, actions);
-          }
-          actions.add({
+          addAction({
             card: other,
             moveType: MOVE_TYPE.TO_FOUNDATION,
             destinationIdx: foundationIdx
@@ -202,14 +205,7 @@ export class GameState {
             const cards = [cardNumber];
             const canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
             for (const other of canPlaceOn) {
-              let actions;
-              if (actionsFor.has(other)) {
-                actions = actionsFor.get(other)
-              } else {
-                actions = new Set();
-                actionsFor.set(other, actions);
-              }
-              actions.add({
+              addAction({
                 card: other,
                 moveType: MOVE_TYPE.TO_FOUNDATION,
                 destinationIdx: foundationIdx,
@@ -233,14 +229,7 @@ export class GameState {
         const canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
           Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
         for (const other of canPlaceOn) {
-          let actions;
-          if (actionsFor.has(other)) {
-            actions = actionsFor.get(other)
-          } else {
-            actions = new Set();
-            actionsFor.set(other, actions);
-          }
-          actions.add({
+          addAction({
             card: other,
             moveType: MOVE_TYPE.TO_TABLEU,
             destinationIdx: tableauIdx,
@@ -253,14 +242,7 @@ export class GameState {
           if (position === tableauLength - 1) {
             const canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
             for (const other of canPlaceOn) {
-              let actions;
-              if (actionsFor.has(other)) {
-                actions = actionsFor.get(other)
-              } else {
-                actions = new Set();
-                actionsFor.set(other, actions);
-              }
-              actions.add({
+              addAction({
                 card: other,
                 moveType: MOVE_TYPE.TO_TABLEU,
                 destinationIdx: tableauIdx,
