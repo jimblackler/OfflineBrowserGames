@@ -196,8 +196,16 @@ export class GameState {
         movableCards.add(cardNumber);
       }
     }
-
     return movableCards;
+  }
+
+  isComplete() {
+    for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
+      if (this.foundations[foundationIdx].length() !== Rules.NUMBER_CARDS_IN_SUIT) {
+        return false;
+      }
+    }
+    return true;
   }
 
   getActions() {
