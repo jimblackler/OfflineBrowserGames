@@ -29,6 +29,7 @@ export class GameController {
   constructor(renderer) {
     this.renderer = renderer;
     this.curves = new Map();
+    this.lastCardMoved = -1;
     this.cardHistory = new Map();
 
     for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
@@ -225,10 +226,6 @@ export class GameController {
 
   placeCard(cardNumber, x, y, onArrive, delay) {
     const timeNow = new Date().getTime();
-    if (!this.cardHistory.has(cardNumber)) {
-      this.cardHistory.set(cardNumber, new Map());
-    }
-    this.cardHistory.get(cardNumber).set([x, y], timeNow);
     this.renderer.setCardNotDraggable(cardNumber);
     this.renderer.raiseCard(cardNumber);
 
@@ -279,48 +276,52 @@ export class GameController {
     return (click) => {
       aborted = true;
       const cardNumber = cards[0];
+      if (this.lastCardMoved !== cardNumber) {
+        this.cardHistory = new Map();
+        this.lastCardMoved = cardNumber;
+      }
       const actionsFor = gameState.getActions();
       let actions = actionsFor.get(cardNumber);
+
       if (actions) {
         // if click ... priority is (age-> usefulness -> proximity)
         // otherwise it is proximity
         if (click) {
+          // Filter actions to oldest actions.
           let oldest = Number.MAX_VALUE;
           let oldestActions = [];
           for (const action of actions) {
-            if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEU) {
-              const cardHistory = this.cardHistory.get(cardNumber);
-              const key = [action.moveType, action.destinationIdx];
-              const time = cardHistory.has(key) ? cardHistory.get(key) : Number.MIN_VALUE;
-              if (time === oldest) {
-                oldestActions.push(action);
-              } else if (time < oldest) {
-                oldest = time;
-                oldestActions = [action];
-              }
+            const actionKey = JSON.stringify(action);
+            const time = this.cardHistory.has(actionKey) ? this.cardHistory.get(actionKey) : Number.MIN_VALUE;
+            if (time === oldest) {
+              oldestActions.push(action);
+            } else if (time < oldest) {
+              oldest = time;
+              oldestActions = [action];
             }
           }
           if (oldestActions) {
             actions = oldestActions;
           }
 
+          // Filter actions to most useful actions.
           let mostUseful = Number.MIN_VALUE;
           let mostUsefulActions = [];
           for (const action of actions) {
-            if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEU) {
-              const useful = action.moveType;
-              if (useful === mostUseful) {
-                mostUsefulActions.push(action);
-              } else if (useful > mostUseful) {
-                mostUseful = useful;
-                mostUsefulActions = [action];
-              }
+            const useful = action.moveType;
+            if (useful === mostUseful) {
+              mostUsefulActions.push(action);
+            } else if (useful > mostUseful) {
+              mostUseful = useful;
+              mostUsefulActions = [action];
             }
           }
           if (mostUsefulActions) {
             actions = mostUsefulActions;
           }
         }
+
+        // Find closet action.
         const position = this.renderer.getCardPosition(cardNumber);
         let closest = Number.MAX_VALUE;
         let closetAction;
@@ -345,6 +346,7 @@ export class GameController {
           }
         }
         if (closetAction) {
+          this.cardHistory.set(JSON.stringify(closetAction), timeNow);
           gameState.execute(closetAction);
         }
       }
