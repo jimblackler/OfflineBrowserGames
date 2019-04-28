@@ -102,7 +102,9 @@ export class GameController {
     }
 
     this.renderer.setClick(this.stockOverlay, () => {
-      gameState.draw();
+      gameState.execute({
+        moveType: MOVE_TYPE.DRAW,
+      });
       GameStore.store(gameState);
       this.render(gameState);
     });
@@ -178,7 +180,6 @@ export class GameController {
         this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive, 0);
       }
-
     }
 
     // Auto play
@@ -351,5 +352,33 @@ export class GameController {
       GameStore.store(gameState);
       this.render(gameState);
     };
+  }
+
+  autoPlay(gameState) {
+
+    const playOne = () => {
+      const actionsFor = gameState.getActions();
+      const actions = new Set();
+      actions.add({
+        moveType: MOVE_TYPE.DRAW,
+      });
+      for (const entries of actionsFor.values()) {
+        for (const action of entries) {
+          actions.add(action);
+        }
+      }
+
+      const numberActions = actions.size;
+
+      const actionArray = Array.from(actions);
+      const action = actionArray[Math.floor(Math.random() * numberActions)];
+
+      gameState.execute(action);
+      GameStore.store(gameState);
+      this.render(gameState);
+      window.setTimeout(playOne, 500);
+    };
+
+    playOne();
   }
 }

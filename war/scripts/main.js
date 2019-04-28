@@ -25,6 +25,7 @@ window.redraw = () => {
   controller.render(gameState);
 };
 
+
 window.newGame = rules => {
   localStorage["gamePosition"] = 0;
   localStorage["version"] = 2;
@@ -66,6 +67,10 @@ window.undo = function() {
     gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]));
     controller.render(gameState);
   }
+};
+
+window.autoPlay = () => {
+  controller.autoPlay(gameState);
 };
 
 let menuFocused = false;

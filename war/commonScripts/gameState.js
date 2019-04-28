@@ -13,6 +13,7 @@ import {CardList} from "./cardList.js";
 import {Rules} from "./rules.js";
 
 export const MOVE_TYPE = {
+  DRAW: 1,
   TO_TABLEU: 2,
   TO_FOUNDATION: 3,
 
@@ -79,7 +80,7 @@ export class GameState {
 
   }
 
-  draw() {
+  _draw() {
     if (this.stock.length() === 0) {
       while (this.waste.length()) {
         const drawn = this.waste.pop();
@@ -160,7 +161,9 @@ export class GameState {
   }
 
   execute(action) {
-    if (action.moveType === MOVE_TYPE.TO_TABLEU) {
+    if (action.moveType === MOVE_TYPE.DRAW) {
+      this._draw();
+    } else if (action.moveType === MOVE_TYPE.TO_TABLEU) {
       this._moveToTableau(action.card, action.destinationIdx);
     } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
       this._moveToFoundation(action.card, action.destinationIdx);
