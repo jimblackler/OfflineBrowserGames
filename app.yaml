@@ -17,6 +17,11 @@ handlers:
   upload: common/manifest.jsp
   mime_type: text/cache-manifest
 
+- url: /(.*\.js)
+  mime_type: text/javascript
+  static_files: war/\1
+  upload: war/(.*)
+
 - url: /(.*)
   static_files: war/\1
   upload: war/(.*)
