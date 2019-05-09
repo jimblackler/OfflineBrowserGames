@@ -1,3 +1,4 @@
+import {GameState} from "../commonScripts/gameState.js";
 import {GameStore} from "../commonScripts/gameStore.js";
 import {MathUtils} from "../commonScripts/mathUtils.js";
 import {Rules} from "../commonScripts/rules.js";
@@ -356,17 +357,60 @@ export class GameController {
 
   autoPlay(gameState) {
 
-    const playOne = () => {
-      const actions = gameState.getAllActions();
-      const actionArray = Array.from(actions);
-      const action = actionArray[Math.floor(Math.random() * actions.size)];
-      console.log(gameState.normalKey());
-      gameState.execute(action);
-      GameStore.store(gameState);
-      this.render(gameState);
-      window.setTimeout(playOne, 500);
-    };
+    if (false) {
+      const playOne = () => {
+        const actions = gameState.getAllActions();
+        const actionArray = Array.from(actions);
+        const action = actionArray[Math.floor(Math.random() * actions.size)];
+        console.log(gameState.normalKey());
+        gameState.execute(action);
+        GameStore.store(gameState);
+        this.render(gameState);
+        window.setTimeout(playOne, 500);
+      };
 
-    playOne();
+      playOne();
+    } else {
+      const considered = new Set();
+      let currentRound = new Set();
+      considered.add(gameState.normalKey());
+      currentRound.add([JSON.stringify(gameState), []]);
+      let roundNumber = 1;
+      while(currentRound.size) {
+        console.log(roundNumber, currentRound.size);
+        const nextRound = new Set();
+        for (const data of currentRound) {
+          const stringifiedState = data[0];
+          const moves = data[1];
+          let moveIndex = 0;
+          const state = new GameState();
+          state.restore(JSON.parse(stringifiedState));
+
+          for (const action of state.getAllActions()) {
+            const cloned = new GameState();
+            cloned.restore(JSON.parse(stringifiedState));
+            cloned.execute(action);
+            if (cloned.definitelyUncompletable()) {
+              continue;
+            }
+            const normalKey = cloned.normalKey();
+            if (considered.has(normalKey)) {
+              continue;
+            }
+            considered.add(normalKey);
+            const clonedMoves = moves.slice(0);
+            clonedMoves.push(moveIndex);
+            if (cloned.isComplete()) {
+              console.log(moves);
+              return moves;
+            }
+            nextRound.add([JSON.stringify(cloned), moves]);
+            moveIndex++;
+          }
+        }
+        currentRound = nextRound;
+        roundNumber++;
+      }
+    }
   }
 }
