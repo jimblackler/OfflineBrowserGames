@@ -170,7 +170,7 @@ export class GameState {
     }
   }
 
-  getMoveableCards() {
+  getMovableCards() {
     const movableCards = new Set();
 
     const wasteLength = this.waste.length();
@@ -210,7 +210,7 @@ export class GameState {
 
   getActions() {
     const actionsFor = new Map();
-    const movableCards = this.getMoveableCards();
+    const movableCards = this.getMovableCards();
 
     function addAction(action) {
 
@@ -291,10 +291,75 @@ export class GameState {
   normalKey() {
     const tableauStrings = [];
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-        tableauStrings.push(JSON.stringify(this.tableausFaceDown[tableauIdx].cards) +
-            JSON.stringify(this.tableausFaceUp[tableauIdx].cards));
+      tableauStrings.push(JSON.stringify(this.tableausFaceDown[tableauIdx].cards) +
+          JSON.stringify(this.tableausFaceUp[tableauIdx].cards));
     }
     tableauStrings.sort();
     return JSON.stringify(tableauStrings) + JSON.stringify(this.stock.cards) + JSON.stringify(this.waste.cards);
   }
+
+  definitelyUncompletable() {
+    const playable = new Set();
+
+    // Stock.
+    this.stock.asArray().forEach(card => playable.add(card));
+    this.waste.asArray().forEach(card => playable.add(card));
+    // Foundations
+    for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
+      this.foundations[idx].asArray().forEach(card => playable.add(card));
+    }
+
+    const maybePlayable = [];
+
+    // Tableaus.
+    for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
+      const list = [];
+      maybePlayable.push(list);
+      this.tableausFaceDown[tableau].asArray().forEach(card => list.push(card));
+      const faceUp = this.tableausFaceUp[tableau].asArray();
+      for (let idx = 0; idx < faceUp.length; idx++) {
+        if (idx === 0) {
+          list.push(faceUp[idx]);
+        } else {
+          playable.add(faceUp[idx]);
+        }
+      }
+    }
+
+    while(true) {
+      let removedAnything = false;
+      let anyCardsRemain = false;
+      for (let idx0 = 0; idx0 < maybePlayable.length; idx0++) {
+
+        const list = maybePlayable[idx0];
+        for (let idx1 = list.length - 1; idx1 >= 0; idx1--) {
+          anyCardsRemain = true;
+          let isPlayable = false;
+          const card = list[idx1];
+          const others = Rules.canPlaceOnInTableau(card).concat(Rules.canPlaceOnInFoundation(card));
+          for (const other of others) {
+            if (playable.has(other)) {
+              isPlayable = true;
+              break;
+            }
+          }
+          if (isPlayable) {
+            removedAnything = true;
+            playable.add(card);
+            list.pop();
+          } else {
+            break;
+          }
+        }
+      }
+      if (!anyCardsRemain) {
+        return false;
+      }
+      if (!removedAnything) {
+        return true;
+      }
+    }
+  }
+
+
 }
