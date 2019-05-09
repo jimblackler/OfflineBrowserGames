@@ -14,11 +14,12 @@ import {GameStore} from "../commonScripts/gameStore.js";
 import {Renderer} from "./renderer.js";
 import {MOVE_TYPE} from "../commonScripts/gameState.js";
 
+const gameState = new GameState();
 const renderer = new Renderer(document.getElementById("gameDiv"));
-const controller = new GameController(renderer);
+const controller = new GameController(renderer, gameState);
 
 window.redraw = () => {
-  const gameState = new GameState();
+
   gameState.newGame(JSON.parse(localStorage["rules"]));
   controller.render(gameState); // Render twice to not animate everything (only draw).
   gameState.execute({
@@ -26,7 +27,7 @@ window.redraw = () => {
       });
   // Initial draw.
   GameStore.store(gameState);
-  controller.render(gameState);
+  controller.render();
 };
 
 
@@ -42,13 +43,12 @@ document.oncontextmenu = () => {
   return false;
 };
 
-const gameState = new GameState();
 let initializedOK = false;
 try {
   if ("gamePosition" in localStorage &&
       gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
-    controller.render(gameState); // Render twice to not animate everything (only draw).
-    controller.render(gameState);
+    controller.render(); // Render twice to not animate everything (only draw).
+    controller.render();
     initializedOK = true;
   }
 } catch(err) {
@@ -67,14 +67,13 @@ function canUndo() {
 window.undo = function() {
   if (canUndo()) {
     localStorage["gamePosition"]--;
-    const gameState = new GameState();
     gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]));
-    controller.render(gameState);
+    controller.render();
   }
 };
 
 window.autoPlay = () => {
-  controller.autoPlay(gameState);
+  controller.autoPlay();
 };
 
 let menuFocused = false;

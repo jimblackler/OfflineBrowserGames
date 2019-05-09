@@ -27,8 +27,9 @@ const FLY_HEIGHT = 30;
 const FLY_DISTANCE_MAX = 800;
 
 export class GameController {
-  constructor(renderer) {
+  constructor(renderer, gameState) {
     this.renderer = renderer;
+    this.gameState = gameState;
     this.curves = new Map();
     this.lastCardMoved = -1;
     this.cardHistory = new Map();
@@ -84,7 +85,8 @@ export class GameController {
     }
   }
 
-  render(gameState) {
+  render() {
+    const gameState = this.gameState;
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const [k, curve] of this.curves) {
       this.renderer.positionCard(k, curve.endX, curve.endY, 0);
@@ -107,7 +109,7 @@ export class GameController {
         moveType: MOVE_TYPE.DRAW,
       });
       GameStore.store(gameState);
-      this.render(gameState);
+      this.render();
     });
 
     // Position waste cards.
@@ -121,7 +123,7 @@ export class GameController {
       if (idx === wasteLength - 1) {
         const cards = [cardNumber];
         onArrive = () => {
-          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
+          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards));
         };
       } else {
         onArrive = () => {
@@ -146,7 +148,7 @@ export class GameController {
         if (position === foundationLength - 1) {
           const cards = [cardNumber];
           onArrive = () => {
-            this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
+            this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards));
           };
         } else {
           onArrive = () => {
@@ -176,7 +178,7 @@ export class GameController {
         const cards = tableau.asArray().slice(position);
         this.renderer.faceUp(cardNumber);
         const onArrive = () => {
-          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards, gameState));
+          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards));
         };
         this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive, 0);
@@ -252,9 +254,10 @@ export class GameController {
     });
   }
 
-  startDrag(cards, gameState) {
+  startDrag(cards) {
     const timeNow = new Date().getTime();
     let aborted = false;
+    const gameState = this.gameState;
 
     const raise = () => {
       if (aborted) {

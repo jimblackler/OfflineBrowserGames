@@ -14,11 +14,11 @@ import {V2Renderer} from './v2Renderer.js';
 
 const renderer = new V2Renderer(document.getElementById("gameDiv"));
 renderer.init().then(() => {
-  const controller = new GameController(renderer);
   const gameState = new GameState();
+  const controller = new GameController(renderer, gameState);
   if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
-    controller.render(gameState); // Render twice to not animate everything (only draw).
-    controller.render(gameState);
+    controller.render(); // Render twice to not animate everything (only draw).
+    controller.render();
   } else {
     window.newGame({"cardsToDraw": 3});
   }
