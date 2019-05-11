@@ -31,27 +31,48 @@ export class Renderer {
     this.gameDiv.appendChild(this.placeholdersDiv);
     this.cardsDiv = document.createElement("div");
     this.gameDiv.appendChild(this.cardsDiv);
-    this.overlaysDiv = document.createElement("div");
-    this.gameDiv.appendChild(this.overlaysDiv);
     this.activeShadows = 0;
+    this.draggingCards = [];
 
     for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
-      const cardImage = this.makeCard(idx);
+      const cardImage = document.createElement("span");
+      cardImage.style.width = CARD_WIDTH + "px";
+      cardImage.style.height = CARD_HEIGHT + "px";
+      cardImage.style.pointerEvents = "none";
+      cardImage.className = "card";
       this.cardImages[idx] = cardImage;
       this.cardVPos[idx] = 0;
       this.cardsDiv.appendChild(cardImage);
     }
 
-    this.selectionIndicator = this.makeSelectionIndicator();
+    const selectionIndicator = document.createElement("span");
+    selectionIndicator.className = "indicator";
+    selectionIndicator.style.width = INDICATOR_WIDTH + "px";
+    selectionIndicator.style.height = INDICATOR_HEIGHT + "px";
+    selectionIndicator.style.backgroundPosition = "-" + INDICATOR_X + "px " + "-" + INDICATOR_Y + "px";
+    this.selectionIndicator = selectionIndicator;
+
     this.hideIndicator();
     this.gameDiv.append(this.selectionIndicator);
-    document.addEventListener("mousemove", (evt) => {
+    document.addEventListener("mousemove", evt => {
+      for (const card of this.draggingCards) {
+        const position = this.getCardPosition(card);
+        this.positionCard(card, position[0] + evt.clientX - this.mouseX,
+            position[1] + evt.clientY - this.mouseY, position[2]);
+      }
+      this.click = false;
       this.mouseX = evt.clientX;
-      this.mouseY = evt.clientY
+      this.mouseY = evt.clientY;
     });
+
+    document.addEventListener("mouseup", () => {
+      this.dragHandler.cardClickedOrDropped(this.draggingCards[0], this.click);
+      this.draggingCards = [];
+    });
+
   }
 
-  placeHolder(x, y) {
+  placeHolder(x, y, onClick) {
     const image = document.createElement("span");
     image.style.width = CARD_WIDTH + "px";
     image.style.height = CARD_HEIGHT + "px";
@@ -59,40 +80,15 @@ export class Renderer {
     image.style.backgroundPosition = "-" + CARD_WIDTH * PLACEHOLDER_COLUMN + "px -" + CARD_HEIGHT * BLANK_ROW + "px";
     image.style.left = x + "px";
     image.style.top = y + "px";
+    if (onClick) {
+      this._setClickable(image, null, onClick);
+    }
     this.placeholdersDiv.appendChild(image);
     return image;
   }
 
-  makeOverlay(x, y) {
-    const image = document.createElement("span");
-    image.style.width = CARD_WIDTH + "px";
-    image.style.height = CARD_HEIGHT + "px";
-    image.className = "overlay";
-    image.style.left = x + "px";
-    image.style.top = y + "px";
-    this.overlaysDiv.appendChild(image);
-    return image;
-  }
-
-  makeCard(cardNumber) {
-    const cardImage = document.createElement("span");
-    cardImage.style.width = CARD_WIDTH + "px";
-    cardImage.style.height = CARD_HEIGHT + "px";
-    cardImage.className = "card";
-    return cardImage;
-  }
-
   hideIndicator() {
     this.selectionIndicator.style.display = "none";
-  }
-
-  makeSelectionIndicator() {
-    const selectionIndicator = document.createElement("span");
-    selectionIndicator.className = "indicator";
-    selectionIndicator.style.width = INDICATOR_WIDTH + "px";
-    selectionIndicator.style.height = INDICATOR_HEIGHT + "px";
-    selectionIndicator.style.backgroundPosition = "-" + INDICATOR_X + "px " + "-" + INDICATOR_Y + "px";
-    return selectionIndicator;
   }
 
   faceDown(cardNumber) {
@@ -108,83 +104,46 @@ export class Renderer {
     cardImage.style.backgroundPosition = "-" + CARD_WIDTH * type + "px " + "-" + CARD_HEIGHT * suit + "px";
   }
 
-  startDrag(cards, release, evt) {
-    let lastClientX = evt.clientX;
-    let lastClientY = evt.clientY;
-    let click = true;
-
-    // Remove all mouseover handlers.
-    for (let idx = 0; idx !== this.cardImages.length; idx++) {
-      const cardImage = this.cardImages[idx];
-      cardImage.onmouseover = null;
-      cardImage.onclick = null;
-    }
-    this.hideIndicator();
-
-    const mousemove = evt => {
-      for (const card of cards) {
-        const position = this.getCardPosition(card);
-        this.positionCard(card, position[0] + evt.clientX - lastClientX,
-            position[1] + evt.clientY - lastClientY, position[2]);
-      }
-      lastClientX = evt.clientX;
-      lastClientY = evt.clientY;
-      click = false;
-    };
-
-    const mouseup = () => {
-      document.removeEventListener("mousemove", mousemove);
-      document.removeEventListener("mouseup", mouseup);
-      release(click);
-    };
-
-    document.addEventListener("mousemove", mousemove);
-    document.addEventListener("mouseup", mouseup);
-  }
-
-  setClick(element, clickFunction) {
-    this.setClickable(element, null, clickFunction);
-  }
-
-  setClickable(image, mouseDownFunction, clickFunction) {
-
-    if (clickFunction || mouseDownFunction) {
-      const highlight = () => {
-        this.selectionIndicator.style.left = image.offsetLeft + INDICATOR_OFFSET_X + "px";
-        this.selectionIndicator.style.top = image.offsetTop + INDICATOR_OFFSET_Y + "px";
-        image.parentNode.insertBefore(this.selectionIndicator, image.nextSibling);
-        this.selectionIndicator.style.display = "block";
-        this.selectionIndicator.onmousedown = mouseDownFunction;
-        image.onmousedown = mouseDownFunction;
-        this.selectionIndicator.onclick = clickFunction;
-        image.onclick = clickFunction;
-        this.selectionIndicator.onmouseout = evt => this.hideIndicator();
-      };
-
-      const rect = image.getBoundingClientRect();
-      if (this.mouseX >= rect.left && this.mouseX <= rect.right &&
-          this.mouseY >= rect.top && this.mouseY <= rect.bottom) {
-        highlight();
-      }
-      image.onmouseover = highlight;
-    } else {
-      image.onclick = null;
-      image.onmousemove = null;
-      image.onmousedown = null;
-    }
-  }
-
-  setCardDraggable(cardNumber, cards, start) {
-    this.setCardClickable(cardNumber, evt => this.startDrag(cards, start(), evt));
-  }
-
-  setCardNotDraggable(cardNumber) {
-    this.setCardClickable(cardNumber, null);
-  }
-
-  setCardClickable(cardNumber, mouseDownFunction) {
+  setDraggable(cardNumber, draggable) {
     const cardImage = this.cardImages[cardNumber];
-    this.setClickable(cardImage, mouseDownFunction, null);
+    if (draggable) {
+      this._setClickable(cardImage, () => {
+        const cards = this.dragHandler.startDrag(cardNumber);
+        this.click = true;
+        this.hideIndicator();
+        this.draggingCards = cards;
+      }, null);
+      cardImage.style.pointerEvents = "auto";
+    } else {
+      cardImage.onmousedown = null;
+      cardImage.onmouseover = null;
+      cardImage.onmouseup = null;
+      cardImage.style.pointerEvents = "none";
+    }
+  }
+
+  _setClickable(image, mouseDownFunction, clickFunction) {
+    const highlight = () => {
+      if (this.draggingCards.length) {
+        return;
+      }
+      this.selectionIndicator.style.left = image.offsetLeft + INDICATOR_OFFSET_X + "px";
+      this.selectionIndicator.style.top = image.offsetTop + INDICATOR_OFFSET_Y + "px";
+      image.parentNode.insertBefore(this.selectionIndicator, image.nextSibling);
+      this.selectionIndicator.style.display = "block";
+      this.selectionIndicator.onmousedown = mouseDownFunction;
+      image.onmousedown = mouseDownFunction;
+      this.selectionIndicator.onclick = clickFunction;
+      image.onclick = clickFunction;
+      this.selectionIndicator.onmouseout = () => this.hideIndicator();
+    };
+
+    const rect = image.getBoundingClientRect();
+    if (this.mouseX >= rect.left && this.mouseX <= rect.right &&
+        this.mouseY >= rect.top && this.mouseY <= rect.bottom) {
+      highlight();
+    }
+    image.onmouseover = highlight;
   }
 
   raiseCard(cardNumber) {
@@ -218,5 +177,9 @@ export class Renderer {
       }
       cardImage.style.zIndex = 0;
     }
+  }
+
+  setDragHandler(dragHandler) {
+    this.dragHandler = dragHandler;
   }
 }

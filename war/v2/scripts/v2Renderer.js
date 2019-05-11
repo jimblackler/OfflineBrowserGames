@@ -29,7 +29,6 @@ export class V2Renderer {
 
   constructor(container) {
     this.cardObjects = [];
-    this.clicks = [];
     this.raycaster = new Raycaster();
 
     const renderer = new WebGLRenderer({antialias: true});
@@ -50,15 +49,27 @@ export class V2Renderer {
   init() {
     const scene = new Scene();
     this.scene = scene;
+
+    this.canDrag = new Set();
+    this.placeholderGroup = new Group();
+    scene.add(this.placeholderGroup);
+
     this.cardGroup = new Group();
     this.cardGroup.position.set(CARD_WIDTH / 2 / 10, 0, CARD_HEIGHT / 2 / 10);
     this.cardGroup.scale.set(1 / 10, 1 / HEIGHT_MULTIPLIER, 1 / 10);
-
     scene.add(this.cardGroup);
+
     const loader = new ObjectLoader();
     return new Promise((resolve, reject) => {
       loader.load('data/app.json', object => {
         scene.add(object);
+
+        const originalPlaceholder = scene.getObjectByName('Placeholder');
+        originalPlaceholder.material = originalPlaceholder.material.clone();
+        originalPlaceholder.material.map = originalPlaceholder.material.map.clone();
+        V2Renderer._paintCard(originalPlaceholder.material.map, 4, 1);
+        originalPlaceholder.visible = false;
+        this.originalPlaceholder = originalPlaceholder;
 
         const indicator = scene.getObjectByName('Indicator');
         indicator.material.map = indicator.material.map.clone();
@@ -71,7 +82,7 @@ export class V2Renderer {
         const originalCard = scene.getObjectByName('Card');
         originalCard.visible = false;
         const back = originalCard.getObjectByName('Back');
-        this.paintCard(back.material.map, 4, 0);
+        V2Renderer._paintCard(back.material.map, 4, 0);
 
         for (let cardNumber = 0; cardNumber !== Rules.NUMBER_CARDS; cardNumber++) {
           const card = originalCard.clone();
@@ -83,7 +94,7 @@ export class V2Renderer {
           front.material.map = front.material.map.clone();
           const suit = Rules.getSuit(cardNumber);
           const type = Rules.getType(cardNumber);
-          this.paintCard(front.material.map, suit, type);
+          V2Renderer._paintCard(front.material.map, suit, type);
 
           card.visible = true;
           this.cardGroup.add(card);
@@ -116,11 +127,10 @@ export class V2Renderer {
                 -(event.clientY / window.innerHeight) * 2 + 1);
             this.raycaster.setFromCamera(mouse, camera);
             const intersects = this.raycaster.intersectObjects(this.cardObjects, true);
-            const cardObject = this.findFirstCardObject(intersects);
+            const cardObject = this._findFirstCardObject(intersects);
             if (cardObject) {
               const cardNumber = this.cardObjects.indexOf(cardObject);
-              const click = this.clicks[cardNumber];
-              if (click) {
+              if (this.canDrag.has(cardNumber)) {
                 const position = this.getCardPosition(cardNumber);
                 indicator.position.x = (position[0] + INDICATOR_WIDTH / 2 + INDICATOR_OFFSET_X) / 10;
                 indicator.position.y = 0;
@@ -136,12 +146,13 @@ export class V2Renderer {
                 -(event.clientY / window.innerHeight) * 2 + 1);
             this.raycaster.setFromCamera(mouse, camera);
             const intersects = this.raycaster.intersectObjects(this.cardObjects, true);
-            const cardObject = this.findFirstCardObject(intersects);
+            const cardObject = this._findFirstCardObject(intersects);
             if (cardObject) {
               const cardNumber = this.cardObjects.indexOf(cardObject);
-              const click = this.clicks[cardNumber];
-              const release = click();
-              release();
+              if (this.canDrag.has(cardNumber)) {
+                this.dragHandler.startDrag(cardNumber);
+                this.dragHandler.cardClickedOrDropped(cardNumber, true);
+              }
             }
           };
 
@@ -157,11 +168,9 @@ export class V2Renderer {
         });
       });
     });
-
-
   }
 
-  findFirstCardObject(objects) {
+  _findFirstCardObject(objects) {
     let intersected = null;
     for (const collided of objects) {
       let idx;
@@ -180,19 +189,27 @@ export class V2Renderer {
     return intersected;
   }
 
-  paintCard(map, suit, type) {
+  static _paintCard(map, suit, type) {
     map.repeat = new Vector2(CARD_WIDTH / TEXTURE_WIDTH, CARD_HEIGHT / TEXTURE_HEIGHT);
     map.offset = new Vector2((CARD_WIDTH * type) / TEXTURE_WIDTH,
         1 - (CARD_HEIGHT * suit + CARD_HEIGHT) / TEXTURE_HEIGHT);
     map.needsUpdate = true;
   }
 
-  placeHolder(x, y) {
-
+  placeHolder(x, y, onClick) {
+    const placeholder = this.originalPlaceholder.clone();
+    placeholder.position.x = (x + INDICATOR_WIDTH / 2) / 10;
+    placeholder.position.z = (y + INDICATOR_HEIGHT / 2) / 10;
+    placeholder.visible = true;
+    this.placeholderGroup.add(placeholder);
   }
 
-  makeOverlay(x, y) {
-
+  setDraggable(cardNumber, draggable) {
+    if (draggable) {
+      this.canDrag.add(cardNumber);
+    } else {
+      this.canDrag.delete(cardNumber);
+    }
   }
 
   faceDown(cardNumber) {
@@ -203,17 +220,6 @@ export class V2Renderer {
   faceUp(cardNumber) {
     const card = this.cardObjects[cardNumber];
     card.rotation.z = 0;
-  }
-
-  setClick(element, clickFunction) {
-  }
-
-  setCardDraggable(cardNumber, cards, start) {
-    this.clicks[cardNumber] = start;
-  }
-
-  setCardNotDraggable(cardNumber) {
-    this.clicks[cardNumber] = null;
   }
 
   raiseCard(cardNumber) {
@@ -232,5 +238,9 @@ export class V2Renderer {
     card.position.x = x;
     card.position.y = v;
     card.position.z = y;
+  }
+
+  setDragHandler(dragHandler) {
+    this.dragHandler = dragHandler;
   }
 }

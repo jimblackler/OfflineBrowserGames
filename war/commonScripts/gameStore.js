@@ -7,6 +7,19 @@ export class GameStore {
     localStorage["gamePosition"]++;
     localStorage["gamePosition" + localStorage["gamePosition"]] = JSON.stringify(gameState);
   }
+
+  static restore(gameState) {
+    if ("gamePosition" in localStorage) {
+      try {
+        gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]));
+        return true;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+   return false;
+  }
+
   static erase() {
     delete localStorage["gamePosition"];
   }

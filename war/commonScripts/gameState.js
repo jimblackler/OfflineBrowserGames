@@ -14,9 +14,8 @@ import {Rules} from "./rules.js";
 
 export const MOVE_TYPE = {
   DRAW: 1,
-  TO_TABLEU: 2,
+  TO_TABLEAU: 2,
   TO_FOUNDATION: 3,
-
 };
 
 export class GameState {
@@ -77,7 +76,6 @@ export class GameState {
     for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
       this.foundations[idx] = new CardList();
     }
-
   }
 
   _draw() {
@@ -130,7 +128,7 @@ export class GameState {
     return false;
   }
 
-  stackedOn(cardNumber) {
+  stackedUnder(cardNumber) {
     // In tableau cards?
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
       const tableau = this.tableausFaceUp[tableauIdx];
@@ -142,11 +140,21 @@ export class GameState {
     return null;
   }
 
+  getStack(cardNumber) {
+    let card = cardNumber;
+    const cards = [];
+    while (card !== null) {
+      cards.push(card);
+      card = this.stackedUnder(card);
+    }
+    return cards;
+  }
+
   _moveToTableau(cardNumber, tableauIdx) {
     let movingCard = cardNumber;
 
     do {
-      const stackedOn = this.stackedOn(movingCard);
+      const stackedOn = this.stackedUnder(movingCard);
       if (this.remove(movingCard)) {
         this.tableausFaceUp[tableauIdx].add(movingCard);
       }
@@ -163,40 +171,11 @@ export class GameState {
   execute(action) {
     if (action.moveType === MOVE_TYPE.DRAW) {
       this._draw();
-    } else if (action.moveType === MOVE_TYPE.TO_TABLEU) {
+    } else if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
       this._moveToTableau(action.card, action.destinationIdx);
     } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
       this._moveToFoundation(action.card, action.destinationIdx);
     }
-  }
-
-  getMovableCards() {
-    const movableCards = new Set();
-
-    const wasteLength = this.waste.length();
-    if (wasteLength !== 0) {
-      const cardNumber = this.waste.get(wasteLength - 1);
-      movableCards.add(cardNumber);
-    }
-
-    for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-      const foundation = this.foundations[foundationIdx];
-      const foundationLength = foundation.length();
-      if (foundationLength !== 0) {
-        const cardNumber = foundation.get(foundationLength - 1);
-        movableCards.add(cardNumber);
-      }
-    }
-
-    for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-      const tableau = this.tableausFaceUp[tableauIdx];
-      const tableauLength = tableau.length();
-      for (let position = 0; position < tableauLength; position++) {
-        const cardNumber = tableau.get(position);
-        movableCards.add(cardNumber);
-      }
-    }
-    return movableCards;
   }
 
   isComplete() {
@@ -210,17 +189,43 @@ export class GameState {
 
   getActions() {
     const actionsFor = new Map();
-    const movableCards = this.getMovableCards();
+    const movableToTableau = new Set();
+    const movableToFoundation = new Set();
+
+    const wasteLength = this.waste.length();
+    if (wasteLength !== 0) {
+      const cardNumber = this.waste.get(wasteLength - 1);
+      movableToTableau.add(cardNumber);
+      movableToFoundation.add(cardNumber);
+    }
+
+    for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
+      const foundation = this.foundations[foundationIdx];
+      const foundationLength = foundation.length();
+      if (foundationLength !== 0) {
+        const cardNumber = foundation.get(foundationLength - 1);
+        movableToTableau.add(cardNumber);
+        movableToFoundation.add(cardNumber);
+      }
+    }
+
+    for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+      const tableau = this.tableausFaceUp[tableauIdx];
+      const tableauLength = tableau.length();
+      for (let position = 0; position < tableauLength; position++) {
+        const cardNumber = tableau.get(position);
+        movableToTableau.add(cardNumber);
+        if (position === tableauLength - 1) {
+          movableToFoundation.add(cardNumber);
+        }
+      }
+    }
 
     function addAction(action) {
-
       const card = action.card;
-      if (!movableCards.has(card)) {
-        return;
-      }
       let actions;
       if (actionsFor.has(card)) {
-        actions = actionsFor.get(card)
+        actions = actionsFor.get(card);
       } else {
         actions = new Set();
         actionsFor.set(card, actions);
@@ -241,6 +246,9 @@ export class GameState {
         canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
       }
       for (const other of canPlaceOn) {
+        if (!movableToFoundation.has(other)) {
+          continue;
+        }
         addAction({
           card: other,
           moveType: MOVE_TYPE.TO_FOUNDATION,
@@ -263,9 +271,13 @@ export class GameState {
         canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
       }
       for (const other of canPlaceOn) {
+        if (!movableToTableau.has(other)) {
+          continue;
+        }
+
         addAction({
           card: other,
-          moveType: MOVE_TYPE.TO_TABLEU,
+          moveType: MOVE_TYPE.TO_TABLEAU,
           destinationIdx: tableauIdx,
         });
       }
@@ -326,7 +338,7 @@ export class GameState {
       }
     }
 
-    while(true) {
+    while (true) {
       let removedAnything = false;
       let anyCardsRemain = false;
       for (let idx0 = 0; idx0 < maybePlayable.length; idx0++) {

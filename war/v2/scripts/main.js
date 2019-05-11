@@ -10,13 +10,15 @@
 
 import {GameController} from "../../commonScripts/gameController.js";
 import {GameState} from "../../commonScripts/gameState.js";
+import {GameStore} from "../../commonScripts/gameStore.js";
 import {V2Renderer} from './v2Renderer.js';
 
 const renderer = new V2Renderer(document.getElementById("gameDiv"));
 renderer.init().then(() => {
   const gameState = new GameState();
   const controller = new GameController(renderer, gameState);
-  if (gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
+  renderer.setDragHandler(controller);
+  if (GameStore.restore(gameState)) {
     controller.render(); // Render twice to not animate everything (only draw).
     controller.render();
   } else {

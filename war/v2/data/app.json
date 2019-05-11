@@ -18,7 +18,7 @@
       "name": "", 
       "premultiplyAlpha": false, 
       "minFilter": 1008, 
-      "image": "CF27829D-4EEF-46DE-BC66-741D8EDA2C84", 
+      "image": "B0B6816B-4C7A-40F6-825B-193CF5E4EBB1", 
       "offset": [
         0, 
         0
@@ -50,7 +50,7 @@
       "name": "", 
       "premultiplyAlpha": false, 
       "minFilter": 1008, 
-      "image": "70793021-4D1B-4203-BD04-2B5CA59FEE8C", 
+      "image": "3164E894-06FB-4DA6-AA82-1D47C19D5E01", 
       "offset": [
         0, 
         0
@@ -403,6 +403,33 @@
         "name": "Indicator", 
         "type": "Mesh", 
         "uuid": "3C7E1BCE-7139-42FB-948F-919F9D12902A"
+      }, 
+      {
+        "layers": 1, 
+        "matrix": [
+          1, 
+          0, 
+          0, 
+          0, 
+          0, 
+          0, 
+          -1, 
+          0, 
+          0, 
+          1, 
+          0, 
+          0, 
+          49.942453, 
+          0, 
+          0, 
+          1
+        ], 
+        "geometry": "E9A52076-24FF-43E5-A0A6-B0A3C82F51A2", 
+        "material": "67225F4B-6F0F-442A-9F82-236E7335C6FE", 
+        "name": "Placeholder", 
+        "castShadow": true, 
+        "type": "Mesh", 
+        "uuid": "F9F9B452-445A-4A13-9085-8B890C0D441C"
       }
     ], 
     "uuid": "76092D26-EB1A-42A4-9A8E-5EAF4BA945AE"
@@ -451,11 +478,11 @@
   "images": [
     {
       "url": "images/8E38148E-764B-43E4-9C5F-E1C460E95690.png", 
-      "uuid": "CF27829D-4EEF-46DE-BC66-741D8EDA2C84"
+      "uuid": "B0B6816B-4C7A-40F6-825B-193CF5E4EBB1"
     }, 
     {
       "url": "images/1C744810-821F-42A2-B3D5-256BB4FE6293.png", 
-      "uuid": "70793021-4D1B-4203-BD04-2B5CA59FEE8C"
+      "uuid": "3164E894-06FB-4DA6-AA82-1D47C19D5E01"
     }
   ], 
   "metadata": {

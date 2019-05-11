@@ -41,6 +41,10 @@ export class CardList {
     return this.cards.pop();
   }
 
+  top() {
+    return this.cards[this.cards.length - 1];
+  }
+
   indexOf(cardNumber) {
     return this.cards.indexOf(cardNumber);
   }

@@ -38,102 +38,102 @@ export class GameController {
       renderer.faceDown(idx);
     }
 
-    const animate = () => {
-      requestAnimationFrame(animate);
-      const timeNow = new Date().getTime();
-      for (const [k, curve] of this.curves) {
-        if (timeNow < curve.startTime) {
-          continue;
-        }
-        const t = MathUtils.toT(curve.startTime, curve.endTime, timeNow);
-        if (t > 1) {
-          renderer.positionCard(k, curve.endX, curve.endY, 0);
-          curve.onArrive();
-          this.curves.delete(k);
-        } else {
-          const multiplier1 = Math.sin(t * Math.PI / 2);
-          let v;
-
-          if (curve.start[2] < curve.flyHeight) {
-            const start = Math.PI - Math.asin(curve.start[2] / curve.flyHeight);
-            const a = MathUtils.tInRange(start, 0, t);
-            v = Math.sin(a) * curve.flyHeight;
-          } else {
-            v = curve.start[2] * (1 - t);
-          }
-
-          renderer.positionCard(k, MathUtils.tInRange(curve.start[0], curve.endX, multiplier1),
-              MathUtils.tInRange(curve.start[1], curve.endY, multiplier1), v);
-        }
-      }
-    };
-
-    requestAnimationFrame(animate);
-
     // Placeholder; stock
-    this.stockHolder = renderer.placeHolder(STOCK_X, STOCK_Y);
-    this.stockOverlay = renderer.makeOverlay(STOCK_X, STOCK_Y);
+    renderer.placeHolder(STOCK_X, STOCK_Y, () => this.draw());
 
     // Placeholder; tableau
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-      renderer.placeHolder(TABLEAU_X + TABLEAU_X_SPACING * tableauIdx, TABLEAU_Y);
+      renderer.placeHolder(TABLEAU_X + TABLEAU_X_SPACING * tableauIdx, TABLEAU_Y, null);
     }
 
     // Placeholder; foundation
     for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-      renderer.placeHolder(FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y);
+      renderer.placeHolder(FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, null);
     }
+    requestAnimationFrame(() => this._animate());
+  }
+
+  _animate() {
+    requestAnimationFrame(() => this._animate());
+    const timeNow = new Date().getTime();
+    for (const [k, curve] of this.curves) {
+      if (timeNow < curve.startTime) {
+        continue;
+      }
+      const t = MathUtils.toT(curve.startTime, curve.endTime, timeNow);
+      if (t > 1) {
+        this.renderer.positionCard(k, curve.endX, curve.endY, 0);
+        this.renderer.setDraggable(k, curve.draggable);
+        this.curves.delete(k);
+      } else {
+        const multiplier1 = Math.sin(t * Math.PI / 2);
+        let v;
+
+        if (curve.start[2] < curve.flyHeight) {
+          const start = Math.PI - Math.asin(curve.start[2] / curve.flyHeight);
+          const a = MathUtils.tInRange(start, 0, t);
+          v = Math.sin(a) * curve.flyHeight;
+        } else {
+          v = curve.start[2] * (1 - t);
+        }
+
+        this.renderer.positionCard(k, MathUtils.tInRange(curve.start[0], curve.endX, multiplier1),
+            MathUtils.tInRange(curve.start[1], curve.endY, multiplier1), v);
+      }
+    }
+    if (this.raisingCards) {
+      let t = (timeNow - this.riseStarted) / RAISE_DURATION;
+      if (t > 1) {
+        t = 1;
+      }
+      for (const cardNumber of this.raisingCards) {
+        const position = this.renderer.getCardPosition(cardNumber);
+        this.renderer.positionCard(cardNumber, position[0], position[1], RAISE_HEIGHT * t);
+      }
+      if (t === 1) {
+        this.raisingCards = null;
+      }
+    }
+  }
+
+  draw() {
+    this.gameState.execute({
+      moveType: MOVE_TYPE.DRAW,
+    });
+    GameStore.store(this.gameState);
+    this.render();
   }
 
   render() {
     const gameState = this.gameState;
-    // Stop all animations immediately (old onArrive functions are invalid)
+    // Stop all animations immediately
     for (const [k, curve] of this.curves) {
       this.renderer.positionCard(k, curve.endX, curve.endY, 0);
-      curve.onArrive();
       this.curves.delete(k);
     }
 
+    this.raisingCards = null;
+
     // Position stock cards.
     const stockLength = gameState.stock.length();
-
     for (let idx = 0; idx !== stockLength; idx++) {
       const cardNumber = gameState.stock.get(idx);
       this.renderer.faceDown(cardNumber);
-      this.placeCard(cardNumber, STOCK_X, STOCK_Y, () => {
-      }, 0);
+      this._placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0);
     }
-
-    this.renderer.setClick(this.stockOverlay, () => {
-      gameState.execute({
-        moveType: MOVE_TYPE.DRAW,
-      });
-      GameStore.store(gameState);
-      this.render();
-    });
 
     // Position waste cards.
     const wasteLength = gameState.waste.length();
     for (let idx = 0; idx !== wasteLength; idx++) {
       const cardNumber = gameState.waste.get(idx);
-      let onArrive;
       this.renderer.faceUp(cardNumber);
       const staggerOrder = Math.max(idx - wasteLength + gameState.rules.cardsToDraw, 0);
       const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
-      if (idx === wasteLength - 1) {
-        const cards = [cardNumber];
-        onArrive = () => {
-          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards));
-        };
-      } else {
-        onArrive = () => {
-        };
-      }
       let position = idx - (wasteLength - Math.min(gameState.rules.cardsToDraw, wasteLength));
       if (position < 0) {
         position = 0;
       }
-      this.placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, onArrive, delay);
+      this._placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, idx === wasteLength - 1, delay);
     }
 
     // Position foundation cards.
@@ -144,17 +144,7 @@ export class GameController {
       for (let position = 0; position < foundationLength; position++) {
         const cardNumber = foundation.get(position);
         this.renderer.faceUp(cardNumber);
-        let onArrive;
-        if (position === foundationLength - 1) {
-          const cards = [cardNumber];
-          onArrive = () => {
-            this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards));
-          };
-        } else {
-          onArrive = () => {
-          };
-        }
-        this.placeCard(cardNumber, FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, onArrive, 0);
+        this._placeCard(cardNumber, FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0);
       }
     }
 
@@ -164,9 +154,8 @@ export class GameController {
       const faceDownLength = tableau.length();
       for (let position = 0; position < faceDownLength; position++) {
         const cardNumber = tableau.get(position);
-        this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-            TABLEAU_Y + TABLEAU_Y_SPACING * position, () => {
-            }, 0);
+        this._placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
+            TABLEAU_Y + TABLEAU_Y_SPACING * position, false, 0);
         this.renderer.faceDown(cardNumber);
       }
 
@@ -175,13 +164,9 @@ export class GameController {
 
       for (let position = 0; position < tableauLength; position++) {
         const cardNumber = tableau.get(position);
-        const cards = tableau.asArray().slice(position);
         this.renderer.faceUp(cardNumber);
-        const onArrive = () => {
-          this.renderer.setCardDraggable(cardNumber, cards, () => this.startDrag(cards));
-        };
-        this.placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-            TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), onArrive, 0);
+        this._placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
+            TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), true, 0);
       }
     }
 
@@ -210,12 +195,12 @@ export class GameController {
               continue;
             }
             for (const action of actions) {
-              if (action.moveType === MOVE_TYPE.TO_TABLEU) {
+              if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
                 continue;
               }
               gameState.execute(action);
               GameStore.store(gameState);
-              this.render(gameState);
+              this.render();
               return;
             }
           }
@@ -226,10 +211,11 @@ export class GameController {
     }
   }
 
-  placeCard(cardNumber, x, y, onArrive, delay) {
+  _placeCard(cardNumber, x, y, draggable, delay) {
+
     const timeNow = new Date().getTime();
-    this.renderer.setCardNotDraggable(cardNumber);
     this.renderer.raiseCard(cardNumber);
+    this.renderer.setDraggable(cardNumber, false);
 
     const position = this.renderer.getCardPosition(cardNumber);
 
@@ -250,116 +236,102 @@ export class GameController {
       endX: x,
       endY: y,
       flyHeight,
-      onArrive
+      draggable,
     });
   }
 
-  startDrag(cards) {
-    const timeNow = new Date().getTime();
-    let aborted = false;
-    const gameState = this.gameState;
-
-    const raise = () => {
-      if (aborted) {
-        return;
-      }
-      let t = (new Date().getTime() - timeNow) / RAISE_DURATION;
-      if (t > 1) {
-        t = 1;
-      }
-      for (const cardNumber of cards) {
-        const position = this.renderer.getCardPosition(cardNumber);
-        this.renderer.positionCard(cardNumber, position[0], position[1], RAISE_HEIGHT * t);
-      }
-      if (t < 1) {
-        requestAnimationFrame(raise);
-      }
-    };
-    requestAnimationFrame(raise);
-    return (click) => {
-      aborted = true;
-      const cardNumber = cards[0];
-      if (this.lastCardMoved !== cardNumber) {
-        this.cardHistory = new Map();
-        this.lastCardMoved = cardNumber;
-      }
-      const actionsFor = gameState.getActions();
-      let actions = actionsFor.get(cardNumber);
-
-      if (actions) {
-        // if click ... priority is (age-> usefulness -> proximity)
-        // otherwise it is proximity
-        if (click) {
-          // Filter actions to oldest actions.
-          let oldest = Number.MAX_VALUE;
-          let oldestActions = [];
-          for (const action of actions) {
-            const actionKey = JSON.stringify(action);
-            const time = this.cardHistory.has(actionKey) ? this.cardHistory.get(actionKey) : Number.MIN_VALUE;
-            if (time === oldest) {
-              oldestActions.push(action);
-            } else if (time < oldest) {
-              oldest = time;
-              oldestActions = [action];
-            }
-          }
-          if (oldestActions) {
-            actions = oldestActions;
-          }
-
-          // Filter actions to most useful actions.
-          let mostUseful = Number.MIN_VALUE;
-          let mostUsefulActions = [];
-          for (const action of actions) {
-            const useful = action.moveType;
-            if (useful === mostUseful) {
-              mostUsefulActions.push(action);
-            } else if (useful > mostUseful) {
-              mostUseful = useful;
-              mostUsefulActions = [action];
-            }
-          }
-          if (mostUsefulActions) {
-            actions = mostUsefulActions;
-          }
-        }
-
-        // Find closet action.
-        const position = this.renderer.getCardPosition(cardNumber);
-        let closest = Number.MAX_VALUE;
-        let closestAction;
-        for (const action of actions) {
-          if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEU) {
-            let x;
-            let y;
-            if (action.moveType === MOVE_TYPE.TO_TABLEU) {
-              x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
-              y = TABLEAU_Y + (gameState.tableausFaceUp[action.destinationIdx].length() +
-                  gameState.tableausFaceDown[action.destinationIdx].length()) * TABLEAU_Y_SPACING;
-            } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
-              x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;
-              y = FOUNDATION_Y;
-            }
-
-            const distance = Math.pow(position[0] - x, 2) + Math.pow(position[1] - y, 2);
-            if (distance < closest) {
-              closest = distance;
-              closestAction = action;
-            }
-          }
-        }
-        if (closestAction) {
-          this.cardHistory.set(JSON.stringify(closestAction), timeNow);
-          gameState.execute(closestAction);
-        }
-      }
-      GameStore.store(gameState);
-      this.render(gameState);
-    };
+  startDrag(card) {
+    const cards = this.gameState.getStack(card)
+    this.riseStarted = new Date().getTime();
+    this.raisingCards = cards;
+    return cards;
   }
 
-  autoPlay(gameState) {
+  cardClickedOrDropped(card, click) {
+    const gameState = this.gameState;
+    const cards = gameState.getStack(card);
+    const cardNumber = cards[0];
+    if (this.lastCardMoved !== cardNumber) {
+      this.cardHistory = new Map();
+      this.lastCardMoved = cardNumber;
+    }
+    const actionsFor = gameState.getActions();
+    let actions = actionsFor.get(cardNumber);
 
+    if (actions) {
+      // if click ... priority is (age-> usefulness -> proximity)
+      // otherwise it is proximity
+      if (click) {
+        // Filter actions to oldest actions.
+        let oldest = Number.MAX_VALUE;
+        let oldestActions = [];
+        for (const action of actions) {
+          const actionKey = JSON.stringify(action);
+          const time = this.cardHistory.has(actionKey) ? this.cardHistory.get(actionKey) : Number.MIN_VALUE;
+          if (time === oldest) {
+            oldestActions.push(action);
+          } else if (time < oldest) {
+            oldest = time;
+            oldestActions = [action];
+          }
+        }
+        if (oldestActions) {
+          actions = oldestActions;
+        }
+
+        // Filter actions to most useful actions.
+        let mostUseful = Number.MIN_VALUE;
+        let mostUsefulActions = [];
+        for (const action of actions) {
+          const useful = action.moveType;
+          if (useful === mostUseful) {
+            mostUsefulActions.push(action);
+          } else if (useful > mostUseful) {
+            mostUseful = useful;
+            mostUsefulActions = [action];
+          }
+        }
+        if (mostUsefulActions) {
+          actions = mostUsefulActions;
+        }
+      }
+
+      // Find closet action.
+      const position = this.renderer.getCardPosition(cardNumber);
+      let closest = Number.MAX_VALUE;
+      let closestAction;
+      for (const action of actions) {
+        if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEAU) {
+          let x;
+          let y;
+          if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
+            x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
+            y = TABLEAU_Y + (gameState.tableausFaceUp[action.destinationIdx].length() +
+                gameState.tableausFaceDown[action.destinationIdx].length()) * TABLEAU_Y_SPACING;
+          } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
+            x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;
+            y = FOUNDATION_Y;
+          }
+
+          const distance = Math.pow(position[0] - x, 2) + Math.pow(position[1] - y, 2);
+          if (distance < closest) {
+            closest = distance;
+            closestAction = action;
+          }
+        }
+      }
+      if (closestAction) {
+        this.cardHistory.set(JSON.stringify(closestAction), new Date().getTime());
+        gameState.execute(closestAction);
+        GameStore.store(gameState);
+      }
+    }
+
+    this.render();
+  }
+
+  autoPlay() {
+    const gameState = this.gameState;
     if (false) {
       const playOne = () => {
         const actions = gameState.getAllActions();
@@ -368,7 +340,7 @@ export class GameController {
         console.log(gameState.normalKey());
         gameState.execute(action);
         GameStore.store(gameState);
-        this.render(gameState);
+        this.render();
         window.setTimeout(playOne, 500);
       };
 
@@ -379,7 +351,7 @@ export class GameController {
       considered.add(gameState.normalKey());
       currentRound.add([JSON.stringify(gameState), []]);
       let roundNumber = 1;
-      while(currentRound.size) {
+      while (currentRound.size) {
         console.log(roundNumber, currentRound.size);
         const nextRound = new Set();
         for (const data of currentRound) {

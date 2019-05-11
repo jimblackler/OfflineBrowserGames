@@ -9,27 +9,22 @@
  * GNU General Public License for more details. */
 
 import {GameController} from "../commonScripts/gameController.js";
-import {GameState} from "../commonScripts/gameState.js";
+import {GameState, MOVE_TYPE} from "../commonScripts/gameState.js";
 import {GameStore} from "../commonScripts/gameStore.js";
 import {Renderer} from "./renderer.js";
-import {MOVE_TYPE} from "../commonScripts/gameState.js";
 
 const gameState = new GameState();
 const renderer = new Renderer(document.getElementById("gameDiv"));
 const controller = new GameController(renderer, gameState);
+renderer.setDragHandler(controller);
 
 window.redraw = () => {
-
   gameState.newGame(JSON.parse(localStorage["rules"]));
-  controller.render(gameState); // Render twice to not animate everything (only draw).
-  gameState.execute({
-        moveType: MOVE_TYPE.DRAW,
-      });
-  // Initial draw.
+  controller.render();
+  controller.draw();
   GameStore.store(gameState);
   controller.render();
 };
-
 
 window.newGame = rules => {
   localStorage["gamePosition"] = 0;
@@ -43,19 +38,10 @@ document.oncontextmenu = () => {
   return false;
 };
 
-let initializedOK = false;
-try {
-  if ("gamePosition" in localStorage &&
-      gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]))) {
-    controller.render(); // Render twice to not animate everything (only draw).
-    controller.render();
-    initializedOK = true;
-  }
-} catch(err) {
-  console.log(err);
-}
-
-if (!initializedOK) {
+if (GameStore.restore(gameState)) {
+  controller.render(); // Render twice to not animate everything (only draw).
+  controller.render();
+} else {
   window.newGame({"cardsToDraw":3});
 }
 
@@ -67,7 +53,7 @@ function canUndo() {
 window.undo = function() {
   if (canUndo()) {
     localStorage["gamePosition"]--;
-    gameState.restore(JSON.parse(localStorage["gamePosition" + localStorage["gamePosition"]]));
+    GameStore.restore(gameState);
     controller.render();
   }
 };
