@@ -169,12 +169,16 @@ export class GameState {
   }
 
   execute(action) {
-    if (action.moveType === MOVE_TYPE.DRAW) {
-      this._draw();
-    } else if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
-      this._moveToTableau(action.card, action.destinationIdx);
-    } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
-      this._moveToFoundation(action.card, action.destinationIdx);
+    switch (action.moveType) {
+      case MOVE_TYPE.DRAW:
+        this._draw();
+        break;
+      case MOVE_TYPE.TO_TABLEAU:
+        this._moveToTableau(action.card, action.destinationIdx);
+        break;
+      case MOVE_TYPE.TO_FOUNDATION:
+        this._moveToFoundation(action.card, action.destinationIdx);
+        break;
     }
   }
 
@@ -298,7 +302,6 @@ export class GameState {
     }
     return actions;
   }
-
 
   normalKey() {
     const tableauStrings = [];
