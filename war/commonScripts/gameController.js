@@ -9,7 +9,8 @@ const STOCK_Y = 42;
 const TABLEAU_X = STOCK_X;
 const TABLEAU_Y = 210;
 const TABLEAU_X_SPACING = 115;
-const TABLEAU_Y_SPACING = 25;
+const TABLEAU_Y_SPACING_FACE_DOWN = 25;
+const TABLEAU_Y_SPACING_FACE_UP = 25;
 const FOUNDATION_X = 386;
 const FOUNDATION_X_SPACING = 115;
 const FOUNDATION_Y = STOCK_Y;
@@ -155,7 +156,7 @@ export class GameController {
       for (let position = 0; position < faceDownLength; position++) {
         const cardNumber = tableau.get(position);
         this._placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-            TABLEAU_Y + TABLEAU_Y_SPACING * position, false, 0);
+            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0);
         this.renderer.faceDown(cardNumber);
       }
 
@@ -166,7 +167,7 @@ export class GameController {
         const cardNumber = tableau.get(position);
         this.renderer.faceUp(cardNumber);
         this._placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-            TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), true, 0);
+            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_UP * position + TABLEAU_Y_SPACING_FACE_DOWN * faceDownLength, true, 0);
       }
     }
 
@@ -306,8 +307,8 @@ export class GameController {
           let y;
           if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
             x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
-            y = TABLEAU_Y + (gameState.tableausFaceUp[action.destinationIdx].length() +
-                gameState.tableausFaceDown[action.destinationIdx].length()) * TABLEAU_Y_SPACING;
+            y = TABLEAU_Y + gameState.tableausFaceUp[action.destinationIdx].length() * TABLEAU_Y_SPACING_FACE_DOWN +
+                gameState.tableausFaceDown[action.destinationIdx].length()* TABLEAU_Y_SPACING_FACE_UP;
           } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
             x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;
             y = FOUNDATION_Y;
