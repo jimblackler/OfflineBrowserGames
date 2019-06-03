@@ -28,7 +28,9 @@ animateOn {
 }
 
 span.indicator,span.card,span.placeholder,span#gears {
-	background: url('cards103x143.png');
+	/*background: url('cards103x143.png');*/
+	background: url('cards206x286.png');
+	background-size: 1339px;
 	position: absolute;
 }
 
