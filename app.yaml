@@ -1,5 +1,5 @@
 application: offlinebrowsergames
-version: 10
+version: 16
 runtime: python27
 api_version: 1
 threadsafe: yes
@@ -17,12 +17,7 @@ handlers:
   upload: common/manifest.jsp
   mime_type: text/cache-manifest
 
-- url: /(.*\.js)
-  mime_type: text/javascript
-  static_files: war/\1
-  upload: war/(.*)
-
-- url: /(.*)
+- url: /(.*)$
   static_files: war/\1
   upload: war/(.*)
 
