@@ -27,12 +27,26 @@ animateOn {
 	-webkit-transition: top 1200ms ease-out;
 }
 
+
 span.indicator,span.card,span.placeholder,span#gears {
-	/*background: url('cards103x143.png');*/
-	background: url('cards206x286.png');
+	background: url('cards103x143.png');
+}
+
+@media
+only screen and (-webkit-min-device-pixel-ratio: 1.25),
+only screen and ( min--moz-device-pixel-ratio: 1.25),
+only screen and ( -o-min-device-pixel-ratio: 1.25/1),
+only screen and ( min-device-pixel-ratio: 1.25) {
+	span.indicator, span.card, span.placeholder, span#gears {
+		background: url('cards206x286.png');
+	}
+}
+
+span.indicator,span.card,span.placeholder,span#gears {
 	background-size: 1339px;
 	position: absolute;
 }
+
 
 span.overlay {
 	position: absolute;
