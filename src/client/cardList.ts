@@ -10,23 +10,9 @@
 
 import {assertDefined} from '../common/check/defined';
 
-// TODO: replace the explicit interface with defining it simply as the return tye of the
-// createCardList method.
-export interface CardList {
-  readonly cards: number[];
-  add(cardNumber: number): void;
-  pushFront(cardNumber: number): number[];
-  asArray(): number[];
-  get(idx: number): number;
-  length(): number;
-  pop(): number | undefined;
-  top(): number | undefined;
-  indexOf(cardNumber: number): number;
-  remove(cardNumber: number): boolean;
-  shuffle(random: () => number): void;
-}
+export type CardList = ReturnType<typeof createCardList>;
 
-export function createCardList(data?: { cards: number[] }): CardList {
+export function createCardList(data?: { cards: number[] }) {
   const cards = data ? data.cards : [];
 
   return {

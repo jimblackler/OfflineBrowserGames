@@ -28,21 +28,9 @@ export type DragHandler = {
   startDrag(cardNumber: number): number[];
 };
 
-// TODO: replace the explicit interface with defining it simply as the return tye of the
-// createRenderer method.
-export interface Renderer {
-  placeHolder(x: number, y: number, onClick: ((ev: MouseEvent) => void) | null): HTMLSpanElement;
-  hideIndicator(): void;
-  faceDown(cardNumber: number): void;
-  faceUp(cardNumber: number): void;
-  setDraggable(cardNumber: number, draggable: boolean): void;
-  raiseCard(cardNumber: number): void;
-  getCardPosition(cardNumber: number): [number, number, number];
-  positionCard(cardNumber: number, x: number, y: number, v: number): void;
-  setDragHandler(dragHandler: DragHandler): void;
-}
+export type Renderer = ReturnType<typeof createRenderer>;
 
-export function createRenderer(gameDiv: HTMLElement): Renderer {
+export function createRenderer(gameDiv: HTMLElement) {
   const cardImages: HTMLSpanElement[] = [];
   const cardVPos: number[] = [];
   const placeholdersDiv = document.createElement('div');

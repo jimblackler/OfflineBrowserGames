@@ -1,8 +1,9 @@
 import {assertDefined} from '../common/check/defined';
-import {type Action, type SerializedGameState, GameState, MOVE_TYPE, createGameState} from './gameState';
+import type {GameState} from './gameState';
+import {type Action, createGameState, MOVE_TYPE, type SerializedGameState} from './gameState';
 import {GameStore} from './gameStore';
 import {MathUtils} from './mathUtils';
-import type {Renderer, DragHandler} from './renderer';
+import type {DragHandler, Renderer} from './renderer';
 import {Rules} from './rules';
 
 const STOCK_X = 42;
