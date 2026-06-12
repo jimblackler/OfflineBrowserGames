@@ -1,26 +1,2 @@
-application: offlinebrowsergames
-version: 16
-runtime: python27
-api_version: 1
-threadsafe: yes
-
-handlers:
-- url: /main
-  script: main.app
-
-- url: /
-  script: main.app
-
-# Legacy - remove when possible
-- url: /manifest.jsp
-  static_files: common/manifest.jsp
-  upload: common/manifest.jsp
-  mime_type: text/cache-manifest
-
-- url: /(.*)$
-  static_files: war/\1
-  upload: war/(.*)
-
-libraries:
-- name: webapp2
-  version: "2.5.2"
+runtime: nodejs14
+instance_class: F2

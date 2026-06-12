@@ -1,0 +1,46 @@
+{
+  "name": "offlinebrowsergames",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --project tsconfig.server.json",
+    "build-client": "npx webpack --mode=production",
+    "build-client:dev": "npx webpack --mode=development",
+    "build-client-nowatch:dev": "npx webpack --mode=development --no-watch",
+    "build:dev": "tsc --project tsconfig.server.json --watch",
+    "build-nowatch:dev": "tsc --project tsconfig.server.json",
+    "eslint": "eslint src",
+    "eslint-fix": "eslint --fix src",
+    "start": "node dist/server/main.js",
+    "start:dev": "nodemon --watch dist --watch static dist/server/main.js"
+  },
+  "dependencies": {
+    "alea": "^1.0.1",
+    "express": "^5.2.1",
+    "parseurl": "^1.3.3",
+    "send": "^1.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.0",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "@types/parseurl": "^1.3.3",
+    "@types/send": "^1.2.1",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "css-loader": "^7.1.4",
+    "eslint": "^9.39.4",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import-x": "^4.16.2",
+    "globals": "^17.5.0",
+    "nodemon": "^3.1.14",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.7",
+    "ts-node": "^10.9.2",
+    "tslint": "^6.1.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.59.0",
+    "webpack": "^5.106.2",
+    "webpack-cli": "^7.0.2"
+  }
+}

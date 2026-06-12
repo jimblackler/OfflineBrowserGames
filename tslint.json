@@ -1,0 +1,118 @@
+{
+  "extends": "tslint:all",
+  "rules": {
+    "align": {"severity": "warn", "options": ["parameters", "statements", "members"]},
+    "array-type": {"options": "array"},
+    "arrow-return-shorthand": {"options": "multiline", "severity": "warn"},
+    "arrow-parens": false,
+    "binary-expression-operand-order": {"severity": "warn"},
+    "comment-format": {"severity": "warn", "options": ["check-space"]},
+    "class-name": {"severity": "warn"},
+    "completed-docs": false,
+    "curly": {"severity": "warn"},
+    "cyclomatic-complexity": false,
+    "increment-decrement": false,
+    "interface-name": false,
+    "interface-over-type-literal": false,
+    "invalid-void": false,
+    "linebreak-style": false,
+    "match-default-export-name": false,
+    "max-classes-per-file": false,
+    "max-file-line-count": false,
+    "max-line-length": false,
+    "member-access": false,
+    "member-ordering": {"options": {"order": "statics-first"}},
+    "newline-before-return": false,
+    "newline-per-chained-call": false,
+    "no-async-without-await": false,
+    "no-bitwise": false,
+    "no-consecutive-blank-lines": {"severity": "warn"},
+    "no-debugger": {"severity": "warn"},
+    "no-console": false,
+    "no-empty": false,
+    "no-floating-promises": {"severity": "warn"},
+    "no-import-side-effect": false,
+    "no-magic-numbers": false,
+    "no-null-keyword": {"severity": "warn"},
+    "no-null-undefined-union": false,
+    "no-parameter-reassignment": false,
+    "no-shadowed-variable": {"severity": "off"},
+    "no-submodule-imports": false,
+    "no-trailing-whitespace": {"severity": "warn"},
+    "no-unnecessary-callback-wrapper": false,
+    "no-unused-expression": {"severity": "warn"},
+    "no-void-expression": false,
+    "number-literal-format": {"severity": "warn"},
+    "object-literal-key-quotes": {"options": "as-needed", "severity": "warn"},
+    "object-literal-shorthand": {"severity": "warn"},
+    "object-literal-sort-keys": {"severity": "warn", "options": "match-declaration-order-only"},
+    "one-line": {"severity": "warn"},
+    "only-arrow-functions": false,
+    "ordered-imports": {
+      "severity": "warn",
+      "options": {
+        "import-sources-order": "any",
+        "named-imports-order": "any",
+        "module-source-path": "full"
+      }
+    },
+    "prefer-const": {"severity": "warn"},
+    "prefer-for-of": {"severity": "warn"},
+    "prefer-function-over-method": false,
+    "prefer-switch": {"severity": "warn"},
+    "prefer-template": {"severity": "warn"},
+    "promise-function-async": false,
+    "quotemark": {"severity": "warn", "options": ["single", "avoid-escape", "avoid-template"]},
+    "radix": false,
+    "semicolon": {"severity": "warn"},
+    "space-before-function-paren": {
+      "options": {
+        "anonymous": "never",
+        "asyncArrow": "always",
+        "constructor": "never",
+        "method": "never",
+        "named": "never"
+      },
+      "severity": "warn"
+    },
+    "space-within-parens": {"severity": "warn"},
+    "strict-boolean-expressions": false,
+    "strict-comparisons": false,
+    "strict-string-expressions": false,
+    "strict-type-predicates": false,
+    "trailing-comma": {
+      "severity": "warn",
+      "options": {"esSpecCompliant": true, "multiline": "never", "singleline": "never"}
+    },
+    "triple-equals": {"severity": "warn"},
+    "typedef": {},
+    "typedef-whitespace": {
+      "options": {
+        "call-signature": "nospace",
+        "index-signature": "nospace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+      },
+      "severity": "warn"
+    },
+    "variable-name": {
+      "options": ["check-format", "allow-leading-underscore", "require-const-for-all-caps"],
+      "severity": "warn"
+    },
+    "whitespace": {
+      "severity": "warn",
+      "options": [
+        "check-branch",
+        "check-decl",
+        "check-operator",
+        "check-separator",
+        "check-type",
+        "check-typecast",
+        "check-preblock",
+        "check-type-operator",
+        "check-rest-spread"
+      ]
+    }
+  }
+}
