@@ -6,7 +6,7 @@ import {assertNotNull} from '../common/check/null';
 import {aboutHandler} from './handlers/aboutHandler';
 import {mainHandler} from './handlers/mainHandler';
 
-const app: express.Express = express();
+const app = express();
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());

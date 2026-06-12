@@ -2,26 +2,26 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
+import {assertDefined} from '../common/check/defined';
+
 export class CardList {
-  constructor(data) {
-    if (data) {
-      this.cards = data.cards;
-    } else {
-      this.cards = [];
-    }
+  cards: number[];
+
+  constructor(data?: { cards: number[] }) {
+    this.cards = data ? data.cards : [];
   }
 
-  add(cardNumber) {
+  add(cardNumber: number) {
     this.cards.push(cardNumber);
   }
 
-  pushFront(cardNumber) {
+  pushFront(cardNumber: number) {
     return this.cards.splice(0, 0, cardNumber);
   }
 
@@ -29,7 +29,7 @@ export class CardList {
     return this.cards;
   }
 
-  get(idx) {
+  get(idx: number) {
     return this.cards[idx];
   }
 
@@ -45,31 +45,29 @@ export class CardList {
     return this.cards[this.cards.length - 1];
   }
 
-  indexOf(cardNumber) {
+  indexOf(cardNumber: number) {
     return this.cards.indexOf(cardNumber);
   }
 
-  remove(cardNumber) {
+  remove(cardNumber: number) {
     const idx = this.indexOf(cardNumber);
     if (idx === -1) {
       return false;
-    } else {
-      this.cards.splice(idx, 1);
-      return true;
     }
+    this.cards.splice(idx, 1);
+    return true;
   }
 
-  shuffle(random) {
+  shuffle(random: () => number) {
     const array = this.cards;
-    let tmp;
-    let current;
+    let current: number;
     let top = array.length;
 
     if (top) {
       while (--top) {
         current = Math.floor(random() * (top + 1));
-        tmp = array[current];
-        array[current] = array[top];
+        const tmp = assertDefined(array[current]);
+        array[current] = assertDefined(array[top]);
         array[top] = tmp;
       }
     }

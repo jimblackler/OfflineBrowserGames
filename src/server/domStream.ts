@@ -77,7 +77,7 @@ class LocalElement extends LocalNode implements HTMLElement {
     this.mode = 'closed';
   }
 
-  setAttribute(name: string, value: string): void {
+  setAttribute(name: string, value: string) {
     switch (this.mode) {
       case 'unopened':
         throw new Error(`Attempt to setAttribute on <${this.tagName}> which has no parent`);
@@ -95,7 +95,7 @@ class LocalElement extends LocalNode implements HTMLElement {
         value.split('&').join('&amp;').split('<').join('&lt;').split('"').join('&quot;')}"`);
   }
 
-  append(...nodes: (LocalNode | string)[]): void {
+  append(...nodes: (LocalNode | string)[]) {
     switch (this.mode) {
       case 'unopened':
         throw new Error(`Attempt to append to <${this.tagName}> which has no parent`);
@@ -171,11 +171,11 @@ class LocalDocument extends LocalNode implements Document {
     }
   }
 
-  createElement(tagName: string): LocalHTMLElement {
+  createElement(tagName: string) {
     return new LocalHTMLElement(this, tagName);
   }
 
-  createElementNS(namespace: string, tagName: string): LocalHTMLElement {
+  createElementNS(namespace: string, tagName: string) {
     // This is only supplied to maintain compatibility with common client/server code that uses this
     // method to create SVGs. Setting the namespace is not needed on the server.
     return new LocalHTMLElement(this, tagName);
@@ -221,7 +221,7 @@ export class DomStream {
     this._document = new LocalDocument(writeString);
   }
 
-  get document(): Document {
+  get document() {
     return this._document;
   }
 

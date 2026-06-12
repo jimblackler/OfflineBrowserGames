@@ -8,7 +8,7 @@ export default function config(
     ...(argv.mode === 'development' && {devtool: 'inline-source-map'}),
     entry: {
       main: {
-        import: './src/client/main.js'
+        import: './src/client/main.ts'
       }
     },
     module: {

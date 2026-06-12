@@ -38,6 +38,7 @@
     "no-parameter-reassignment": false,
     "no-shadowed-variable": {"severity": "off"},
     "no-submodule-imports": false,
+    "no-this-assignment": {"severity": "warn"},
     "no-trailing-whitespace": {"severity": "warn"},
     "no-unnecessary-callback-wrapper": false,
     "no-unused-expression": {"severity": "warn"},

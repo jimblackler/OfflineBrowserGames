@@ -2,7 +2,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -16,16 +16,16 @@ export const Rules = {
   NUMBER_CARDS_IN_SUIT: 13,
   NUMBER_FOUNDATIONS: 4,
 
-  getSuit: function(cardNumber) {
+  getSuit(cardNumber: number) {
     return Math.floor(cardNumber / Rules.NUMBER_CARDS_IN_SUIT);
   },
-  getType: function(cardNumber) {
+  getType(cardNumber: number) {
     return cardNumber % Rules.NUMBER_CARDS_IN_SUIT;
   },
-  getCard: function(suit, type) {
+  getCard(suit: number, type: number) {
     return suit * Rules.NUMBER_CARDS_IN_SUIT + type;
   },
-  canPlaceOnInTableau(cardNumber) {
+  canPlaceOnInTableau(cardNumber: number) {
     const suit = Rules.getSuit(cardNumber);
     const type = Rules.getType(cardNumber);
     if (type === Rules.ACE_TYPE) {
@@ -33,12 +33,12 @@ export const Rules = {
     }
     if (suit < 2) {
       return [Rules.getCard(2, type - 1), Rules.getCard(3, type - 1)];
-    } else {
-      return [Rules.getCard(0, type - 1), Rules.getCard(1, type - 1)];
     }
+    return [Rules.getCard(0, type - 1), Rules.getCard(1, type - 1)];
+
   },
 
-  canPlaceOnInFoundation(cardNumber) {
+  canPlaceOnInFoundation(cardNumber: number) {
     const suit = Rules.getSuit(cardNumber);
     const type = Rules.getType(cardNumber);
     if (type === Rules.KING_TYPE) {
