@@ -10,66 +10,83 @@
 
 import {assertDefined} from '../common/check/defined';
 
-export class CardList {
-  cards: number[];
+// TODO: replace the explicit interface with defining it simply as the return tye of the
+// createCardList method.
+export interface CardList {
+  readonly cards: number[];
+  add(cardNumber: number): void;
+  pushFront(cardNumber: number): number[];
+  asArray(): number[];
+  get(idx: number): number;
+  length(): number;
+  pop(): number | undefined;
+  top(): number | undefined;
+  indexOf(cardNumber: number): number;
+  remove(cardNumber: number): boolean;
+  shuffle(random: () => number): void;
+}
 
-  constructor(data?: { cards: number[] }) {
-    this.cards = data ? data.cards : [];
-  }
+export function createCardList(data?: { cards: number[] }): CardList {
+  const cards = data ? data.cards : [];
 
-  add(cardNumber: number) {
-    this.cards.push(cardNumber);
-  }
+  return {
+    get cards() {
+      return cards;
+    },
 
-  pushFront(cardNumber: number) {
-    return this.cards.splice(0, 0, cardNumber);
-  }
+    add(cardNumber: number) {
+      cards.push(cardNumber);
+    },
 
-  asArray() {
-    return this.cards;
-  }
+    pushFront(cardNumber: number) {
+      return cards.splice(0, 0, cardNumber);
+    },
 
-  get(idx: number) {
-    return this.cards[idx];
-  }
+    asArray() {
+      return cards;
+    },
 
-  length() {
-    return this.cards.length;
-  }
+    get(idx: number) {
+      return assertDefined(cards[idx]);
+    },
 
-  pop() {
-    return this.cards.pop();
-  }
+    length() {
+      return cards.length;
+    },
 
-  top() {
-    return this.cards[this.cards.length - 1];
-  }
+    pop() {
+      return cards.pop();
+    },
 
-  indexOf(cardNumber: number) {
-    return this.cards.indexOf(cardNumber);
-  }
+    top() {
+      return cards[cards.length - 1];
+    },
 
-  remove(cardNumber: number) {
-    const idx = this.indexOf(cardNumber);
-    if (idx === -1) {
-      return false;
-    }
-    this.cards.splice(idx, 1);
-    return true;
-  }
+    indexOf(cardNumber: number) {
+      return cards.indexOf(cardNumber);
+    },
 
-  shuffle(random: () => number) {
-    const array = this.cards;
-    let current: number;
-    let top = array.length;
+    remove(cardNumber: number) {
+      const idx = cards.indexOf(cardNumber);
+      if (idx === -1) {
+        return false;
+      }
+      cards.splice(idx, 1);
+      return true;
+    },
 
-    if (top) {
-      while (--top) {
-        current = Math.floor(random() * (top + 1));
-        const tmp = assertDefined(array[current]);
-        array[current] = assertDefined(array[top]);
-        array[top] = tmp;
+    shuffle(random: () => number) {
+      let current: number;
+      let top = cards.length;
+
+      if (top) {
+        while (--top) {
+          current = Math.floor(random() * (top + 1));
+          const tmp = assertDefined(cards[current]);
+          cards[current] = assertDefined(cards[top]);
+          cards[top] = tmp;
+        }
       }
     }
-  }
+  };
 }

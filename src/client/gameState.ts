@@ -10,7 +10,7 @@
 
 import alea from 'alea';
 import {assertDefined} from '../common/check/defined';
-import {CardList} from './cardList';
+import {type CardList, createCardList} from './cardList';
 import {Rules} from './rules';
 
 export const MOVE_TYPE = {
@@ -43,102 +43,58 @@ export type Action = {
   destinationIdx: number;
 };
 
-export class GameState {
-  deck!: CardList;
-  stock!: CardList;
-  rules!: GameRules;
-  tableausFaceDown!: CardList[];
-  tableausFaceUp!: CardList[];
-  waste!: CardList;
-  foundations!: CardList[];
+export interface GameState {
+  deck: CardList;
+  stock: CardList;
+  rules: GameRules;
+  tableausFaceDown: CardList[];
+  tableausFaceUp: CardList[];
+  waste: CardList;
+  foundations: CardList[];
 
-  restore(data: SerializedGameState) {
-    this.deck = new CardList(data.deck);
-    this.stock = new CardList(data.stock);
-    this.rules = data.rules;
-    this.tableausFaceDown = [];
-    for (let idx = 0; idx !== data.tableausFaceDown.length; idx++) {
-      this.tableausFaceDown.push(new CardList(data.tableausFaceDown[idx]));
-    }
-    this.tableausFaceUp = [];
-    for (let idx = 0; idx !== data.tableausFaceUp.length; idx++) {
-      this.tableausFaceUp.push(new CardList(data.tableausFaceUp[idx]));
-    }
-    this.waste = new CardList(data.waste);
-    this.foundations = [];
-    for (let idx = 0; idx !== data.foundations.length; idx++) {
-      this.foundations.push(new CardList(data.foundations[idx]));
-    }
-    return true;
-  }
+  restore(data: SerializedGameState): boolean;
+  newGame(rules: GameRules): void;
+  execute(action: Action): void;
+  isComplete(): boolean;
+  getActions(): Map<number, Set<Action>>;
+  getAllActions(): Set<Action>;
+  normalKey(): string;
+  definitelyUncompletable(): boolean;
+  getStack(cardNumber: number): number[];
+}
 
-  newGame(rules: GameRules) {
-    this.deck = new CardList();
-    this.stock = new CardList();
-    this.tableausFaceDown = [];
-    this.tableausFaceUp = [];
-    this.waste = new CardList();
-    this.foundations = [];
-    this.rules = rules;
+export function createGameState(): GameState {
+  let deck: CardList;
+  let stock: CardList;
+  let rules: GameRules;
+  let tableausFaceDown: CardList[] = [];
+  let tableausFaceUp: CardList[] = [];
+  let waste: CardList;
+  let foundations: CardList[] = [];
 
-    // Add cards to deck
-    for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
-      this.deck.add(idx);
-    }
-
-    const random = alea(localStorage.getItem('seed'));
-
-    this.deck.shuffle(random);
-
-    // Tableaus.
-    for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
-      const faceDownList = new CardList();
-      this.tableausFaceDown[tableau] = faceDownList;
-      for (let position = 0; position <= tableau - 1; position++) {
-        const card = assertDefined(this.deck.pop());
-        faceDownList.add(card);
-      }
-      const faceUpList = new CardList();
-      this.tableausFaceUp[tableau] = faceUpList;
-      const card = assertDefined(this.deck.pop());
-      faceUpList.add(card);
-    }
-
-    // Stock.
-    while (this.deck.length() > 0) {
-      const card = assertDefined(this.deck.pop());
-      this.stock.add(card);
-    }
-
-    // Foundations
-    for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
-      this.foundations[idx] = new CardList();
-    }
-  }
-
-  _draw() {
-    if (this.stock.length() === 0) {
-      while (this.waste.length()) {
-        const drawn = assertDefined(this.waste.pop());
-        this.stock.add(drawn);
+  function _draw() {
+    if (stock.length() === 0) {
+      while (waste.length()) {
+        const drawn = assertDefined(waste.pop());
+        stock.add(drawn);
       }
     } else {
       // X cards from stock to waste.
-      for (let idx = 0; idx !== this.rules.cardsToDraw && this.stock.length(); idx++) {
-        const drawn = assertDefined(this.stock.pop());
-        this.waste.add(drawn);
+      for (let idx = 0; idx !== rules.cardsToDraw && stock.length(); idx++) {
+        const drawn = assertDefined(stock.pop());
+        waste.add(drawn);
       }
     }
   }
 
-  remove(cardNumber: number) {
+  function remove(cardNumber: number) {
     // In tableau cards?
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-      const tableau = assertDefined(this.tableausFaceUp[tableauIdx]);
+      const tableau = assertDefined(tableausFaceUp[tableauIdx]);
       if (tableau.remove(cardNumber)) {
         // Reveal undercard if needed.
         if (tableau.length() === 0) {
-          const tableauFaceDown = assertDefined(this.tableausFaceDown[tableauIdx]);
+          const tableauFaceDown = assertDefined(tableausFaceDown[tableauIdx]);
           if (tableauFaceDown.length() > 0) {
             const popped = assertDefined(tableauFaceDown.pop());
             tableau.pushFront(popped);
@@ -148,18 +104,18 @@ export class GameState {
       }
     }
     // In stock cards?
-    if (this.stock.remove(cardNumber)) {
+    if (stock.remove(cardNumber)) {
       return true;
     }
 
     // In waste cards?
-    if (this.waste.remove(cardNumber)) {
+    if (waste.remove(cardNumber)) {
       return true;
     }
 
     // Foundations
     for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
-      const foundation = assertDefined(this.foundations[idx]);
+      const foundation = assertDefined(foundations[idx]);
       if (foundation.remove(cardNumber)) {
         return true;
       }
@@ -168,10 +124,10 @@ export class GameState {
     return false;
   }
 
-  stackedUnder(cardNumber: number) {
+  function stackedUnder(cardNumber: number) {
     // In tableau cards?
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-      const tableau = assertDefined(this.tableausFaceUp[tableauIdx]);
+      const tableau = assertDefined(tableausFaceUp[tableauIdx]);
       const idx = tableau.indexOf(cardNumber);
       if (idx !== -1 && idx < tableau.length() - 1) {
         const val = assertDefined(tableau.get(idx + 1));
@@ -181,254 +137,335 @@ export class GameState {
     return null;
   }
 
-  getStack(cardNumber: number) {
-    let card: number | null = cardNumber;
-    const cards: number[] = [];
-    while (card !== null) {
-      cards.push(card);
-      card = this.stackedUnder(card);
-    }
-    return cards;
-  }
-
-  _moveToTableau(cardNumber: number, tableauIdx: number) {
+  function _moveToTableau(cardNumber: number, tableauIdx: number) {
     let movingCard: number | null = cardNumber;
-    const tableau = assertDefined(this.tableausFaceUp[tableauIdx]);
+    const tableau = assertDefined(tableausFaceUp[tableauIdx]);
     do {
-      const stackedOn = this.stackedUnder(movingCard);
-      if (this.remove(movingCard)) {
+      const stackedOn = stackedUnder(movingCard);
+      if (remove(movingCard)) {
         tableau.add(movingCard);
       }
       movingCard = stackedOn;
     } while (movingCard !== null);
   }
 
-  _moveToFoundation(cardNumber: number, foundationIdx: number) {
-    if (this.remove(cardNumber)) {
-      const foundation = assertDefined(this.foundations[foundationIdx]);
+  function _moveToFoundation(cardNumber: number, foundationIdx: number) {
+    if (remove(cardNumber)) {
+      const foundation = assertDefined(foundations[foundationIdx]);
       foundation.add(cardNumber);
     }
   }
 
-  execute(action: Action) {
-    switch (action.moveType) {
-      case MOVE_TYPE.DRAW:
-        this._draw();
-        break;
-      case MOVE_TYPE.TO_TABLEAU:
-        this._moveToTableau(action.card, action.destinationIdx);
-        break;
-      case MOVE_TYPE.TO_FOUNDATION:
-        this._moveToFoundation(action.card, action.destinationIdx);
-        break;
-      default:
-        break;
-    }
-  }
+  return {
+    get deck() { return deck; },
+    set deck(val) { deck = val; },
+    get stock() { return stock; },
+    set stock(val) { stock = val; },
+    get rules() { return rules; },
+    set rules(val) { rules = val; },
+    get tableausFaceDown() { return tableausFaceDown; },
+    set tableausFaceDown(val) { tableausFaceDown = val; },
+    get tableausFaceUp() { return tableausFaceUp; },
+    set tableausFaceUp(val) { tableausFaceUp = val; },
+    get waste() { return waste; },
+    set waste(val) { waste = val; },
+    get foundations() { return foundations; },
+    set foundations(val) { foundations = val; },
 
-  isComplete() {
-    for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-      const foundation = assertDefined(this.foundations[foundationIdx]);
-      if (foundation.length() !== Rules.NUMBER_CARDS_IN_SUIT) {
-        return false;
+    getStack(cardNumber: number) {
+      let card: number | null = cardNumber;
+      const cards: number[] = [];
+      while (card !== null) {
+        cards.push(card);
+        card = stackedUnder(card);
       }
-    }
-    return true;
-  }
+      return cards;
+    },
 
-  getActions() {
-    const actionsFor = new Map<number, Set<Action>>();
-    const movableToTableau = new Set<number>();
-    const movableToFoundation = new Set<number>();
+    restore(data: SerializedGameState) {
+      deck = createCardList(data.deck);
+      stock = createCardList(data.stock);
+      rules = data.rules;
+      tableausFaceDown = [];
+      for (let idx = 0; idx !== data.tableausFaceDown.length; idx++) {
+        tableausFaceDown.push(createCardList(data.tableausFaceDown[idx]));
+      }
+      tableausFaceUp = [];
+      for (let idx = 0; idx !== data.tableausFaceUp.length; idx++) {
+        tableausFaceUp.push(createCardList(data.tableausFaceUp[idx]));
+      }
+      waste = createCardList(data.waste);
+      foundations = [];
+      for (let idx = 0; idx !== data.foundations.length; idx++) {
+        foundations.push(createCardList(data.foundations[idx]));
+      }
+      return true;
+    },
 
-    const wasteLength = this.waste.length();
-    if (wasteLength !== 0) {
-      const cardNumber = assertDefined(this.waste.get(wasteLength - 1));
-      movableToTableau.add(cardNumber);
-      movableToFoundation.add(cardNumber);
-    }
+    newGame(r: GameRules) {
+      deck = createCardList();
+      stock = createCardList();
+      tableausFaceDown = [];
+      tableausFaceUp = [];
+      waste = createCardList();
+      foundations = [];
+      rules = r;
 
-    for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-      const foundation = assertDefined(this.foundations[foundationIdx]);
-      const foundationLength = foundation.length();
-      if (foundationLength !== 0) {
-        const cardNumber = assertDefined(foundation.get(foundationLength - 1));
+      // Add cards to deck
+      for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
+        deck.add(idx);
+      }
+
+      const random = alea(localStorage.getItem('seed'));
+
+      deck.shuffle(random);
+
+      // Tableaus.
+      for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
+        const faceDownList = createCardList();
+        tableausFaceDown[tableau] = faceDownList;
+        for (let position = 0; position <= tableau - 1; position++) {
+          const card = assertDefined(deck.pop());
+          faceDownList.add(card);
+        }
+        const faceUpList = createCardList();
+        tableausFaceUp[tableau] = faceUpList;
+        const card = assertDefined(deck.pop());
+        faceUpList.add(card);
+      }
+
+      // Stock.
+      while (deck.length() > 0) {
+        const card = assertDefined(deck.pop());
+        stock.add(card);
+      }
+
+      // Foundations
+      for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
+        foundations[idx] = createCardList();
+      }
+    },
+
+    execute(action: Action) {
+      switch (action.moveType) {
+        case MOVE_TYPE.DRAW:
+          _draw();
+          break;
+        case MOVE_TYPE.TO_TABLEAU:
+          _moveToTableau(action.card, action.destinationIdx);
+          break;
+        case MOVE_TYPE.TO_FOUNDATION:
+          _moveToFoundation(action.card, action.destinationIdx);
+          break;
+        default:
+          break;
+      }
+    },
+
+    isComplete() {
+      for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
+        const foundation = assertDefined(foundations[foundationIdx]);
+        if (foundation.length() !== Rules.NUMBER_CARDS_IN_SUIT) {
+          return false;
+        }
+      }
+      return true;
+    },
+
+    getActions() {
+      const actionsFor = new Map<number, Set<Action>>();
+      const movableToTableau = new Set<number>();
+      const movableToFoundation = new Set<number>();
+
+      const wasteLength = waste.length();
+      if (wasteLength !== 0) {
+        const cardNumber = assertDefined(waste.get(wasteLength - 1));
         movableToTableau.add(cardNumber);
         movableToFoundation.add(cardNumber);
       }
-    }
 
-    for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-      const tableau = assertDefined(this.tableausFaceUp[tableauIdx]);
-      const tableauLength = tableau.length();
-      for (let position = 0; position < tableauLength; position++) {
-        const cardNumber = assertDefined(tableau.get(position));
-        movableToTableau.add(cardNumber);
-        if (position === tableauLength - 1) {
+      for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
+        const foundation = assertDefined(foundations[foundationIdx]);
+        const foundationLength = foundation.length();
+        if (foundationLength !== 0) {
+          const cardNumber = assertDefined(foundation.get(foundationLength - 1));
+          movableToTableau.add(cardNumber);
           movableToFoundation.add(cardNumber);
         }
       }
-    }
 
-    const addAction = (action: Action) => {
-      if ('card' in action) {
-        const {card} = action;
-        let actions = actionsFor.get(card);
-        if (!actions) {
-          actions = new Set<Action>();
-          actionsFor.set(card, actions);
+      for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+        const tableau = assertDefined(tableausFaceUp[tableauIdx]);
+        const tableauLength = tableau.length();
+        for (let position = 0; position < tableauLength; position++) {
+          const cardNumber = assertDefined(tableau.get(position));
+          movableToTableau.add(cardNumber);
+          if (position === tableauLength - 1) {
+            movableToFoundation.add(cardNumber);
+          }
         }
-        actions.add(action);
       }
-    };
 
-    for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-      const foundation = assertDefined(this.foundations[foundationIdx]);
-      const foundationLength = foundation.length();
-      let canPlaceOn: number[];
-      if (foundationLength === 0) {
-        // Empty foundation ... will take Aces
-        canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
-          Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
-      } else {
-        const cardNumber = assertDefined(foundation.get(foundationLength - 1));
-        canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
-      }
-      for (const other of canPlaceOn) {
-        if (!movableToFoundation.has(other)) {
-          continue;
+      const addAction = (action: Action) => {
+        if ('card' in action) {
+          const {card} = action;
+          let actions = actionsFor.get(card);
+          if (!actions) {
+            actions = new Set<Action>();
+            actionsFor.set(card, actions);
+          }
+          actions.add(action);
         }
-        addAction({
-          card: other,
-          moveType: MOVE_TYPE.TO_FOUNDATION,
-          destinationIdx: foundationIdx
-        });
-      }
-    }
+      };
 
-    // Position tableau cards.
-    for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-      const tableau = assertDefined(this.tableausFaceUp[tableauIdx]);
-      const tableauLength = tableau.length();
-      let canPlaceOn: number[];
-      if (tableauLength === 0) {
-        // Empty tableau ... will take Kings
-        canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
-          Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
-      } else {
-        const cardNumber = assertDefined(tableau.get(tableauLength - 1));
-        canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
-      }
-      for (const other of canPlaceOn) {
-        if (!movableToTableau.has(other)) {
-          continue;
+      for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
+        const foundation = assertDefined(foundations[foundationIdx]);
+        const foundationLength = foundation.length();
+        let canPlaceOn: number[];
+        if (foundationLength === 0) {
+          // Empty foundation ... will take Aces
+          canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
+            Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
+        } else {
+          const cardNumber = assertDefined(foundation.get(foundationLength - 1));
+          canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
         }
-
-        addAction({
-          card: other,
-          moveType: MOVE_TYPE.TO_TABLEAU,
-          destinationIdx: tableauIdx,
-        });
+        for (const other of canPlaceOn) {
+          if (!movableToFoundation.has(other)) {
+            continue;
+          }
+          addAction({
+            card: other,
+            moveType: MOVE_TYPE.TO_FOUNDATION,
+            destinationIdx: foundationIdx
+          });
+        }
       }
-    }
-    return actionsFor;
-  }
 
-  getAllActions() {
-    const actionsFor = this.getActions();
-    const actions = new Set<Action>();
-    actions.add({
-      moveType: MOVE_TYPE.DRAW,
-    });
-    for (const entries of actionsFor.values()) {
-      for (const action of entries) {
-        actions.add(action);
+      // Position tableau cards.
+      for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+        const tableau = assertDefined(tableausFaceUp[tableauIdx]);
+        const tableauLength = tableau.length();
+        let canPlaceOn: number[];
+        if (tableauLength === 0) {
+          // Empty tableau ... will take Kings
+          canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
+            Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
+        } else {
+          const cardNumber = assertDefined(tableau.get(tableauLength - 1));
+          canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
+        }
+        for (const other of canPlaceOn) {
+          if (!movableToTableau.has(other)) {
+            continue;
+          }
+
+          addAction({
+            card: other,
+            moveType: MOVE_TYPE.TO_TABLEAU,
+            destinationIdx: tableauIdx,
+          });
+        }
       }
-    }
-    return actions;
-  }
+      return actionsFor;
+    },
 
-  normalKey() {
-    const tableauStrings: string[] = [];
-    for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-      const faceDown = assertDefined(this.tableausFaceDown[tableauIdx]);
-      const faceUp = assertDefined(this.tableausFaceUp[tableauIdx]);
-      tableauStrings.push(JSON.stringify(faceDown.cards) + JSON.stringify(faceUp.cards));
-    }
-    tableauStrings.sort();
-    return JSON.stringify(tableauStrings) + JSON.stringify(this.stock.cards) + JSON.stringify(this.waste.cards);
-  }
+    getAllActions() {
+      const actionsFor = this.getActions();
+      const actions = new Set<Action>();
+      actions.add({
+        moveType: MOVE_TYPE.DRAW,
+      });
+      for (const entries of actionsFor.values()) {
+        for (const action of entries) {
+          actions.add(action);
+        }
+      }
+      return actions;
+    },
 
-  definitelyUncompletable() {
-    const playable = new Set<number>();
+    normalKey() {
+      const tableauStrings: string[] = [];
+      for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+        const faceDown = assertDefined(tableausFaceDown[tableauIdx]);
+        const faceUp = assertDefined(tableausFaceUp[tableauIdx]);
+        tableauStrings.push(JSON.stringify(faceDown.cards) + JSON.stringify(faceUp.cards));
+      }
+      tableauStrings.sort();
+      return JSON.stringify(tableauStrings) + JSON.stringify(stock.cards) + JSON.stringify(waste.cards);
+    },
 
-    // Stock.
-    for (const card of this.stock.asArray()) {
-      playable.add(card);
-    }
-    for (const card of this.waste.asArray()) {
-      playable.add(card);
-    }
-    // Foundations
-    for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
-      const foundation = assertDefined(this.foundations[idx]);
-      for (const card of foundation.asArray()) {
+    definitelyUncompletable() {
+      const playable = new Set<number>();
+
+      // Stock.
+      for (const card of stock.asArray()) {
         playable.add(card);
       }
-    }
-
-    const maybePlayable: number[][] = [];
-
-    // Tableaus.
-    for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
-      const list: number[] = [];
-      maybePlayable.push(list);
-      const faceDown = assertDefined(this.tableausFaceDown[tableau]);
-      for (const card of faceDown.asArray()) {
-        list.push(card);
+      for (const card of waste.asArray()) {
+        playable.add(card);
       }
-      const faceUp = assertDefined(this.tableausFaceUp[tableau]);
-      const faceUpCards = faceUp.asArray();
-      for (let idx = 0; idx < faceUpCards.length; idx++) {
-        const card = assertDefined(faceUpCards[idx]);
-        if (idx === 0) {
-          list.push(card);
-        } else {
+      // Foundations
+      for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
+        const foundation = assertDefined(foundations[idx]);
+        for (const card of foundation.asArray()) {
           playable.add(card);
         }
       }
-    }
 
-    while (true) {
-      let removedAnything = false;
-      let anyCardsRemain = false;
-      for (const list of maybePlayable) {
-        for (let idx1 = list.length - 1; idx1 >= 0; idx1--) {
-          anyCardsRemain = true;
-          let isPlayable = false;
-          const card = assertDefined(list[idx1]);
-          const others = Rules.canPlaceOnInTableau(card).concat(Rules.canPlaceOnInFoundation(card));
-          for (const other of others) {
-            if (playable.has(other)) {
-              isPlayable = true;
-              break;
-            }
-          }
-          if (isPlayable) {
-            removedAnything = true;
-            playable.add(card);
-            list.pop();
+      const maybePlayable: number[][] = [];
+
+      // Tableaus.
+      for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
+        const list: number[] = [];
+        maybePlayable.push(list);
+        const faceDown = assertDefined(tableausFaceDown[tableau]);
+        for (const card of faceDown.asArray()) {
+          list.push(card);
+        }
+        const faceUp = assertDefined(tableausFaceUp[tableau]);
+        const faceUpCards = faceUp.asArray();
+        for (let idx = 0; idx < faceUpCards.length; idx++) {
+          const card = assertDefined(faceUpCards[idx]);
+          if (idx === 0) {
+            list.push(card);
           } else {
-            break;
+            playable.add(card);
           }
         }
       }
-      if (!anyCardsRemain) {
-        return false;
-      }
-      if (!removedAnything) {
-        return true;
+
+      while (true) {
+        let removedAnything = false;
+        let anyCardsRemain = false;
+        for (const list of maybePlayable) {
+          for (let idx1 = list.length - 1; idx1 >= 0; idx1--) {
+            anyCardsRemain = true;
+            let isPlayable = false;
+            const card = assertDefined(list[idx1]);
+            const others = Rules.canPlaceOnInTableau(card).concat(Rules.canPlaceOnInFoundation(card));
+            for (const other of others) {
+              if (playable.has(other)) {
+                isPlayable = true;
+                break;
+              }
+            }
+            if (isPlayable) {
+              removedAnything = true;
+              playable.add(card);
+              list.pop();
+            } else {
+              break;
+            }
+          }
+        }
+        if (!anyCardsRemain) {
+          return false;
+        }
+        if (!removedAnything) {
+          return true;
+        }
       }
     }
-  }
+  };
 }

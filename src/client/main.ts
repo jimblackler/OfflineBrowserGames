@@ -1,7 +1,7 @@
-import {GameController} from './gameController';
-import {type GameRules, GameState} from './gameState';
+import {type GameController, create as createGameController} from './gameController';
+import {type GameRules, type GameState, createGameState} from './gameState';
 import {GameStore} from './gameStore';
-import {Renderer} from './renderer';
+import {type Renderer, createRenderer} from './renderer';
 
 declare global {
   interface Window {
@@ -12,13 +12,13 @@ declare global {
   }
 }
 
-const gameState = new GameState();
+const gameState = createGameState();
 const gameDiv = document.getElementById('gameDiv');
 if (!gameDiv) {
   throw new Error('gameDiv not found');
 }
-const renderer = new Renderer(gameDiv);
-const controller = new GameController(renderer, gameState);
+const renderer = createRenderer(gameDiv);
+const controller = createGameController(renderer, gameState);
 renderer.setDragHandler(controller);
 
 window.redraw = () => {

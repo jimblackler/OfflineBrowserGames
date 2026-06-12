@@ -28,185 +28,193 @@ export type DragHandler = {
   startDrag(cardNumber: number): number[];
 };
 
-export class Renderer {
-  gameDiv: HTMLElement;
-  cardImages: HTMLSpanElement[];
-  cardVPos: number[];
-  placeholdersDiv: HTMLDivElement;
-  cardsDiv: HTMLDivElement;
-  activeShadows: number;
-  draggingCards: number[];
-  selectionIndicator: HTMLSpanElement;
-  click = false;
-  mouseX = 0;
-  mouseY = 0;
-  dragHandler!: DragHandler;
+// TODO: replace the explicit interface with defining it simply as the return tye of the
+// createRenderer method.
+export interface Renderer {
+  placeHolder(x: number, y: number, onClick: ((ev: MouseEvent) => void) | null): HTMLSpanElement;
+  hideIndicator(): void;
+  faceDown(cardNumber: number): void;
+  faceUp(cardNumber: number): void;
+  setDraggable(cardNumber: number, draggable: boolean): void;
+  raiseCard(cardNumber: number): void;
+  getCardPosition(cardNumber: number): [number, number, number];
+  positionCard(cardNumber: number, x: number, y: number, v: number): void;
+  setDragHandler(dragHandler: DragHandler): void;
+}
 
-  constructor(gameDiv: HTMLElement) {
-    this.gameDiv = gameDiv;
-    this.cardImages = [];
-    this.cardVPos = [];
-    this.placeholdersDiv = document.createElement('div');
-    this.gameDiv.appendChild(this.placeholdersDiv);
-    this.cardsDiv = document.createElement('div');
-    this.gameDiv.appendChild(this.cardsDiv);
-    this.activeShadows = 0;
-    this.draggingCards = [];
+export function createRenderer(gameDiv: HTMLElement): Renderer {
+  const cardImages: HTMLSpanElement[] = [];
+  const cardVPos: number[] = [];
+  const placeholdersDiv = document.createElement('div');
+  gameDiv.appendChild(placeholdersDiv);
+  const cardsDiv = document.createElement('div');
+  gameDiv.appendChild(cardsDiv);
+  let activeShadows = 0;
+  let draggingCards: number[] = [];
+  let click = false;
+  let mouseX = 0;
+  let mouseY = 0;
+  let dragHandler: DragHandler;
 
-    for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
-      const cardImage = document.createElement('span');
-      cardImage.style.width = `${CARD_WIDTH}px`;
-      cardImage.style.height = `${CARD_HEIGHT}px`;
-      cardImage.style.pointerEvents = 'none';
-      cardImage.className = 'card';
-      this.cardImages[idx] = cardImage;
-      this.cardVPos[idx] = 0;
-      this.cardsDiv.appendChild(cardImage);
+  for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
+    const cardImage = document.createElement('span');
+    cardImage.style.width = `${CARD_WIDTH}px`;
+    cardImage.style.height = `${CARD_HEIGHT}px`;
+    cardImage.style.pointerEvents = 'none';
+    cardImage.className = 'card';
+    cardImages[idx] = cardImage;
+    cardVPos[idx] = 0;
+    cardsDiv.appendChild(cardImage);
+  }
+
+  const selectionIndicator = document.createElement('span');
+  selectionIndicator.className = 'indicator';
+  selectionIndicator.style.width = `${INDICATOR_WIDTH}px`;
+  selectionIndicator.style.height = `${INDICATOR_HEIGHT}px`;
+  selectionIndicator.style.backgroundPosition = `-${INDICATOR_X}px -${INDICATOR_Y}px`;
+
+  function hideIndicator() {
+    selectionIndicator.style.display = 'none';
+  }
+
+  hideIndicator();
+  gameDiv.append(selectionIndicator);
+
+  document.addEventListener('mousemove', evt => {
+    for (const card of draggingCards) {
+      const position = getCardPosition(card);
+      positionCard(card, position[0] + evt.clientX - mouseX,
+          position[1] + evt.clientY - mouseY, position[2]);
     }
+    click = false;
+    mouseX = evt.clientX;
+    mouseY = evt.clientY;
+  });
 
-    const selectionIndicator = document.createElement('span');
-    selectionIndicator.className = 'indicator';
-    selectionIndicator.style.width = `${INDICATOR_WIDTH}px`;
-    selectionIndicator.style.height = `${INDICATOR_HEIGHT}px`;
-    selectionIndicator.style.backgroundPosition = `-${INDICATOR_X}px -${INDICATOR_Y}px`;
-    this.selectionIndicator = selectionIndicator;
-
-    this.hideIndicator();
-    this.gameDiv.append(this.selectionIndicator);
-    document.addEventListener('mousemove', evt => {
-      for (const card of this.draggingCards) {
-        const position = this.getCardPosition(card);
-        this.positionCard(card, position[0] + evt.clientX - this.mouseX,
-            position[1] + evt.clientY - this.mouseY, position[2]);
-      }
-      this.click = false;
-      this.mouseX = evt.clientX;
-      this.mouseY = evt.clientY;
-    });
-
-    document.addEventListener('mouseup', () => {
-      if (this.draggingCards.length > 0) {
-        this.dragHandler.cardClickedOrDropped(this.draggingCards[0], this.click);
-      }
-      this.draggingCards = [];
-    });
-
-  }
-
-  placeHolder(x: number, y: number, onClick: ((ev: MouseEvent) => void) | null) {
-    const image = document.createElement('span');
-    image.style.width = `${CARD_WIDTH}px`;
-    image.style.height = `${CARD_HEIGHT}px`;
-    image.className = 'placeholder';
-    image.style.backgroundPosition = `-${CARD_WIDTH * PLACEHOLDER_COLUMN}px -${CARD_HEIGHT * BLANK_ROW}px`;
-    image.style.left = `${x}px`;
-    image.style.top = `${y}px`;
-    if (onClick) {
-      this._setClickable(image, null, onClick);
+  document.addEventListener('mouseup', () => {
+    if (draggingCards.length > 0) {
+      dragHandler.cardClickedOrDropped(draggingCards[0], click);
     }
-    this.placeholdersDiv.appendChild(image);
-    return image;
-  }
+    draggingCards = [];
+  });
 
-  hideIndicator() {
-    this.selectionIndicator.style.display = 'none';
-  }
-
-  faceDown(cardNumber: number) {
-    const cardImage = assertDefined(this.cardImages[cardNumber]);
-    cardImage.style.backgroundPosition =
-        `${CARD_WIDTH * CARDBACK_COLUMN}px -${CARD_HEIGHT * BLANK_ROW}px`;
-  }
-
-  faceUp(cardNumber: number) {
-    const suit = Rules.getSuit(cardNumber);
-    const type = Rules.getType(cardNumber);
-    const cardImage = assertDefined(this.cardImages[cardNumber]);
-    cardImage.style.backgroundPosition = `-${CARD_WIDTH * type}px -${CARD_HEIGHT * suit}px`;
-  }
-
-  setDraggable(cardNumber: number, draggable: boolean) {
-    const cardImage = assertDefined(this.cardImages[cardNumber]);
-    if (draggable) {
-      this._setClickable(cardImage, () => {
-        const cards = this.dragHandler.startDrag(cardNumber);
-        this.click = true;
-        this.hideIndicator();
-        this.draggingCards = cards;
-      }, null);
-      cardImage.style.pointerEvents = 'auto';
-    } else {
-      cardImage.onmousedown = null;
-      cardImage.onmouseover = null;
-      cardImage.onmouseup = null;
-      cardImage.style.pointerEvents = 'none';
-    }
-  }
-
-  _setClickable(
+  function _setClickable(
     image: HTMLSpanElement,
     mouseDownFunction: ((ev: MouseEvent) => void) | null,
     clickFunction: ((ev: MouseEvent) => void) | null
   ) {
     const highlight = () => {
-      if (this.draggingCards.length) {
+      if (draggingCards.length) {
         return;
       }
-      this.selectionIndicator.style.left = `${image.offsetLeft + INDICATOR_OFFSET_X}px`;
-      this.selectionIndicator.style.top = `${image.offsetTop + INDICATOR_OFFSET_Y}px`;
+      selectionIndicator.style.left = `${image.offsetLeft + INDICATOR_OFFSET_X}px`;
+      selectionIndicator.style.top = `${image.offsetTop + INDICATOR_OFFSET_Y}px`;
       if (image.parentNode) {
-        image.parentNode.insertBefore(this.selectionIndicator, image.nextSibling);
+        image.parentNode.insertBefore(selectionIndicator, image.nextSibling);
       }
-      this.selectionIndicator.style.display = 'block';
-      this.selectionIndicator.onmousedown = mouseDownFunction;
+      selectionIndicator.style.display = 'block';
+      selectionIndicator.onmousedown = mouseDownFunction;
       image.onmousedown = mouseDownFunction;
-      this.selectionIndicator.onclick = clickFunction;
+      selectionIndicator.onclick = clickFunction;
       image.onclick = clickFunction;
-      this.selectionIndicator.onmouseout = () => this.hideIndicator();
+      selectionIndicator.onmouseout = () => hideIndicator();
     };
 
     const rect = image.getBoundingClientRect();
-    if (this.mouseX >= rect.left && this.mouseX <= rect.right &&
-        this.mouseY >= rect.top && this.mouseY <= rect.bottom) {
+    if (mouseX >= rect.left && mouseX <= rect.right &&
+        mouseY >= rect.top && mouseY <= rect.bottom) {
       highlight();
     }
     image.onmouseover = highlight;
   }
 
-  raiseCard(cardNumber: number) {
-    const cardImage = assertDefined(this.cardImages[cardNumber]);
-    this.cardsDiv.removeChild(cardImage);
-    this.cardsDiv.appendChild(cardImage);
-  }
-
-  getCardPosition(cardNumber: number): [number, number, number] {
-    const cardImage = assertDefined(this.cardImages[cardNumber]);
-    const vPos = this.cardVPos[cardNumber] ?? 0;
+  function getCardPosition(cardNumber: number): [number, number, number] {
+    const cardImage = assertDefined(cardImages[cardNumber]);
+    const vPos = cardVPos[cardNumber] ?? 0;
     return [cardImage.offsetLeft, cardImage.offsetTop + vPos, vPos];
   }
 
-  positionCard(cardNumber: number, x: number, y: number, v: number) { // TODO: take vector not components ?
-    const cardImage = assertDefined(this.cardImages[cardNumber]);
-    this.cardVPos[cardNumber] = v;
+  function positionCard(cardNumber: number, x: number, y: number, v: number) {
+    const cardImage = assertDefined(cardImages[cardNumber]);
+    cardVPos[cardNumber] = v;
     cardImage.style.left = `${x}px`;
     cardImage.style.top = `${y - v}px`;
     if (v) {
       if (!cardImage.style.boxShadow) {
-        this.activeShadows++;
+        activeShadows++;
       }
       cardImage.style.boxShadow =
-          `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, ${0.4 / this.activeShadows}) 4px ${v}px 5px`;
+          `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, ${0.4 / activeShadows}) 4px ${v}px 5px`;
       cardImage.style.zIndex = '1';
     } else {
       if (cardImage.style.boxShadow) {
-        this.activeShadows--;
+        activeShadows--;
         cardImage.style.boxShadow = '';
       }
       cardImage.style.zIndex = '0';
     }
   }
 
-  setDragHandler(dragHandler: DragHandler) {
-    this.dragHandler = dragHandler;
-  }
+  return {
+    placeHolder(x: number, y: number, onClick: ((ev: MouseEvent) => void) | null) {
+      const image = document.createElement('span');
+      image.style.width = `${CARD_WIDTH}px`;
+      image.style.height = `${CARD_HEIGHT}px`;
+      image.className = 'placeholder';
+      image.style.backgroundPosition = `-${CARD_WIDTH * PLACEHOLDER_COLUMN}px -${CARD_HEIGHT * BLANK_ROW}px`;
+      image.style.left = `${x}px`;
+      image.style.top = `${y}px`;
+      if (onClick) {
+        _setClickable(image, null, onClick);
+      }
+      placeholdersDiv.appendChild(image);
+      return image;
+    },
+
+    hideIndicator,
+
+    faceDown(cardNumber: number) {
+      const cardImage = assertDefined(cardImages[cardNumber]);
+      cardImage.style.backgroundPosition =
+          `${CARD_WIDTH * CARDBACK_COLUMN}px -${CARD_HEIGHT * BLANK_ROW}px`;
+    },
+
+    faceUp(cardNumber: number) {
+      const suit = Rules.getSuit(cardNumber);
+      const type = Rules.getType(cardNumber);
+      const cardImage = assertDefined(cardImages[cardNumber]);
+      cardImage.style.backgroundPosition = `-${CARD_WIDTH * type}px -${CARD_HEIGHT * suit}px`;
+    },
+
+    setDraggable(cardNumber: number, draggable: boolean) {
+      const cardImage = assertDefined(cardImages[cardNumber]);
+      if (draggable) {
+        _setClickable(cardImage, () => {
+          const cards = dragHandler.startDrag(cardNumber);
+          click = true;
+          hideIndicator();
+          draggingCards = cards;
+        }, null);
+        cardImage.style.pointerEvents = 'auto';
+      } else {
+        cardImage.onmousedown = null;
+        cardImage.onmouseover = null;
+        cardImage.onmouseup = null;
+        cardImage.style.pointerEvents = 'none';
+      }
+    },
+
+    raiseCard(cardNumber: number) {
+      const cardImage = assertDefined(cardImages[cardNumber]);
+      cardsDiv.removeChild(cardImage);
+      cardsDiv.appendChild(cardImage);
+    },
+
+    getCardPosition,
+    positionCard,
+
+    setDragHandler(handler: DragHandler) {
+      dragHandler = handler;
+    }
+  };
 }
