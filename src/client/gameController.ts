@@ -39,11 +39,11 @@ type Curve = {
   draggable: boolean;
 };
 
-export interface GameController extends DragHandler {
+export type GameController = {
   draw(): void;
   render(): void;
   autoPlay(): number[] | undefined;
-}
+} & DragHandler
 
 export function create(renderer: Renderer, gameState: GameState): GameController {
   const curves = new Map<number, Curve>();

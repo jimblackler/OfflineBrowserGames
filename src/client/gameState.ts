@@ -43,7 +43,7 @@ export type Action = {
   destinationIdx: number;
 };
 
-export interface GameState {
+export type GameState = {
   deck: CardList;
   stock: CardList;
   rules: GameRules;
