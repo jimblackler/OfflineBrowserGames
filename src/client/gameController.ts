@@ -326,15 +326,16 @@ export function create(renderer: Renderer, gameState: GameState): GameController
           if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEAU) {
             let x = 0;
             let y = 0;
+            const {destinationIdx} = action;
             if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
-              x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
+              x = TABLEAU_X + TABLEAU_X_SPACING * destinationIdx;
               y = TABLEAU_Y +
-                  assertDefined(gameState.tableausFaceUp[action.destinationIdx]).length() *
+                  assertDefined(gameState.tableausFaceUp[destinationIdx]).length() *
                   TABLEAU_Y_SPACING_FACE_DOWN +
-                  assertDefined(gameState.tableausFaceDown[action.destinationIdx]).length() *
+                  assertDefined(gameState.tableausFaceDown[destinationIdx]).length() *
                   TABLEAU_Y_SPACING_FACE_UP;
             } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
-              x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;
+              x = FOUNDATION_X + FOUNDATION_X_SPACING * destinationIdx;
               y = FOUNDATION_Y;
             }
 
