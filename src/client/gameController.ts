@@ -398,8 +398,7 @@ export function create(renderer: Renderer, gameState: GameState): GameController
                 continue;
               }
               considered.add(normalKey);
-              const clonedMoves = moves.slice(0);
-              clonedMoves.push(moveIndex);
+              const clonedMoves = [...moves, moveIndex];
               if (cloned.isComplete()) {
                 console.log(moves);
                 return moves;
