@@ -149,7 +149,8 @@ export function createRenderer(gameDiv: HTMLElement) {
       image.style.width = `${CARD_WIDTH}px`;
       image.style.height = `${CARD_HEIGHT}px`;
       image.className = 'placeholder';
-      image.style.backgroundPosition = `-${CARD_WIDTH * PLACEHOLDER_COLUMN}px -${CARD_HEIGHT * BLANK_ROW}px`;
+      image.style.backgroundPosition =
+          `-${CARD_WIDTH * PLACEHOLDER_COLUMN}px -${CARD_HEIGHT * BLANK_ROW}px`;
       image.style.left = `${x}px`;
       image.style.top = `${y}px`;
       if (onClick) {
