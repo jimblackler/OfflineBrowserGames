@@ -150,7 +150,8 @@ export function create(renderer: Renderer, gameState: GameState): GameController
       if (position < 0) {
         position = 0;
       }
-      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, idx === wasteLength - 1, delay);
+      _placeCard(cardNumber,
+          WASTE_X + WASTE_X_SPACING * position, WASTE_Y, idx === wasteLength - 1, delay);
     }
 
     // Position foundation cards.
@@ -161,7 +162,8 @@ export function create(renderer: Renderer, gameState: GameState): GameController
       for (let position = 0; position < foundationLength; position++) {
         const cardNumber = assertDefined(foundation[position]);
         renderer.faceUp(cardNumber);
-        _placeCard(cardNumber, FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0);
+        _placeCard(cardNumber,
+            FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0);
       }
     }
 
@@ -183,7 +185,8 @@ export function create(renderer: Renderer, gameState: GameState): GameController
         const cardNumber = assertDefined(tableauFaceUp[position]);
         renderer.faceUp(cardNumber);
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_UP * position + TABLEAU_Y_SPACING_FACE_DOWN * faceDownLength, true, 0);
+            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_UP * position +
+            TABLEAU_Y_SPACING_FACE_DOWN * faceDownLength, true, 0);
       }
     }
 
