@@ -152,22 +152,12 @@ export function createGameState() {
     },
 
     restore(data: SerializedGameState) {
-      stock = data.stock;
-      rules = data.rules;
-      tableausFaceDown = [];
-      for (let idx = 0; idx !== data.tableausFaceDown.length; idx++) {
-        tableausFaceDown.push(assertDefined(data.tableausFaceDown[idx]));
-      }
-      tableausFaceUp = [];
-      for (let idx = 0; idx !== data.tableausFaceUp.length; idx++) {
-        tableausFaceUp.push(assertDefined(data.tableausFaceUp[idx]));
-      }
-      waste = data.waste;
-      foundations = [];
-      for (let idx = 0; idx !== data.foundations.length; idx++) {
-        foundations.push(assertDefined(data.foundations[idx]));
-      }
-      return true;
+      stock = [...data.stock];
+      ({rules} = data);
+      tableausFaceDown = data.tableausFaceDown.map(arr => [...arr]);
+      tableausFaceUp = data.tableausFaceUp.map(arr => [...arr]);
+      waste = [...data.waste];
+      foundations = data.foundations.map(arr => [...arr]);
     },
 
     newGame(r: GameRules) {
