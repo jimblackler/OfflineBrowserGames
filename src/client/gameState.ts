@@ -26,7 +26,6 @@ export type GameRules = {
 };
 
 export type SerializedGameState = {
-  deck: number[];
   stock: number[];
   rules: GameRules;
   tableausFaceDown: number[][];
@@ -56,7 +55,6 @@ export type GameState = SerializedGameState & {
 }
 
 export function createGameState(): GameState {
-  let deck: number[];
   let stock: number[];
   let rules: GameRules;
   let tableausFaceDown: number[][] = [];
@@ -146,20 +144,12 @@ export function createGameState(): GameState {
   }
 
   return {
-    get deck() { return deck; },
-    set deck(val) { deck = val; },
     get stock() { return stock; },
-    set stock(val) { stock = val; },
     get rules() { return rules; },
-    set rules(val) { rules = val; },
     get tableausFaceDown() { return tableausFaceDown; },
-    set tableausFaceDown(val) { tableausFaceDown = val; },
     get tableausFaceUp() { return tableausFaceUp; },
-    set tableausFaceUp(val) { tableausFaceUp = val; },
     get waste() { return waste; },
-    set waste(val) { waste = val; },
     get foundations() { return foundations; },
-    set foundations(val) { foundations = val; },
 
     getStack(cardNumber: number) {
       let card: number | null = cardNumber;
@@ -172,7 +162,6 @@ export function createGameState(): GameState {
     },
 
     restore(data: SerializedGameState) {
-      deck = data.deck;
       stock = data.stock;
       rules = data.rules;
       tableausFaceDown = [];
@@ -192,7 +181,7 @@ export function createGameState(): GameState {
     },
 
     newGame(r: GameRules) {
-      deck = [];
+      const deck: number[] = [];
       stock = [];
       tableausFaceDown = [];
       tableausFaceUp = [];
