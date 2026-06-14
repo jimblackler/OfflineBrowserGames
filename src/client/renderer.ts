@@ -23,7 +23,7 @@ const BLANK_ROW = 4;
 const CARDBACK_COLUMN = 0;
 const PLACEHOLDER_COLUMN = 1;
 
-export type DragHandler = {
+type DragHandler = {
   cardClickedOrDropped(card: number | undefined, click: boolean): void;
   startDrag(cardNumber: number): number[];
 };

@@ -17,17 +17,17 @@ export type GameRules = {
   cardsToDraw: number;
 };
 
-export type DrawAction = {
+type DrawAction = {
   moveType: 'draw';
 };
 
-export type ToTableauAction = {
+type ToTableauAction = {
   moveType: 'toTableau';
   card: number;
   destinationIdx: number;
 };
 
-export type ToFoundationAction = {
+type ToFoundationAction = {
   moveType: 'toFoundation';
   card: number;
   destinationIdx: number;
@@ -55,7 +55,7 @@ export function createGameState(): GameState {
   };
 }
 
-export function _draw(gameState: GameState) {
+function _draw(gameState: GameState) {
   if (gameState.stock.length === 0) {
     while (gameState.waste.length > 0) {
       gameState.stock.push(assertDefined(gameState.waste.pop()));
@@ -68,7 +68,7 @@ export function _draw(gameState: GameState) {
   }
 }
 
-export function remove(gameState: GameState, cardNumber: number) {
+function remove(gameState: GameState, cardNumber: number) {
   // In tableau cards?
   for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
     const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
@@ -104,7 +104,7 @@ export function remove(gameState: GameState, cardNumber: number) {
   return false;
 }
 
-export function stackedUnder(gameState: GameState, cardNumber: number) {
+function stackedUnder(gameState: GameState, cardNumber: number) {
   // In tableau cards?
   for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
     const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
@@ -117,7 +117,7 @@ export function stackedUnder(gameState: GameState, cardNumber: number) {
   return null;
 }
 
-export function _moveToTableau(gameState: GameState, cardNumber: number, tableauIdx: number) {
+function _moveToTableau(gameState: GameState, cardNumber: number, tableauIdx: number) {
   let movingCard: number | null = cardNumber;
   const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
   do {
@@ -129,7 +129,7 @@ export function _moveToTableau(gameState: GameState, cardNumber: number, tableau
   } while (movingCard !== null);
 }
 
-export function _moveToFoundation(gameState: GameState, cardNumber: number, foundationIdx: number) {
+function _moveToFoundation(gameState: GameState, cardNumber: number, foundationIdx: number) {
   if (remove(gameState, cardNumber)) {
     const foundation = assertDefined(gameState.foundations[foundationIdx]);
     foundation.push(cardNumber);
