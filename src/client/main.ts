@@ -34,7 +34,7 @@ window.redraw = () => {
 
 window.newGame = rules => {
   localStorage.setItem('gamePosition', '0');
-  localStorage.setItem('version', '2');
+  localStorage.setItem('version', '3');
   localStorage.setItem('seed', String(Math.floor(Math.random() * 100000)));
   localStorage.setItem('rules', JSON.stringify(rules));
   window.redraw();

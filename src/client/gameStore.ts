@@ -3,21 +3,21 @@ import type { GameState, SerializedGameState } from './gameState';
 export const GameStore = {
   store(gameState: GameState) {
     const MAX_UNDOS = 3;
-    const gamePositionStr = localStorage.getItem('gamePositionV2');
+    const gamePositionStr = localStorage.getItem('gamePosition');
       let gamePosition = gamePositionStr ? parseInt(gamePositionStr, 10) : 0;
     if (gamePosition > MAX_UNDOS) { // max undos
       localStorage.removeItem(`gamePosition${gamePosition - MAX_UNDOS}`);
     }
     gamePosition++;
-    localStorage.setItem('gamePositionV2', String(gamePosition));
-    localStorage.setItem(`gamePositionV2${gamePosition}`, JSON.stringify(gameState));
+    localStorage.setItem('gamePosition', String(gamePosition));
+    localStorage.setItem(`gamePosition${gamePosition}`, JSON.stringify(gameState));
   },
 
   restore(gameState: GameState) {
-    const gamePositionStr = localStorage.getItem('gamePositionV2');
+    const gamePositionStr = localStorage.getItem('gamePosition');
     if (gamePositionStr !== null) {
       try {
-        const storedState = localStorage.getItem(`gamePositionV2${gamePositionStr}`);
+        const storedState = localStorage.getItem(`gamePosition${gamePositionStr}`);
         if (storedState) {
           gameState.restore(JSON.parse(storedState) as SerializedGameState);
           return true;
