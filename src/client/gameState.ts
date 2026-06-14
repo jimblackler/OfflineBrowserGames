@@ -144,12 +144,7 @@ export function newGame(rules: GameRules): GameState {
     waste: [],
     foundations: [],
   };
-  const deck: number[] = [];
-
-  // Add cards to deck
-  for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
-    deck.push(idx);
-  }
+  const deck: number[] = Array.from({length: Rules.NUMBER_CARDS}).map((_, idx) => idx);
 
   const random = alea(localStorage.getItem('seed'));
 
@@ -168,14 +163,10 @@ export function newGame(rules: GameRules): GameState {
   }
 
   // Stock.
-  while (deck.length > 0) {
-    gameState.stock.push(assertDefined(deck.pop()));
-  }
+  gameState.stock = Array.from({length: deck.length}).map(() => assertDefined(deck.pop()));
 
   // Foundations
-  for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
-    gameState.foundations[idx] = [];
-  }
+  gameState.foundations = Array.from({length: Rules.NUMBER_FOUNDATIONS}).map(() => []);
 
   return gameState;
 }
