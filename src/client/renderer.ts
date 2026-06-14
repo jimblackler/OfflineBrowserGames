@@ -44,6 +44,33 @@ export function createRenderer(gameDiv: HTMLElement) {
   let mouseY = 0;
   let dragHandler: DragHandler;
 
+  function getCardPosition(cardNumber: number): [number, number, number] {
+    const cardImage = assertDefined(cardImages[cardNumber]);
+    const vPos = cardVPos[cardNumber] ?? 0;
+    return [cardImage.offsetLeft, cardImage.offsetTop + vPos, vPos];
+  }
+
+  function positionCard(cardNumber: number, x: number, y: number, v: number) {
+    const cardImage = assertDefined(cardImages[cardNumber]);
+    cardVPos[cardNumber] = v;
+    cardImage.style.left = `${x}px`;
+    cardImage.style.top = `${y - v}px`;
+    if (v) {
+      if (!cardImage.style.boxShadow) {
+        activeShadows++;
+      }
+      cardImage.style.boxShadow =
+          `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, ${0.4 / activeShadows}) 4px ${v}px 5px`;
+      cardImage.style.zIndex = '1';
+    } else {
+      if (cardImage.style.boxShadow) {
+        activeShadows--;
+        cardImage.style.boxShadow = '';
+      }
+      cardImage.style.zIndex = '0';
+    }
+  }
+
   for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
     const cardImage = document.createElement('span');
     cardImage.style.width = `${CARD_WIDTH}px`;
@@ -114,33 +141,6 @@ export function createRenderer(gameDiv: HTMLElement) {
       highlight();
     }
     image.onmouseover = highlight;
-  }
-
-  function getCardPosition(cardNumber: number): [number, number, number] {
-    const cardImage = assertDefined(cardImages[cardNumber]);
-    const vPos = cardVPos[cardNumber] ?? 0;
-    return [cardImage.offsetLeft, cardImage.offsetTop + vPos, vPos];
-  }
-
-  function positionCard(cardNumber: number, x: number, y: number, v: number) {
-    const cardImage = assertDefined(cardImages[cardNumber]);
-    cardVPos[cardNumber] = v;
-    cardImage.style.left = `${x}px`;
-    cardImage.style.top = `${y - v}px`;
-    if (v) {
-      if (!cardImage.style.boxShadow) {
-        activeShadows++;
-      }
-      cardImage.style.boxShadow =
-          `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, ${0.4 / activeShadows}) 4px ${v}px 5px`;
-      cardImage.style.zIndex = '1';
-    } else {
-      if (cardImage.style.boxShadow) {
-        activeShadows--;
-        cardImage.style.boxShadow = '';
-      }
-      cardImage.style.zIndex = '0';
-    }
   }
 
   return {

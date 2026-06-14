@@ -46,74 +46,32 @@ export function createGameController(renderer: Renderer) {
   let raisingCards: number[] | null = null;
   let riseStarted = 0;
 
-  for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
-    renderer.faceDown(idx);
-  }
-
-  // Placeholder; stock
-  renderer.placeHolder(STOCK_X, STOCK_Y, () => draw());
-
-  // Placeholder; tableau
-  for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-    renderer.placeHolder(TABLEAU_X + TABLEAU_X_SPACING * tableauIdx, TABLEAU_Y, null);
-  }
-
-  // Placeholder; foundation
-  for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-    renderer.placeHolder(FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, null);
-  }
-
-  function _animate() {
-    requestAnimationFrame(() => _animate());
+  function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean, delay: number) {
     const timeNow = new Date().getTime();
-    for (const [k, curve] of curves) {
-      if (timeNow < curve.startTime) {
-        continue;
-      }
-      const t = toT(curve.startTime, curve.endTime, timeNow);
-      if (t > 1) {
-        renderer.positionCard(k, curve.endX, curve.endY, 0);
-        renderer.setDraggable(k, curve.draggable);
-        curves.delete(k);
-      } else {
-        const multiplier1 = Math.sin(t * Math.PI / 2);
-        let v;
+    renderer.raiseCard(cardNumber);
+    renderer.setDraggable(cardNumber, false);
 
-        if (curve.start[2] < curve.flyHeight) {
-          const start = Math.PI - Math.asin(curve.start[2] / curve.flyHeight);
-          const a = tInRange(start, 0, t);
-          v = Math.sin(a) * curve.flyHeight;
-        } else {
-          v = curve.start[2] * (1 - t);
-        }
+    const position = renderer.getCardPosition(cardNumber);
 
-        renderer.positionCard(k, tInRange(curve.start[0], curve.endX, multiplier1),
-            tInRange(curve.start[1], curve.endY, multiplier1), v);
-      }
-    }
-    if (raisingCards) {
-      let t = (timeNow - riseStarted) / RAISE_DURATION;
-      if (t > 1) {
-        t = 1;
-      }
-      for (const cardNumber of raisingCards) {
-        const position = renderer.getCardPosition(cardNumber);
-        renderer.positionCard(cardNumber, position[0], position[1], RAISE_HEIGHT * t);
-      }
-      if (t === 1) {
-        raisingCards = null;
-      }
-    }
-  }
+    const deltaX = position[0] - x;
+    const deltaY = position[1] - y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const flyDistance = Math.min(distance, FLY_DISTANCE_MAX);
+    const flyHeight = FLY_HEIGHT * flyDistance / FLY_DISTANCE_MAX;
+    const animationDistance = Math.min(distance, ANIMATION_DISTANCE_MAX);
 
-  requestAnimationFrame(() => _animate());
+    const animationTime = ANIMATION_TEST_SLOWDOWN *
+        (ANIMATION_TIME * animationDistance / ANIMATION_DISTANCE_MAX + ANIMATION_TIME_SUPPLEMENT);
 
-  function draw() {
-    execute(gameState, {
-      moveType: 'draw',
+    curves.set(cardNumber, {
+      startTime: timeNow + delay,
+      endTime: timeNow + animationTime + delay,
+      start: position,
+      endX: x,
+      endY: y,
+      flyHeight,
+      draggable
     });
-    store(gameState);
-    render();
   }
 
   function render() {
@@ -225,33 +183,75 @@ export function createGameController(renderer: Renderer) {
     }
   }
 
-  function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean, delay: number) {
-    const timeNow = new Date().getTime();
-    renderer.raiseCard(cardNumber);
-    renderer.setDraggable(cardNumber, false);
-
-    const position = renderer.getCardPosition(cardNumber);
-
-    const deltaX = position[0] - x;
-    const deltaY = position[1] - y;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const flyDistance = Math.min(distance, FLY_DISTANCE_MAX);
-    const flyHeight = FLY_HEIGHT * flyDistance / FLY_DISTANCE_MAX;
-    const animationDistance = Math.min(distance, ANIMATION_DISTANCE_MAX);
-
-    const animationTime = ANIMATION_TEST_SLOWDOWN *
-        (ANIMATION_TIME * animationDistance / ANIMATION_DISTANCE_MAX + ANIMATION_TIME_SUPPLEMENT);
-
-    curves.set(cardNumber, {
-      startTime: timeNow + delay,
-      endTime: timeNow + animationTime + delay,
-      start: position,
-      endX: x,
-      endY: y,
-      flyHeight,
-      draggable
+  function draw() {
+    execute(gameState, {
+      moveType: 'draw',
     });
+    store(gameState);
+    render();
   }
+
+  for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
+    renderer.faceDown(idx);
+  }
+
+  // Placeholder; stock
+  renderer.placeHolder(STOCK_X, STOCK_Y, () => draw());
+
+  // Placeholder; tableau
+  for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+    renderer.placeHolder(TABLEAU_X + TABLEAU_X_SPACING * tableauIdx, TABLEAU_Y, null);
+  }
+
+  // Placeholder; foundation
+  for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
+    renderer.placeHolder(FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, null);
+  }
+
+  function _animate() {
+    requestAnimationFrame(() => _animate());
+    const timeNow = new Date().getTime();
+    for (const [k, curve] of curves) {
+      if (timeNow < curve.startTime) {
+        continue;
+      }
+      const t = toT(curve.startTime, curve.endTime, timeNow);
+      if (t > 1) {
+        renderer.positionCard(k, curve.endX, curve.endY, 0);
+        renderer.setDraggable(k, curve.draggable);
+        curves.delete(k);
+      } else {
+        const multiplier1 = Math.sin(t * Math.PI / 2);
+        let v;
+
+        if (curve.start[2] < curve.flyHeight) {
+          const start = Math.PI - Math.asin(curve.start[2] / curve.flyHeight);
+          const a = tInRange(start, 0, t);
+          v = Math.sin(a) * curve.flyHeight;
+        } else {
+          v = curve.start[2] * (1 - t);
+        }
+
+        renderer.positionCard(k, tInRange(curve.start[0], curve.endX, multiplier1),
+            tInRange(curve.start[1], curve.endY, multiplier1), v);
+      }
+    }
+    if (raisingCards) {
+      let t = (timeNow - riseStarted) / RAISE_DURATION;
+      if (t > 1) {
+        t = 1;
+      }
+      for (const cardNumber of raisingCards) {
+        const position = renderer.getCardPosition(cardNumber);
+        renderer.positionCard(cardNumber, position[0], position[1], RAISE_HEIGHT * t);
+      }
+      if (t === 1) {
+        raisingCards = null;
+      }
+    }
+  }
+
+  requestAnimationFrame(() => _animate());
 
   return {
     draw,
