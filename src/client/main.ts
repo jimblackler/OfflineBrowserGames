@@ -1,6 +1,6 @@
 import {type GameController, create as createGameController} from './gameController';
 import {type GameRules, type GameState, createGameState} from './gameState';
-import {GameStore} from './gameStore';
+import {store, restore} from './gameStore';
 import {type Renderer, createRenderer} from './renderer';
 
 declare global {
@@ -28,7 +28,7 @@ window.redraw = () => {
   }
   controller.render();
   controller.draw();
-  GameStore.store(gameState);
+  store(gameState);
   controller.render();
 };
 
@@ -42,7 +42,7 @@ window.newGame = rules => {
 
 document.oncontextmenu = () => false;
 
-if (GameStore.restore(gameState)) {
+if (restore(gameState)) {
   controller.render(); // Render twice to not animate everything (only draw).
   controller.render();
 } else {
@@ -62,7 +62,7 @@ window.undo = () => {
     let gamePosition = gamePositionStr ? parseInt(gamePositionStr, 10) : 0;
     gamePosition--;
     localStorage.setItem('gamePosition', String(gamePosition));
-    GameStore.restore(gameState);
+    restore(gameState);
     controller.render();
   }
 };

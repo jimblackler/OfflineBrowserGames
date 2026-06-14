@@ -1,7 +1,7 @@
 import {assertDefined} from '../common/check/defined';
 import type {GameState} from './gameState';
 import {type Action, createGameState, MOVE_TYPE, type SerializedGameState} from './gameState';
-import {GameStore} from './gameStore';
+import {store, erase} from './gameStore';
 import {MathUtils} from './mathUtils';
 import type {DragHandler, Renderer} from './renderer';
 import {Rules} from './rules';
@@ -118,7 +118,7 @@ export function create(renderer: Renderer, gameState: GameState): GameController
     gameState.execute({
       moveType: MOVE_TYPE.DRAW,
     });
-    GameStore.store(gameState);
+    store(gameState);
     render();
   }
 
@@ -219,13 +219,13 @@ export function create(renderer: Renderer, gameState: GameState): GameController
                 continue;
               }
               gameState.execute(action);
-              GameStore.store(gameState);
+              store(gameState);
               render();
               return;
             }
           }
           // All complete. If the user hits refresh, start a new game.
-          GameStore.erase();
+          erase();
         }, 400);
       }
     }
@@ -353,7 +353,7 @@ export function create(renderer: Renderer, gameState: GameState): GameController
         if (closestAction) {
           cardHistory.set(JSON.stringify(closestAction), new Date().getTime());
           gameState.execute(closestAction);
-          GameStore.store(gameState);
+          store(gameState);
         }
       }
 
