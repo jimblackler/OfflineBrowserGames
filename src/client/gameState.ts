@@ -203,7 +203,7 @@ export function getActions(gameState: GameState) {
     }
   }
 
-  const addAction = (action: ToTableauAction | ToFoundationAction) => {
+  function addAction(action: ToTableauAction | ToFoundationAction) {
     const {card} = action;
     let actions = actionsFor.get(card);
     if (!actions) {
@@ -211,7 +211,7 @@ export function getActions(gameState: GameState) {
       actionsFor.set(card, actions);
     }
     actions.add(action);
-  };
+  }
 
   for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
     const foundation = assertDefined(gameState.foundations[foundationIdx]);
