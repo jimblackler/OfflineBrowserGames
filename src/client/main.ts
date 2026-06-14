@@ -18,7 +18,8 @@ if (!gameDiv) {
   throw new Error('gameDiv not found');
 }
 const renderer = createRenderer(gameDiv);
-const controller = createGameController(renderer, gameState);
+const controller = createGameController(renderer);
+controller.setGameState(gameState);
 renderer.setDragHandler(controller);
 
 window.redraw = () => {

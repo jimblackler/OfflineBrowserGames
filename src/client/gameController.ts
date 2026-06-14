@@ -51,8 +51,8 @@ type Curve = {
 
 export type GameController = ReturnType<typeof createGameController>;
 
-export function createGameController(renderer: Renderer, initialGameState: GameState) {
-  let gameState = initialGameState;
+export function createGameController(renderer: Renderer) {
+  let gameState: GameState;
   const curves = new Map<number, Curve>();
   let lastCardMoved = -1;
   let cardHistory = new Map<string, number>();
