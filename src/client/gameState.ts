@@ -19,8 +19,6 @@ export const MOVE_TYPE = {
   TO_FOUNDATION: 3,
 } as const;
 
-export type MoveType = typeof MOVE_TYPE[keyof typeof MOVE_TYPE];
-
 export type GameRules = {
   cardsToDraw: number;
 };
