@@ -1,16 +1,5 @@
 import {assertDefined} from '../common/check/defined';
-import {
-  type Action,
-  definitelyUncompletable,
-  execute,
-  getAllActions,
-  getActions,
-  getStack,
-  isComplete,
-  MOVE_TYPE,
-  normalKey,
-  type GameState,
-} from './gameState';
+import {type Action, definitelyUncompletable, execute, getAllActions, getActions, getStack, isComplete, MOVE_TYPE, normalKey, type GameState,} from './gameState';
 import {store, erase} from './gameStore';
 import {MathUtils} from './mathUtils';
 import type {Renderer} from './renderer';
