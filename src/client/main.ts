@@ -5,29 +5,22 @@ import {restore, store} from './gameStore';
 import {createRenderer} from './renderer';
 
 const restored = restore();
-let gameState: GameState = restored ?? {
-  stock: [],
-  rules: {cardsToDraw: 1},
-  tableausFaceDown: [],
-  tableausFaceUp: [],
-  waste: [],
-  foundations: [],
-};
+let gameState: GameState;
 const gameDiv = document.getElementById('gameDiv');
 if (!gameDiv) {
   throw new Error('gameDiv not found');
 }
 const renderer = createRenderer(gameDiv);
 const controller = createGameController(renderer);
-controller.setGameState(gameState);
 renderer.setDragHandler(controller);
 
 function redraw() {
   const rulesStr = localStorage.getItem('rules');
-  if (rulesStr) {
-    gameState = newGame(JSON.parse(rulesStr) as GameRules);
-    controller.setGameState(gameState);
+  if (!rulesStr) {
+    throw new Error('No rules found in localStorage');
   }
+  gameState = newGame(JSON.parse(rulesStr) as GameRules);
+  controller.setGameState(gameState);
   controller.render();
   controller.draw();
   store(gameState);
@@ -45,6 +38,8 @@ function startNewGame(rules: GameRules) {
 document.oncontextmenu = () => false;
 
 if (restored) {
+  gameState = restored;
+  controller.setGameState(gameState);
   controller.render(); // Render twice to not animate everything (only draw).
   controller.render();
 } else {
