@@ -136,12 +136,15 @@ export function getStack(gameState: GameState, cardNumber: number) {
 }
 
 export function newGame(rules: GameRules): GameState {
+  const gameState: GameState = {
+    stock: [],
+    rules,
+    tableausFaceDown: [],
+    tableausFaceUp: [],
+    waste: [],
+    foundations: [],
+  };
   const deck: number[] = [];
-  const stock: number[] = [];
-  const tableausFaceDown: number[][] = [];
-  const tableausFaceUp: number[][] = [];
-  const waste: number[] = [];
-  const foundations: number[][] = [];
 
   // Add cards to deck
   for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
@@ -155,13 +158,13 @@ export function newGame(rules: GameRules): GameState {
   // Tableaus.
   for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
     const faceDownList: number[] = [];
-    tableausFaceDown[tableau] = faceDownList;
+    gameState.tableausFaceDown[tableau] = faceDownList;
     for (let position = 0; position <= tableau - 1; position++) {
       const card = assertDefined(deck.pop());
       faceDownList.push(card);
     }
     const faceUpList: number[] = [];
-    tableausFaceUp[tableau] = faceUpList;
+    gameState.tableausFaceUp[tableau] = faceUpList;
     const card = assertDefined(deck.pop());
     faceUpList.push(card);
   }
@@ -169,22 +172,15 @@ export function newGame(rules: GameRules): GameState {
   // Stock.
   while (deck.length > 0) {
     const card = assertDefined(deck.pop());
-    stock.push(card);
+    gameState.stock.push(card);
   }
 
   // Foundations
   for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
-    foundations[idx] = [];
+    gameState.foundations[idx] = [];
   }
 
-  return {
-    stock,
-    rules,
-    tableausFaceDown,
-    tableausFaceUp,
-    waste,
-    foundations,
-  };
+  return gameState;
 }
 
 export function execute(gameState: GameState, action: Action) {
