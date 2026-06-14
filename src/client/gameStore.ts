@@ -1,4 +1,4 @@
-import type { GameState, SerializedGameState } from './gameState';
+import { type GameState, restore as restoreState } from './gameState';
 
 export function store(gameState: GameState) {
   const MAX_UNDOS = 3;
@@ -18,7 +18,7 @@ export function restore(gameState: GameState) {
     try {
       const storedState = localStorage.getItem(`gamePosition${gamePositionStr}`);
       if (storedState) {
-        gameState.restore(JSON.parse(storedState) as SerializedGameState);
+        restoreState(gameState, JSON.parse(storedState) as GameState);
         return true;
       }
     } catch (err) {

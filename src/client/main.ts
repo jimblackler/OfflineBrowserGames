@@ -1,7 +1,7 @@
-import {type GameController, create as createGameController} from './gameController';
-import {type GameRules, type GameState, createGameState} from './gameState';
+import {create as createGameController} from './gameController';
+import {type GameRules, createGameState, newGame} from './gameState';
 import {store, restore} from './gameStore';
-import {type Renderer, createRenderer} from './renderer';
+import {createRenderer} from './renderer';
 
 declare global {
   interface Window {
@@ -24,7 +24,7 @@ renderer.setDragHandler(controller);
 window.redraw = () => {
   const rulesStr = localStorage.getItem('rules');
   if (rulesStr) {
-    gameState.newGame(JSON.parse(rulesStr) as GameRules);
+    newGame(gameState, JSON.parse(rulesStr) as GameRules);
   }
   controller.render();
   controller.draw();

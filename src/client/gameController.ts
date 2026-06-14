@@ -1,6 +1,18 @@
 import {assertDefined} from '../common/check/defined';
-import type {GameState} from './gameState';
-import {type Action, createGameState, MOVE_TYPE, type SerializedGameState} from './gameState';
+import {
+  type Action,
+  createGameState,
+  definitelyUncompletable,
+  execute,
+  getAllActions,
+  getActions,
+  getStack,
+  isComplete,
+  MOVE_TYPE,
+  normalKey,
+  restore,
+  type GameState,
+} from './gameState';
 import {store, erase} from './gameStore';
 import {MathUtils} from './mathUtils';
 import type {DragHandler, Renderer} from './renderer';
@@ -115,7 +127,7 @@ export function create(renderer: Renderer, gameState: GameState): GameController
   requestAnimationFrame(() => _animate());
 
   function draw() {
-    gameState.execute({
+    execute(gameState, {
       moveType: MOVE_TYPE.DRAW,
     });
     store(gameState);
@@ -192,7 +204,7 @@ export function create(renderer: Renderer, gameState: GameState): GameController
 
     // Auto play
     if (gameState.stock.length === 0 && gameState.waste.length === 0) {
-      const actionsFor = gameState.getActions();
+      const actionsFor = getActions(gameState);
       let anyFaceDown = false;
       for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
         const tableau = assertDefined(gameState.tableausFaceDown[tableauIdx]);
@@ -218,7 +230,7 @@ export function create(renderer: Renderer, gameState: GameState): GameController
               if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
                 continue;
               }
-              gameState.execute(action);
+              execute(gameState, action);
               store(gameState);
               render();
               return;
@@ -264,7 +276,7 @@ export function create(renderer: Renderer, gameState: GameState): GameController
     render,
 
     startDrag(card: number) {
-      const cards = gameState.getStack(card);
+      const cards = getStack(gameState, card);
       riseStarted = new Date().getTime();
       raisingCards = cards;
       return cards;
@@ -274,13 +286,13 @@ export function create(renderer: Renderer, gameState: GameState): GameController
       if (card === undefined) {
         return;
       }
-      const cards = gameState.getStack(card);
+      const cards = getStack(gameState, card);
       const cardNumber = assertDefined(cards[0]);
       if (lastCardMoved !== cardNumber) {
         cardHistory = new Map();
         lastCardMoved = cardNumber;
       }
-      const actionsFor = gameState.getActions();
+      const actionsFor = getActions(gameState);
       let actions = actionsFor.get(cardNumber);
 
       if (actions) {
@@ -352,7 +364,7 @@ export function create(renderer: Renderer, gameState: GameState): GameController
         }
         if (closestAction) {
           cardHistory.set(JSON.stringify(closestAction), new Date().getTime());
-          gameState.execute(closestAction);
+          execute(gameState, closestAction);
           store(gameState);
         }
       }
@@ -363,7 +375,7 @@ export function create(renderer: Renderer, gameState: GameState): GameController
     autoPlay() {
       const considered = new Set<string>();
       let currentRound = new Set<[string, number[]]>();
-      considered.add(gameState.normalKey());
+      considered.add(normalKey(gameState));
       currentRound.add([JSON.stringify(gameState), []]);
       let roundNumber = 1;
       while (currentRound.size) {
@@ -374,22 +386,22 @@ export function create(renderer: Renderer, gameState: GameState): GameController
           const moves = data[1];
           let moveIndex = 0;
           const state = createGameState();
-          state.restore(JSON.parse(stringifiedState) as SerializedGameState);
+          restore(state, JSON.parse(stringifiedState) as GameState);
 
-          for (const action of state.getAllActions()) {
+          for (const action of getAllActions(state)) {
             const cloned = createGameState();
-            cloned.restore(JSON.parse(stringifiedState) as SerializedGameState);
-            cloned.execute(action);
-            if (cloned.definitelyUncompletable()) {
+            restore(cloned, JSON.parse(stringifiedState) as GameState);
+            execute(cloned, action);
+            if (definitelyUncompletable(cloned)) {
               continue;
             }
-            const normalKey = cloned.normalKey();
-            if (considered.has(normalKey)) {
+            const key = normalKey(cloned);
+            if (considered.has(key)) {
               continue;
             }
-            considered.add(normalKey);
+            considered.add(key);
             const clonedMoves = [...moves, moveIndex];
-            if (cloned.isComplete()) {
+            if (isComplete(cloned)) {
               console.log(moves);
               return moves;
             }
