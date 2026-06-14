@@ -1,7 +1,7 @@
 import {assertDefined} from '../common/check/defined';
 import {type Action, definitelyUncompletable, execute, getAllActions, getActions, getStack, isComplete, normalKey, type GameState,} from './gameState';
 import {store, erase} from './gameStore';
-import {MathUtils} from './mathUtils';
+import {toT, tInRange} from './mathUtils';
 import type {Renderer} from './renderer';
 import {Rules} from './rules';
 
@@ -70,7 +70,7 @@ export function createGameController(renderer: Renderer) {
       if (timeNow < curve.startTime) {
         continue;
       }
-      const t = MathUtils.toT(curve.startTime, curve.endTime, timeNow);
+      const t = toT(curve.startTime, curve.endTime, timeNow);
       if (t > 1) {
         renderer.positionCard(k, curve.endX, curve.endY, 0);
         renderer.setDraggable(k, curve.draggable);
@@ -81,14 +81,14 @@ export function createGameController(renderer: Renderer) {
 
         if (curve.start[2] < curve.flyHeight) {
           const start = Math.PI - Math.asin(curve.start[2] / curve.flyHeight);
-          const a = MathUtils.tInRange(start, 0, t);
+          const a = tInRange(start, 0, t);
           v = Math.sin(a) * curve.flyHeight;
         } else {
           v = curve.start[2] * (1 - t);
         }
 
-        renderer.positionCard(k, MathUtils.tInRange(curve.start[0], curve.endX, multiplier1),
-            MathUtils.tInRange(curve.start[1], curve.endY, multiplier1), v);
+        renderer.positionCard(k, tInRange(curve.start[0], curve.endX, multiplier1),
+            tInRange(curve.start[1], curve.endY, multiplier1), v);
       }
     }
     if (raisingCards) {

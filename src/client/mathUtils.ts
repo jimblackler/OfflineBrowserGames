@@ -8,12 +8,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-export const MathUtils = {
-  toT(start: number, end: number, value: number) {
-    return (value - start) / (end - start);
-  },
+export function toT(start: number, end: number, value: number) {
+  return (value - start) / (end - start);
+}
 
-  tInRange(start: number, end: number, t: number) {
-    return t * (end - start) + start;
-  }
-};
+export function tInRange(start: number, end: number, t: number) {
+  return t * (end - start) + start;
+}
