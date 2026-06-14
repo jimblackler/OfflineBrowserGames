@@ -150,13 +150,13 @@ export function newGame(rules: GameRules): GameState {
 
   shuffle(deck, random);
 
-  // Tableaus.
-  for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
-    gameState.tableausFaceDown.push(
+  gameState.tableausFaceDown = Array.from({length: Rules.NUMBER_TABLEAUS}).map((_, tableau) =>
       Array.from({length: tableau}).map(() => assertDefined(deck.pop()))
-    );
-    gameState.tableausFaceUp.push([assertDefined(deck.pop())]);
-  }
+  );
+
+  gameState.tableausFaceUp = Array.from({length: Rules.NUMBER_TABLEAUS}).map(() => [
+    assertDefined(deck.pop()),
+  ]);
 
   // Stock.
   gameState.stock = Array.from({length: deck.length}).map(() => assertDefined(deck.pop()));
