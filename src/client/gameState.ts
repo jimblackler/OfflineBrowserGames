@@ -25,13 +25,23 @@ export type GameRules = {
   cardsToDraw: number;
 };
 
-export type Action = {
+export type DrawAction = {
   moveType: typeof MOVE_TYPE.DRAW;
-} | {
-  moveType: typeof MOVE_TYPE.TO_TABLEAU | typeof MOVE_TYPE.TO_FOUNDATION;
+};
+
+export type ToTableauAction = {
+  moveType: typeof MOVE_TYPE.TO_TABLEAU;
   card: number;
   destinationIdx: number;
 };
+
+export type ToFoundationAction = {
+  moveType: typeof MOVE_TYPE.TO_FOUNDATION;
+  card: number;
+  destinationIdx: number;
+};
+
+export type Action = DrawAction | ToTableauAction | ToFoundationAction;
 
 export type GameState = {
   stock: number[];
