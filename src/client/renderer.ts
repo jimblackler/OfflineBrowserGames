@@ -91,7 +91,7 @@ export function createRenderer(gameDiv: HTMLElement) {
     mouseDownFunction: ((ev: MouseEvent) => void) | null,
     clickFunction: ((ev: MouseEvent) => void) | null
   ) {
-    const highlight = () => {
+    function highlight() {
       if (draggingCards.length) {
         return;
       }
