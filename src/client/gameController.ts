@@ -1,5 +1,5 @@
 import {assertDefined} from '../common/check/defined';
-import {type Action, definitelyUncompletable, execute, getAllActions, getActions, getStack, isComplete, MOVE_TYPE, normalKey, type GameState,} from './gameState';
+import {type Action, definitelyUncompletable, execute, getAllActions, getActions, getStack, isComplete, normalKey, type GameState,} from './gameState';
 import {store, erase} from './gameStore';
 import {MathUtils} from './mathUtils';
 import type {Renderer} from './renderer';
@@ -112,7 +112,7 @@ export function createGameController(renderer: Renderer) {
 
   function draw() {
     execute(gameState, {
-      moveType: MOVE_TYPE.DRAW,
+      moveType: 'draw',
     });
     store(gameState);
     render();
@@ -211,7 +211,7 @@ export function createGameController(renderer: Renderer) {
               continue;
             }
             for (const action of actions) {
-              if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
+              if (action.moveType === 'toTableau') {
                 continue;
               }
               execute(gameState, action);
@@ -304,10 +304,15 @@ export function createGameController(renderer: Renderer) {
           }
 
           // Filter actions to most useful actions.
+          const actionPriority = {
+            draw: 1,
+            toTableau: 2,
+            toFoundation: 3,
+          } as const;
           let mostUseful = Number.MIN_VALUE;
           let mostUsefulActions: Action[] = [];
           for (const action of actions) {
-            const useful = action.moveType;
+            const useful = actionPriority[action.moveType];
             if (useful === mostUseful) {
               mostUsefulActions.push(action);
             } else if (useful > mostUseful) {
@@ -325,10 +330,10 @@ export function createGameController(renderer: Renderer) {
         let closest = Number.MAX_VALUE;
         let closestAction: Action | undefined;
         for (const action of actions) {
-          if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEAU) {
+          if (cards.length === 1 || action.moveType === 'toTableau') {
             let x = 0;
             let y = 0;
-            if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
+            if (action.moveType === 'toTableau') {
               const {destinationIdx} = action;
               x = TABLEAU_X + TABLEAU_X_SPACING * destinationIdx;
               y = TABLEAU_Y +
@@ -336,7 +341,7 @@ export function createGameController(renderer: Renderer) {
                   TABLEAU_Y_SPACING_FACE_DOWN +
                   assertDefined(gameState.tableausFaceDown[destinationIdx]).length *
                   TABLEAU_Y_SPACING_FACE_UP;
-            } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
+            } else if (action.moveType === 'toFoundation') {
               const {destinationIdx} = action;
               x = FOUNDATION_X + FOUNDATION_X_SPACING * destinationIdx;
               y = FOUNDATION_Y;

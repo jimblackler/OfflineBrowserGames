@@ -13,28 +13,22 @@ import {assertDefined} from '../common/check/defined';
 import {remove as removeCard, shuffle} from './cardList';
 import {Rules} from './rules';
 
-export const MOVE_TYPE = {
-  DRAW: 1,
-  TO_TABLEAU: 2,
-  TO_FOUNDATION: 3,
-} as const;
-
 export type GameRules = {
   cardsToDraw: number;
 };
 
 export type DrawAction = {
-  moveType: typeof MOVE_TYPE.DRAW;
+  moveType: 'draw';
 };
 
 export type ToTableauAction = {
-  moveType: typeof MOVE_TYPE.TO_TABLEAU;
+  moveType: 'toTableau';
   card: number;
   destinationIdx: number;
 };
 
 export type ToFoundationAction = {
-  moveType: typeof MOVE_TYPE.TO_FOUNDATION;
+  moveType: 'toFoundation';
   card: number;
   destinationIdx: number;
 };
@@ -198,13 +192,13 @@ export function newGame(gameState: GameState, r: GameRules) {
 
 export function execute(gameState: GameState, action: Action) {
   switch (action.moveType) {
-    case MOVE_TYPE.DRAW:
+    case 'draw':
       _draw(gameState);
       break;
-    case MOVE_TYPE.TO_TABLEAU:
+    case 'toTableau':
       _moveToTableau(gameState, action.card, action.destinationIdx);
       break;
-    case MOVE_TYPE.TO_FOUNDATION:
+    case 'toFoundation':
       _moveToFoundation(gameState, action.card, action.destinationIdx);
       break;
     default:
@@ -286,7 +280,7 @@ export function getActions(gameState: GameState) {
       }
       addAction({
         card: other,
-        moveType: MOVE_TYPE.TO_FOUNDATION,
+        moveType: 'toFoundation',
         destinationIdx: foundationIdx
       });
     }
@@ -312,7 +306,7 @@ export function getActions(gameState: GameState) {
 
       addAction({
         card: other,
-        moveType: MOVE_TYPE.TO_TABLEAU,
+        moveType: 'toTableau',
         destinationIdx: tableauIdx,
       });
     }
@@ -324,7 +318,7 @@ export function getAllActions(gameState: GameState) {
   const actionsFor = getActions(gameState);
   const actions = new Set<Action>();
   actions.add({
-    moveType: MOVE_TYPE.DRAW,
+    moveType: 'draw',
   });
   for (const entries of actionsFor.values()) {
     for (const action of entries) {
