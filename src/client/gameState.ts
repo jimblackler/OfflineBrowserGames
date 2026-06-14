@@ -153,12 +153,12 @@ export function newGame(rules: GameRules): GameState {
   // Tableaus.
   for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
     const faceDownList: number[] = [];
-    gameState.tableausFaceDown[tableau] = faceDownList;
+    gameState.tableausFaceDown.push(faceDownList);
     for (let position = 0; position <= tableau - 1; position++) {
       faceDownList.push(assertDefined(deck.pop()));
     }
     const faceUpList: number[] = [];
-    gameState.tableausFaceUp[tableau] = faceUpList;
+    gameState.tableausFaceUp.push(faceUpList);
     faceUpList.push(assertDefined(deck.pop()));
   }
 
