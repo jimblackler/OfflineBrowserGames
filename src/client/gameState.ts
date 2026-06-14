@@ -136,35 +136,21 @@ export function getStack(gameState: GameState, cardNumber: number) {
 }
 
 export function newGame(rules: GameRules): GameState {
-  const gameState: GameState = {
-    stock: [],
-    rules,
-    tableausFaceDown: [],
-    tableausFaceUp: [],
-    waste: [],
-    foundations: [],
-  };
   const deck: number[] = Array.from({length: Rules.NUMBER_CARDS}).map((_, idx) => idx);
+  shuffle(deck, alea(localStorage.getItem('seed')));
 
-  const random = alea(localStorage.getItem('seed'));
-
-  shuffle(deck, random);
-
-  gameState.tableausFaceDown = Array.from({length: Rules.NUMBER_TABLEAUS}).map((_, tableau) =>
-      Array.from({length: tableau}).map(() => assertDefined(deck.pop()))
-  );
-
-  gameState.tableausFaceUp = Array.from({length: Rules.NUMBER_TABLEAUS}).map(() => [
-    assertDefined(deck.pop()),
-  ]);
-
-  // Stock.
-  gameState.stock = Array.from({length: deck.length}).map(() => assertDefined(deck.pop()));
-
-  // Foundations
-  gameState.foundations = Array.from({length: Rules.NUMBER_FOUNDATIONS}).map(() => []);
-
-  return gameState;
+  return {
+    rules,
+    tableausFaceDown: Array.from({length: Rules.NUMBER_TABLEAUS}).map((_, tableau) =>
+        Array.from({length: tableau}).map(() => assertDefined(deck.pop()))
+    ),
+    tableausFaceUp: Array.from({length: Rules.NUMBER_TABLEAUS}).map(() => [
+      assertDefined(deck.pop()),
+    ]),
+    waste: [],
+    foundations: Array.from({length: Rules.NUMBER_FOUNDATIONS}).map(() => []),
+    stock: deck,
+  };
 }
 
 export function execute(gameState: GameState, action: Action) {
