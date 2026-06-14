@@ -132,17 +132,17 @@ export function create(renderer: Renderer, gameState: GameState): GameController
     raisingCards = null;
 
     // Position stock cards.
-    const stockLength = gameState.stock.length();
+    const stockLength = gameState.stock.length;
     for (let idx = 0; idx !== stockLength; idx++) {
-      const cardNumber = assertDefined(gameState.stock.get(idx));
+      const cardNumber = assertDefined(gameState.stock[idx]);
       renderer.faceDown(cardNumber);
       _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0);
     }
 
     // Position waste cards.
-    const wasteLength = gameState.waste.length();
+    const wasteLength = gameState.waste.length;
     for (let idx = 0; idx !== wasteLength; idx++) {
-      const cardNumber = assertDefined(gameState.waste.get(idx));
+      const cardNumber = assertDefined(gameState.waste[idx]);
       renderer.faceUp(cardNumber);
       const staggerOrder = Math.max(idx - wasteLength + gameState.rules.cardsToDraw, 0);
       const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
@@ -156,10 +156,10 @@ export function create(renderer: Renderer, gameState: GameState): GameController
     // Position foundation cards.
     for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
       const foundation = assertDefined(gameState.foundations[foundationIdx]);
-      const foundationLength = foundation.length();
+      const foundationLength = foundation.length;
 
       for (let position = 0; position < foundationLength; position++) {
-        const cardNumber = assertDefined(foundation.get(position));
+        const cardNumber = assertDefined(foundation[position]);
         renderer.faceUp(cardNumber);
         _placeCard(cardNumber, FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0);
       }
@@ -168,19 +168,19 @@ export function create(renderer: Renderer, gameState: GameState): GameController
     // Position tableau cards.
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
       const tableauFaceDown = assertDefined(gameState.tableausFaceDown[tableauIdx]);
-      const faceDownLength = tableauFaceDown.length();
+      const faceDownLength = tableauFaceDown.length;
       for (let position = 0; position < faceDownLength; position++) {
-        const cardNumber = assertDefined(tableauFaceDown.get(position));
+        const cardNumber = assertDefined(tableauFaceDown[position]);
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0);
         renderer.faceDown(cardNumber);
       }
 
       const tableauFaceUp = assertDefined(gameState.tableausFaceUp[tableauIdx]);
-      const tableauLength = tableauFaceUp.length();
+      const tableauLength = tableauFaceUp.length;
 
       for (let position = 0; position < tableauLength; position++) {
-        const cardNumber = assertDefined(tableauFaceUp.get(position));
+        const cardNumber = assertDefined(tableauFaceUp[position]);
         renderer.faceUp(cardNumber);
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             TABLEAU_Y + TABLEAU_Y_SPACING_FACE_UP * position + TABLEAU_Y_SPACING_FACE_DOWN * faceDownLength, true, 0);
@@ -188,12 +188,12 @@ export function create(renderer: Renderer, gameState: GameState): GameController
     }
 
     // Auto play
-    if (gameState.stock.length() === 0 && gameState.waste.length() === 0) {
+    if (gameState.stock.length === 0 && gameState.waste.length === 0) {
       const actionsFor = gameState.getActions();
       let anyFaceDown = false;
       for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
         const tableau = assertDefined(gameState.tableausFaceDown[tableauIdx]);
-        if (tableau.length() > 0) {
+        if (tableau.length > 0) {
           anyFaceDown = true;
           break;
         }
@@ -202,11 +202,11 @@ export function create(renderer: Renderer, gameState: GameState): GameController
         window.setTimeout(() => {
           for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
             const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
-            if (tableau.length() <= 0) {
+            if (tableau.length <= 0) {
               continue;
             }
-            const position = tableau.length() - 1;
-            const cardNumber = assertDefined(tableau.get(position));
+            const position = tableau.length - 1;
+            const cardNumber = assertDefined(tableau[position]);
             const actions = actionsFor.get(cardNumber);
             if (!actions) {
               continue;
@@ -330,9 +330,9 @@ export function create(renderer: Renderer, gameState: GameState): GameController
               const {destinationIdx} = action;
               x = TABLEAU_X + TABLEAU_X_SPACING * destinationIdx;
               y = TABLEAU_Y +
-                  assertDefined(gameState.tableausFaceUp[destinationIdx]).length() *
+                  assertDefined(gameState.tableausFaceUp[destinationIdx]).length *
                   TABLEAU_Y_SPACING_FACE_DOWN +
-                  assertDefined(gameState.tableausFaceDown[destinationIdx]).length() *
+                  assertDefined(gameState.tableausFaceDown[destinationIdx]).length *
                   TABLEAU_Y_SPACING_FACE_UP;
             } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
               const {destinationIdx} = action;

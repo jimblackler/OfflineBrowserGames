@@ -10,7 +10,7 @@
 
 import alea from 'alea';
 import {assertDefined} from '../common/check/defined';
-import {type CardList, createCardList} from './cardList';
+import {remove as removeCard, shuffle} from './cardList';
 import {Rules} from './rules';
 
 export const MOVE_TYPE = {
@@ -26,13 +26,13 @@ export type GameRules = {
 };
 
 export type SerializedGameState = {
-  deck: { cards: number[] };
-  stock: { cards: number[] };
+  deck: number[];
+  stock: number[];
   rules: GameRules;
-  tableausFaceDown: { cards: number[] }[];
-  tableausFaceUp: { cards: number[] }[];
-  waste: { cards: number[] };
-  foundations: { cards: number[] }[];
+  tableausFaceDown: number[][];
+  tableausFaceUp: number[][];
+  waste: number[];
+  foundations: number[][];
 };
 
 export type Action = {
@@ -44,13 +44,13 @@ export type Action = {
 };
 
 export type GameState = {
-  deck: CardList;
-  stock: CardList;
+  deck: number[];
+  stock: number[];
   rules: GameRules;
-  tableausFaceDown: CardList[];
-  tableausFaceUp: CardList[];
-  waste: CardList;
-  foundations: CardList[];
+  tableausFaceDown: number[][];
+  tableausFaceUp: number[][];
+  waste: number[];
+  foundations: number[][];
 
   restore(data: SerializedGameState): boolean;
   newGame(rules: GameRules): void;
@@ -64,25 +64,23 @@ export type GameState = {
 }
 
 export function createGameState(): GameState {
-  let deck: CardList;
-  let stock: CardList;
+  let deck: number[];
+  let stock: number[];
   let rules: GameRules;
-  let tableausFaceDown: CardList[] = [];
-  let tableausFaceUp: CardList[] = [];
-  let waste: CardList;
-  let foundations: CardList[] = [];
+  let tableausFaceDown: number[][] = [];
+  let tableausFaceUp: number[][] = [];
+  let waste: number[];
+  let foundations: number[][] = [];
 
   function _draw() {
-    if (stock.length() === 0) {
-      while (waste.length()) {
-        const drawn = assertDefined(waste.pop());
-        stock.add(drawn);
+    if (stock.length === 0) {
+      while (waste.length > 0) {
+        stock.push(assertDefined(waste.pop()));
       }
     } else {
       // X cards from stock to waste.
-      for (let idx = 0; idx !== rules.cardsToDraw && stock.length(); idx++) {
-        const drawn = assertDefined(stock.pop());
-        waste.add(drawn);
+      for (let idx = 0; idx !== rules.cardsToDraw && stock.length > 0; idx++) {
+        waste.push(assertDefined(stock.pop()));
       }
     }
   }
@@ -91,32 +89,31 @@ export function createGameState(): GameState {
     // In tableau cards?
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
       const tableau = assertDefined(tableausFaceUp[tableauIdx]);
-      if (tableau.remove(cardNumber)) {
+      if (removeCard(tableau, cardNumber)) {
         // Reveal undercard if needed.
-        if (tableau.length() === 0) {
+        if (tableau.length === 0) {
           const tableauFaceDown = assertDefined(tableausFaceDown[tableauIdx]);
-          if (tableauFaceDown.length() > 0) {
-            const popped = assertDefined(tableauFaceDown.pop());
-            tableau.pushFront(popped);
+          if (tableauFaceDown.length > 0) {
+            tableau.unshift(assertDefined(tableauFaceDown.pop()));
           }
         }
         return true;
       }
     }
     // In stock cards?
-    if (stock.remove(cardNumber)) {
+    if (removeCard(stock, cardNumber)) {
       return true;
     }
 
     // In waste cards?
-    if (waste.remove(cardNumber)) {
+    if (removeCard(waste, cardNumber)) {
       return true;
     }
 
     // Foundations
     for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
       const foundation = assertDefined(foundations[idx]);
-      if (foundation.remove(cardNumber)) {
+      if (removeCard(foundation, cardNumber)) {
         return true;
       }
     }
@@ -129,8 +126,8 @@ export function createGameState(): GameState {
     for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
       const tableau = assertDefined(tableausFaceUp[tableauIdx]);
       const idx = tableau.indexOf(cardNumber);
-      if (idx !== -1 && idx < tableau.length() - 1) {
-        const val = assertDefined(tableau.get(idx + 1));
+      if (idx !== -1 && idx < tableau.length - 1) {
+        const val = assertDefined(tableau[idx + 1]);
         return val;
       }
     }
@@ -143,7 +140,7 @@ export function createGameState(): GameState {
     do {
       const stackedOn = stackedUnder(movingCard);
       if (remove(movingCard)) {
-        tableau.add(movingCard);
+        tableau.push(movingCard);
       }
       movingCard = stackedOn;
     } while (movingCard !== null);
@@ -152,7 +149,7 @@ export function createGameState(): GameState {
   function _moveToFoundation(cardNumber: number, foundationIdx: number) {
     if (remove(cardNumber)) {
       const foundation = assertDefined(foundations[foundationIdx]);
-      foundation.add(cardNumber);
+      foundation.push(cardNumber);
     }
   }
 
@@ -183,66 +180,66 @@ export function createGameState(): GameState {
     },
 
     restore(data: SerializedGameState) {
-      deck = createCardList(data.deck.cards);
-      stock = createCardList(data.stock.cards);
+      deck = data.deck;
+      stock = data.stock;
       rules = data.rules;
       tableausFaceDown = [];
       for (let idx = 0; idx !== data.tableausFaceDown.length; idx++) {
-        tableausFaceDown.push(createCardList(assertDefined(data.tableausFaceDown[idx]).cards));
+        tableausFaceDown.push(assertDefined(data.tableausFaceDown[idx]));
       }
       tableausFaceUp = [];
       for (let idx = 0; idx !== data.tableausFaceUp.length; idx++) {
-        tableausFaceUp.push(createCardList(assertDefined(data.tableausFaceUp[idx]).cards));
+        tableausFaceUp.push(assertDefined(data.tableausFaceUp[idx]));
       }
-      waste = createCardList(data.waste.cards);
+      waste = data.waste;
       foundations = [];
       for (let idx = 0; idx !== data.foundations.length; idx++) {
-        foundations.push(createCardList(assertDefined(data.foundations[idx]).cards));
+        foundations.push(assertDefined(data.foundations[idx]));
       }
       return true;
     },
 
     newGame(r: GameRules) {
-      deck = createCardList([]);
-      stock = createCardList([]);
+      deck = [];
+      stock = [];
       tableausFaceDown = [];
       tableausFaceUp = [];
-      waste = createCardList([]);
+      waste = [];
       foundations = [];
       rules = r;
 
       // Add cards to deck
       for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
-        deck.add(idx);
+        deck.push(idx);
       }
 
       const random = alea(localStorage.getItem('seed'));
 
-      deck.shuffle(random);
+      shuffle(deck, random);
 
       // Tableaus.
       for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
-        const faceDownList = createCardList([]);
+        const faceDownList: number[] = [];
         tableausFaceDown[tableau] = faceDownList;
         for (let position = 0; position <= tableau - 1; position++) {
           const card = assertDefined(deck.pop());
-          faceDownList.add(card);
+          faceDownList.push(card);
         }
-        const faceUpList = createCardList([]);
+        const faceUpList: number[] = [];
         tableausFaceUp[tableau] = faceUpList;
         const card = assertDefined(deck.pop());
-        faceUpList.add(card);
+        faceUpList.push(card);
       }
 
       // Stock.
-      while (deck.length() > 0) {
+      while (deck.length > 0) {
         const card = assertDefined(deck.pop());
-        stock.add(card);
+        stock.push(card);
       }
 
       // Foundations
       for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
-        foundations[idx] = createCardList([]);
+        foundations[idx] = [];
       }
     },
 
@@ -265,7 +262,7 @@ export function createGameState(): GameState {
     isComplete() {
       for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
         const foundation = assertDefined(foundations[foundationIdx]);
-        if (foundation.length() !== Rules.NUMBER_CARDS_IN_SUIT) {
+        if (foundation.length !== Rules.NUMBER_CARDS_IN_SUIT) {
           return false;
         }
       }
@@ -277,18 +274,18 @@ export function createGameState(): GameState {
       const movableToTableau = new Set<number>();
       const movableToFoundation = new Set<number>();
 
-      const wasteLength = waste.length();
+      const wasteLength = waste.length;
       if (wasteLength !== 0) {
-        const cardNumber = assertDefined(waste.get(wasteLength - 1));
+        const cardNumber = assertDefined(waste[wasteLength - 1]);
         movableToTableau.add(cardNumber);
         movableToFoundation.add(cardNumber);
       }
 
       for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
         const foundation = assertDefined(foundations[foundationIdx]);
-        const foundationLength = foundation.length();
+        const foundationLength = foundation.length;
         if (foundationLength !== 0) {
-          const cardNumber = assertDefined(foundation.get(foundationLength - 1));
+          const cardNumber = assertDefined(foundation[foundationLength - 1]);
           movableToTableau.add(cardNumber);
           movableToFoundation.add(cardNumber);
         }
@@ -296,9 +293,9 @@ export function createGameState(): GameState {
 
       for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
         const tableau = assertDefined(tableausFaceUp[tableauIdx]);
-        const tableauLength = tableau.length();
+        const tableauLength = tableau.length;
         for (let position = 0; position < tableauLength; position++) {
-          const cardNumber = assertDefined(tableau.get(position));
+          const cardNumber = assertDefined(tableau[position]);
           movableToTableau.add(cardNumber);
           if (position === tableauLength - 1) {
             movableToFoundation.add(cardNumber);
@@ -320,14 +317,14 @@ export function createGameState(): GameState {
 
       for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
         const foundation = assertDefined(foundations[foundationIdx]);
-        const foundationLength = foundation.length();
+        const foundationLength = foundation.length;
         let canPlaceOn: number[];
         if (foundationLength === 0) {
           // Empty foundation ... will take Aces
           canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
             Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
         } else {
-          const cardNumber = assertDefined(foundation.get(foundationLength - 1));
+          const cardNumber = assertDefined(foundation[foundationLength - 1]);
           canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
         }
         for (const other of canPlaceOn) {
@@ -345,14 +342,14 @@ export function createGameState(): GameState {
       // Position tableau cards.
       for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
         const tableau = assertDefined(tableausFaceUp[tableauIdx]);
-        const tableauLength = tableau.length();
+        const tableauLength = tableau.length;
         let canPlaceOn: number[];
         if (tableauLength === 0) {
           // Empty tableau ... will take Kings
           canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
             Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
         } else {
-          const cardNumber = assertDefined(tableau.get(tableauLength - 1));
+          const cardNumber = assertDefined(tableau[tableauLength - 1]);
           canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
         }
         for (const other of canPlaceOn) {
@@ -389,26 +386,26 @@ export function createGameState(): GameState {
       for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
         const faceDown = assertDefined(tableausFaceDown[tableauIdx]);
         const faceUp = assertDefined(tableausFaceUp[tableauIdx]);
-        tableauStrings.push(JSON.stringify(faceDown.cards) + JSON.stringify(faceUp.cards));
+        tableauStrings.push(JSON.stringify(faceDown) + JSON.stringify(faceUp));
       }
       tableauStrings.sort();
-      return JSON.stringify(tableauStrings) + JSON.stringify(stock.cards) + JSON.stringify(waste.cards);
+      return JSON.stringify(tableauStrings) + JSON.stringify(stock) + JSON.stringify(waste);
     },
 
     definitelyUncompletable() {
       const playable = new Set<number>();
 
       // Stock.
-      for (const card of stock.asArray()) {
+      for (const card of stock) {
         playable.add(card);
       }
-      for (const card of waste.asArray()) {
+      for (const card of waste) {
         playable.add(card);
       }
       // Foundations
       for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
         const foundation = assertDefined(foundations[idx]);
-        for (const card of foundation.asArray()) {
+        for (const card of foundation) {
           playable.add(card);
         }
       }
@@ -420,11 +417,10 @@ export function createGameState(): GameState {
         const list: number[] = [];
         maybePlayable.push(list);
         const faceDown = assertDefined(tableausFaceDown[tableau]);
-        for (const card of faceDown.asArray()) {
+        for (const card of faceDown) {
           list.push(card);
         }
-        const faceUp = assertDefined(tableausFaceUp[tableau]);
-        const faceUpCards = faceUp.asArray();
+        const faceUpCards = assertDefined(tableausFaceUp[tableau]);
         for (let idx = 0; idx < faceUpCards.length; idx++) {
           const card = assertDefined(faceUpCards[idx]);
           if (idx === 0) {

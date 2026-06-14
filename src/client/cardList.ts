@@ -10,67 +10,25 @@
 
 import {assertDefined} from '../common/check/defined';
 
-export type CardList = ReturnType<typeof createCardList>;
+export function remove(cards: number[], cardNumber: number): boolean {
+  const idx = cards.indexOf(cardNumber);
+  if (idx === -1) {
+    return false;
+  }
+  cards.splice(idx, 1);
+  return true;
+}
 
-export function createCardList(cards: number[]) {
-  return {
-    get cards() {
-      return cards;
-    },
+export function shuffle(cards: number[], random: () => number): void {
+  let current: number;
+  let top = cards.length;
 
-    add(cardNumber: number) {
-      cards.push(cardNumber);
-    },
-
-    pushFront(cardNumber: number) {
-      return cards.splice(0, 0, cardNumber);
-    },
-
-    asArray() {
-      return cards;
-    },
-
-    get(idx: number) {
-      return assertDefined(cards[idx]);
-    },
-
-    length() {
-      return cards.length;
-    },
-
-    pop() {
-      return cards.pop();
-    },
-
-    top() {
-      return cards[cards.length - 1];
-    },
-
-    indexOf(cardNumber: number) {
-      return cards.indexOf(cardNumber);
-    },
-
-    remove(cardNumber: number) {
-      const idx = cards.indexOf(cardNumber);
-      if (idx === -1) {
-        return false;
-      }
-      cards.splice(idx, 1);
-      return true;
-    },
-
-    shuffle(random: () => number) {
-      let current: number;
-      let top = cards.length;
-
-      if (top) {
-        while (--top) {
-          current = Math.floor(random() * (top + 1));
-          const tmp = assertDefined(cards[current]);
-          cards[current] = assertDefined(cards[top]);
-          cards[top] = tmp;
-        }
-      }
+  if (top) {
+    while (--top) {
+      current = Math.floor(random() * (top + 1));
+      const tmp = assertDefined(cards[current]);
+      cards[current] = assertDefined(cards[top]);
+      cards[top] = tmp;
     }
-  };
+  }
 }
