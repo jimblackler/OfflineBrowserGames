@@ -183,31 +183,31 @@ export function createGameState(): GameState {
     },
 
     restore(data: SerializedGameState) {
-      deck = createCardList(data.deck);
-      stock = createCardList(data.stock);
+      deck = createCardList(data.deck.cards);
+      stock = createCardList(data.stock.cards);
       rules = data.rules;
       tableausFaceDown = [];
       for (let idx = 0; idx !== data.tableausFaceDown.length; idx++) {
-        tableausFaceDown.push(createCardList(data.tableausFaceDown[idx]));
+        tableausFaceDown.push(createCardList(assertDefined(data.tableausFaceDown[idx]).cards));
       }
       tableausFaceUp = [];
       for (let idx = 0; idx !== data.tableausFaceUp.length; idx++) {
-        tableausFaceUp.push(createCardList(data.tableausFaceUp[idx]));
+        tableausFaceUp.push(createCardList(assertDefined(data.tableausFaceUp[idx]).cards));
       }
-      waste = createCardList(data.waste);
+      waste = createCardList(data.waste.cards);
       foundations = [];
       for (let idx = 0; idx !== data.foundations.length; idx++) {
-        foundations.push(createCardList(data.foundations[idx]));
+        foundations.push(createCardList(assertDefined(data.foundations[idx]).cards));
       }
       return true;
     },
 
     newGame(r: GameRules) {
-      deck = createCardList();
-      stock = createCardList();
+      deck = createCardList([]);
+      stock = createCardList([]);
       tableausFaceDown = [];
       tableausFaceUp = [];
-      waste = createCardList();
+      waste = createCardList([]);
       foundations = [];
       rules = r;
 
@@ -222,13 +222,13 @@ export function createGameState(): GameState {
 
       // Tableaus.
       for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
-        const faceDownList = createCardList();
+        const faceDownList = createCardList([]);
         tableausFaceDown[tableau] = faceDownList;
         for (let position = 0; position <= tableau - 1; position++) {
           const card = assertDefined(deck.pop());
           faceDownList.add(card);
         }
-        const faceUpList = createCardList();
+        const faceUpList = createCardList([]);
         tableausFaceUp[tableau] = faceUpList;
         const card = assertDefined(deck.pop());
         faceUpList.add(card);
@@ -242,7 +242,7 @@ export function createGameState(): GameState {
 
       // Foundations
       for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
-        foundations[idx] = createCardList();
+        foundations[idx] = createCardList([]);
       }
     },
 

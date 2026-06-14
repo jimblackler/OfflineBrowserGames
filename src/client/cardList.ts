@@ -12,9 +12,7 @@ import {assertDefined} from '../common/check/defined';
 
 export type CardList = ReturnType<typeof createCardList>;
 
-export function createCardList(data?: { cards: number[] }) {
-  const cards = data ? data.cards : [];
-
+export function createCardList(cards: number[]) {
   return {
     get cards() {
       return cards;
