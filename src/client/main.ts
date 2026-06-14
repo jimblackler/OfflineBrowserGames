@@ -32,7 +32,8 @@ renderer.setDragHandler(controller);
 window.redraw = () => {
   const rulesStr = localStorage.getItem('rules');
   if (rulesStr) {
-    newGame(gameState, JSON.parse(rulesStr) as GameRules);
+    gameState = newGame(JSON.parse(rulesStr) as GameRules);
+    controller.setGameState(gameState);
   }
   controller.render();
   controller.draw();
