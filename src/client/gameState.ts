@@ -157,9 +157,7 @@ export function newGame(rules: GameRules): GameState {
     for (let position = 0; position <= tableau - 1; position++) {
       faceDownList.push(assertDefined(deck.pop()));
     }
-    const faceUpList: number[] = [];
-    gameState.tableausFaceUp.push(faceUpList);
-    faceUpList.push(assertDefined(deck.pop()));
+    gameState.tableausFaceUp.push([assertDefined(deck.pop())]);
   }
 
   // Stock.
