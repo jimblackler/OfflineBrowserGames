@@ -1,7 +1,6 @@
 import {assertDefined} from '../common/check/defined';
 import {
   type Action,
-  createGameState,
   definitelyUncompletable,
   execute,
   getAllActions,
@@ -10,7 +9,6 @@ import {
   isComplete,
   MOVE_TYPE,
   normalKey,
-  restore,
   type GameState,
 } from './gameState';
 import {store, erase} from './gameStore';
@@ -55,9 +53,11 @@ export type GameController = {
   draw(): void;
   render(): void;
   autoPlay(): number[] | undefined;
+  setGameState(gameState: GameState): void;
 } & DragHandler
 
-export function create(renderer: Renderer, gameState: GameState): GameController {
+export function create(renderer: Renderer, initialGameState: GameState): GameController {
+  let gameState = initialGameState;
   const curves = new Map<number, Curve>();
   let lastCardMoved = -1;
   let cardHistory = new Map<string, number>();
@@ -274,6 +274,9 @@ export function create(renderer: Renderer, gameState: GameState): GameController
   return {
     draw,
     render,
+    setGameState(newState: GameState) {
+      gameState = newState;
+    },
 
     startDrag(card: number) {
       const cards = getStack(gameState, card);
@@ -385,12 +388,10 @@ export function create(renderer: Renderer, gameState: GameState): GameController
           const stringifiedState = data[0];
           const moves = data[1];
           let moveIndex = 0;
-          const state = createGameState();
-          restore(state, JSON.parse(stringifiedState) as GameState);
+          const state = JSON.parse(stringifiedState) as GameState;
 
           for (const action of getAllActions(state)) {
-            const cloned = createGameState();
-            restore(cloned, JSON.parse(stringifiedState) as GameState);
+            const cloned = JSON.parse(stringifiedState) as GameState;
             execute(cloned, action);
             if (definitelyUncompletable(cloned)) {
               continue;

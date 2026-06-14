@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-const gameState = createGameState();
+let gameState = createGameState();
 const gameDiv = document.getElementById('gameDiv');
 if (!gameDiv) {
   throw new Error('gameDiv not found');
@@ -42,7 +42,10 @@ window.newGame = rules => {
 
 document.oncontextmenu = () => false;
 
-if (restore(gameState)) {
+const restored = restore();
+if (restored) {
+  gameState = restored;
+  controller.setGameState(gameState);
   controller.render(); // Render twice to not animate everything (only draw).
   controller.render();
 } else {
@@ -62,7 +65,11 @@ window.undo = () => {
     let gamePosition = gamePositionStr ? parseInt(gamePositionStr, 10) : 0;
     gamePosition--;
     localStorage.setItem('gamePosition', String(gamePosition));
-    restore(gameState);
+    const restored = restore();
+    if (restored) {
+      gameState = restored;
+      controller.setGameState(gameState);
+    }
     controller.render();
   }
 };

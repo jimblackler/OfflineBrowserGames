@@ -144,15 +144,6 @@ export function getStack(gameState: GameState, cardNumber: number) {
   return cards;
 }
 
-export function restore(gameState: GameState, data: GameState) {
-  gameState.stock = [...data.stock];
-  gameState.rules = data.rules;
-  gameState.tableausFaceDown = data.tableausFaceDown.map(arr => [...arr]);
-  gameState.tableausFaceUp = data.tableausFaceUp.map(arr => [...arr]);
-  gameState.waste = [...data.waste];
-  gameState.foundations = data.foundations.map(arr => [...arr]);
-}
-
 export function newGame(gameState: GameState, r: GameRules) {
   const deck: number[] = [];
   gameState.stock = [];

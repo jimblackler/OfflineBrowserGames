@@ -1,4 +1,4 @@
-import { type GameState, restore as restoreState } from './gameState';
+import type { GameState } from './gameState';
 
 export function store(gameState: GameState) {
   const MAX_UNDOS = 3;
@@ -12,20 +12,19 @@ export function store(gameState: GameState) {
   localStorage.setItem(`gamePosition${gamePosition}`, JSON.stringify(gameState));
 }
 
-export function restore(gameState: GameState) {
+export function restore(): GameState | null {
   const gamePositionStr = localStorage.getItem('gamePosition');
   if (gamePositionStr !== null) {
     try {
       const storedState = localStorage.getItem(`gamePosition${gamePositionStr}`);
       if (storedState) {
-        restoreState(gameState, JSON.parse(storedState) as GameState);
-        return true;
+        return JSON.parse(storedState) as GameState;
       }
     } catch (err) {
       console.log(err);
     }
   }
-  return false;
+  return null;
 }
 
 export function erase() {
