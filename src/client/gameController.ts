@@ -13,7 +13,7 @@ import {
 } from './gameState';
 import {store, erase} from './gameStore';
 import {MathUtils} from './mathUtils';
-import type {DragHandler, Renderer} from './renderer';
+import type {Renderer} from './renderer';
 import {Rules} from './rules';
 
 const STOCK_X = 42;
@@ -49,14 +49,9 @@ type Curve = {
   draggable: boolean;
 };
 
-export type GameController = {
-  draw(): void;
-  render(): void;
-  autoPlay(): number[] | undefined;
-  setGameState(gameState: GameState): void;
-} & DragHandler
+export type GameController = ReturnType<typeof createGameController>;
 
-export function create(renderer: Renderer, initialGameState: GameState): GameController {
+export function createGameController(renderer: Renderer, initialGameState: GameState) {
   let gameState = initialGameState;
   const curves = new Map<number, Curve>();
   let lastCardMoved = -1;

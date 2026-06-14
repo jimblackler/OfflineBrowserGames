@@ -1,4 +1,4 @@
-import {create as createGameController} from './gameController';
+import {createGameController} from './gameController';
 import {type GameRules, createGameState, newGame} from './gameState';
 import {store, restore} from './gameStore';
 import {createRenderer} from './renderer';
