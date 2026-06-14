@@ -152,7 +152,7 @@ export default defineConfig([
             'dot-location': 'off',
             eqeqeq: 'warn',
             'func-names': 'warn',
-            'func-style': 'off',
+            'func-style': ['warn', 'declaration'],
             'id-length': 'off',
             'import/order': [
                 'warn',
