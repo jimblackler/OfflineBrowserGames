@@ -42,19 +42,9 @@ export type Action = {
   destinationIdx: number;
 };
 
-export type GameState = SerializedGameState & {
-  restore(data: SerializedGameState): boolean;
-  newGame(rules: GameRules): void;
-  execute(action: Action): void;
-  isComplete(): boolean;
-  getActions(): Map<number, Set<Action>>;
-  getAllActions(): Set<Action>;
-  normalKey(): string;
-  definitelyUncompletable(): boolean;
-  getStack(cardNumber: number): number[];
-}
+export type GameState = ReturnType<typeof createGameState>;
 
-export function createGameState(): GameState {
+export function createGameState() {
   let stock: number[];
   let rules: GameRules;
   let tableausFaceDown: number[][] = [];
