@@ -1,5 +1,5 @@
 import {createGameController} from './gameController';
-import {type GameRules, createGameState, newGame} from './gameState';
+import {type GameRules, type GameState, newGame} from './gameState';
 import {store, restore} from './gameStore';
 import {createRenderer} from './renderer';
 
@@ -12,7 +12,14 @@ declare global {
   }
 }
 
-let gameState = createGameState();
+let gameState: GameState = {
+  stock: [],
+  rules: {cardsToDraw: 1},
+  tableausFaceDown: [],
+  tableausFaceUp: [],
+  waste: [],
+  foundations: [],
+};
 const gameDiv = document.getElementById('gameDiv');
 if (!gameDiv) {
   throw new Error('gameDiv not found');

@@ -44,17 +44,6 @@ export type GameState = {
   foundations: number[][];
 };
 
-export function createGameState(): GameState {
-  return {
-    stock: [],
-    rules: {cardsToDraw: 1},
-    tableausFaceDown: [],
-    tableausFaceUp: [],
-    waste: [],
-    foundations: [],
-  };
-}
-
 function _draw(gameState: GameState) {
   if (gameState.stock.length === 0) {
     while (gameState.waste.length > 0) {
