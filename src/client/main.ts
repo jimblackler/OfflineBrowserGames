@@ -4,7 +4,6 @@ import {type GameRules, type GameState, newGame} from './gameState';
 import {restore, store} from './gameStore';
 import {createRenderer} from './renderer';
 
-const restored = restore();
 let gameState: GameState;
 const gameDiv = document.getElementById('gameDiv');
 if (!gameDiv) {
@@ -37,6 +36,7 @@ function startNewGame(rules: GameRules) {
 
 document.oncontextmenu = () => false;
 
+const restored = restore();
 if (restored) {
   gameState = restored;
   controller.setGameState(gameState);
