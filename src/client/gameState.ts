@@ -160,19 +160,16 @@ export function newGame(rules: GameRules): GameState {
     const faceDownList: number[] = [];
     gameState.tableausFaceDown[tableau] = faceDownList;
     for (let position = 0; position <= tableau - 1; position++) {
-      const card = assertDefined(deck.pop());
-      faceDownList.push(card);
+      faceDownList.push(assertDefined(deck.pop()));
     }
     const faceUpList: number[] = [];
     gameState.tableausFaceUp[tableau] = faceUpList;
-    const card = assertDefined(deck.pop());
-    faceUpList.push(card);
+    faceUpList.push(assertDefined(deck.pop()));
   }
 
   // Stock.
   while (deck.length > 0) {
-    const card = assertDefined(deck.pop());
-    gameState.stock.push(card);
+    gameState.stock.push(assertDefined(deck.pop()));
   }
 
   // Foundations
