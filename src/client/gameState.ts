@@ -43,15 +43,7 @@ export type Action = {
   destinationIdx: number;
 };
 
-export type GameState = {
-  deck: number[];
-  stock: number[];
-  rules: GameRules;
-  tableausFaceDown: number[][];
-  tableausFaceUp: number[][];
-  waste: number[];
-  foundations: number[][];
-
+export type GameState = SerializedGameState & {
   restore(data: SerializedGameState): boolean;
   newGame(rules: GameRules): void;
   execute(action: Action): void;
