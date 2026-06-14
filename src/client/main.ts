@@ -1,6 +1,6 @@
 import {createGameController} from './gameController';
 import {type GameRules, type GameState, newGame} from './gameState';
-import {store, restore} from './gameStore';
+import {restore, store} from './gameStore';
 import {createRenderer} from './renderer';
 
 declare global {
@@ -12,7 +12,8 @@ declare global {
   }
 }
 
-let gameState: GameState = {
+const restored = restore();
+let gameState: GameState = restored ?? {
   stock: [],
   rules: {cardsToDraw: 1},
   tableausFaceDown: [],
@@ -50,10 +51,7 @@ window.newGame = rules => {
 
 document.oncontextmenu = () => false;
 
-const restored = restore();
 if (restored) {
-  gameState = restored;
-  controller.setGameState(gameState);
   controller.render(); // Render twice to not animate everything (only draw).
   controller.render();
 } else {
