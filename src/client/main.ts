@@ -8,7 +8,6 @@ declare global {
     redraw(): void;
     newGame(rules: GameRules): void;
     undo(): void;
-    autoPlay(): void;
   }
 }
 
@@ -78,10 +77,6 @@ window.undo = () => {
     }
     controller.render();
   }
-};
-
-window.autoPlay = () => {
-  controller.autoPlay();
 };
 
 let menuFocused = false;

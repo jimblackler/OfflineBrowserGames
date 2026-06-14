@@ -1,5 +1,5 @@
 import {assertDefined} from '../common/check/defined';
-import {type Action, definitelyUncompletable, execute, getAllActions, getActions, getStack, isComplete, normalKey, type GameState,} from './gameState';
+import {type Action, execute, getActions, getStack, type GameState,} from './gameState';
 import {store, erase} from './gameStore';
 import {toT, tInRange} from './mathUtils';
 import type {Renderer} from './renderer';
@@ -360,47 +360,6 @@ export function createGameController(renderer: Renderer) {
       }
 
       render();
-    },
-
-    autoPlay() {
-      const considered = new Set<string>();
-      let currentRound = new Set<[string, number[]]>();
-      considered.add(normalKey(gameState));
-      currentRound.add([JSON.stringify(gameState), []]);
-      let roundNumber = 1;
-      while (currentRound.size) {
-        console.log(roundNumber, currentRound.size);
-        const nextRound = new Set<[string, number[]]>();
-        for (const data of currentRound) {
-          const stringifiedState = data[0];
-          const moves = data[1];
-          let moveIndex = 0;
-          const state = JSON.parse(stringifiedState) as GameState;
-
-          for (const action of getAllActions(state)) {
-            const cloned = JSON.parse(stringifiedState) as GameState;
-            execute(cloned, action);
-            if (definitelyUncompletable(cloned)) {
-              continue;
-            }
-            const key = normalKey(cloned);
-            if (considered.has(key)) {
-              continue;
-            }
-            considered.add(key);
-            const clonedMoves = [...moves, moveIndex];
-            if (isComplete(cloned)) {
-              console.log(moves);
-              return moves;
-            }
-            nextRound.add([JSON.stringify(cloned), clonedMoves]);
-            moveIndex++;
-          }
-        }
-        currentRound = nextRound;
-        roundNumber++;
-      }
-      return undefined;
     }
   };
 }

@@ -195,16 +195,6 @@ export function execute(gameState: GameState, action: Action) {
   }
 }
 
-export function isComplete(gameState: GameState) {
-  for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-    const foundation = assertDefined(gameState.foundations[foundationIdx]);
-    if (foundation.length !== Rules.NUMBER_CARDS_IN_SUIT) {
-      return false;
-    }
-  }
-  return true;
-}
-
 export function getActions(gameState: GameState) {
   const actionsFor = new Map<number, Set<Action>>();
   const movableToTableau = new Set<number>();
@@ -299,101 +289,4 @@ export function getActions(gameState: GameState) {
     }
   }
   return actionsFor;
-}
-
-export function getAllActions(gameState: GameState) {
-  const actionsFor = getActions(gameState);
-  const actions = new Set<Action>();
-  actions.add({
-    moveType: 'draw',
-  });
-  for (const entries of actionsFor.values()) {
-    for (const action of entries) {
-      actions.add(action);
-    }
-  }
-  return actions;
-}
-
-export function normalKey(gameState: GameState) {
-  const tableauStrings: string[] = [];
-  for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-    const faceDown = assertDefined(gameState.tableausFaceDown[tableauIdx]);
-    const faceUp = assertDefined(gameState.tableausFaceUp[tableauIdx]);
-    tableauStrings.push(JSON.stringify(faceDown) + JSON.stringify(faceUp));
-  }
-  tableauStrings.sort();
-  return JSON.stringify(tableauStrings) + JSON.stringify(gameState.stock) + JSON.stringify(gameState.waste);
-}
-
-export function definitelyUncompletable(gameState: GameState) {
-  const playable = new Set<number>();
-
-  // Stock.
-  for (const card of gameState.stock) {
-    playable.add(card);
-  }
-  for (const card of gameState.waste) {
-    playable.add(card);
-  }
-  // Foundations
-  for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
-    const foundation = assertDefined(gameState.foundations[idx]);
-    for (const card of foundation) {
-      playable.add(card);
-    }
-  }
-
-  const maybePlayable: number[][] = [];
-
-  // Tableaus.
-  for (let tableau = 0; tableau !== Rules.NUMBER_TABLEAUS; tableau++) {
-    const list: number[] = [];
-    maybePlayable.push(list);
-    const faceDown = assertDefined(gameState.tableausFaceDown[tableau]);
-    for (const card of faceDown) {
-      list.push(card);
-    }
-    const faceUpCards = assertDefined(gameState.tableausFaceUp[tableau]);
-    for (let idx = 0; idx < faceUpCards.length; idx++) {
-      const card = assertDefined(faceUpCards[idx]);
-      if (idx === 0) {
-        list.push(card);
-      } else {
-        playable.add(card);
-      }
-    }
-  }
-
-  while (true) {
-    let removedAnything = false;
-    let anyCardsRemain = false;
-    for (const list of maybePlayable) {
-      for (let idx1 = list.length - 1; idx1 >= 0; idx1--) {
-        anyCardsRemain = true;
-        let isPlayable = false;
-        const card = assertDefined(list[idx1]);
-        const others = Rules.canPlaceOnInTableau(card).concat(Rules.canPlaceOnInFoundation(card));
-        for (const other of others) {
-          if (playable.has(other)) {
-            isPlayable = true;
-            break;
-          }
-        }
-        if (isPlayable) {
-          removedAnything = true;
-          playable.add(card);
-          list.pop();
-        } else {
-          break;
-        }
-      }
-    }
-    if (!anyCardsRemain) {
-      return false;
-    }
-    if (!removedAnything) {
-      return true;
-    }
-  }
 }
