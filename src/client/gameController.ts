@@ -38,8 +38,6 @@ type Curve = {
   draggable: boolean;
 };
 
-export type GameController = ReturnType<typeof createGameController>;
-
 export function createGameController(renderer: Renderer) {
   let gameState: GameState;
   const curves = new Map<number, Curve>();
