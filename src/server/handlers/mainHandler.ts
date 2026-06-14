@@ -49,21 +49,21 @@ export function mainHandler(req: Request, res: Response, _next: NextFunction) {
 
   const li1 = document.createElement('li');
   menu.append(li1);
-  li1.setAttribute('onclick', 'newGame({cardsToDraw:3});menu.className = \'\';');
+  li1.setAttribute('id', 'newGame3');
   const a1 = document.createElement('a');
   li1.append(a1);
   a1.append('New game: three card draw');
 
   const li2 = document.createElement('li');
   menu.append(li2);
-  li2.setAttribute('onclick', 'newGame({cardsToDraw:1});menu.className = \'\';');
+  li2.setAttribute('id', 'newGame1');
   const a2 = document.createElement('a');
   li2.append(a2);
   a2.append('New game: one card draw');
 
   const li3 = document.createElement('li');
   menu.append(li3);
-  li3.setAttribute('onclick', 'redraw();menu.className = \'\';');
+  li3.setAttribute('id', 'redrawItem');
   const a3 = document.createElement('a');
   li3.append(a3);
   a3.append('Re-attempt same game');
@@ -71,7 +71,6 @@ export function mainHandler(req: Request, res: Response, _next: NextFunction) {
   const li4 = document.createElement('li');
   menu.append(li4);
   li4.setAttribute('id', 'undoItem');
-  li4.setAttribute('onclick', 'undo();menu.className = \'\';');
   const a4 = document.createElement('a');
   li4.append(a4);
   a4.append('Undo last move');
