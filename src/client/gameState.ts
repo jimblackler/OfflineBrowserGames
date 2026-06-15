@@ -145,8 +145,7 @@ export function execute(gameState: GameState, action: Action) {
     }
     case 'toFoundation':
       if (remove(gameState, action.card)) {
-        const foundation = assertDefined(gameState.foundations[action.destinationIdx]);
-        foundation.push(action.card);
+        assertDefined(gameState.foundations[action.destinationIdx]).push(action.card);
       }
       break;
     default:
