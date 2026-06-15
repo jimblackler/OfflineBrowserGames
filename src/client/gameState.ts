@@ -80,8 +80,7 @@ function remove(gameState: GameState, cardNumber: number) {
 
 function stackedUnder(gameState: GameState, cardNumber: number) {
   // In tableau cards?
-  for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
-    const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
+  for (const tableau of gameState.tableausFaceUp) {
     const idx = tableau.indexOf(cardNumber);
     if (idx !== -1 && idx < tableau.length - 1) {
       return assertDefined(tableau[idx + 1]);
