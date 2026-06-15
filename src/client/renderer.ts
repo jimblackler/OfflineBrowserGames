@@ -133,7 +133,7 @@ export function createRenderer(gameDiv: HTMLElement) {
       selectionIndicator.onclick = clickFunction;
       image.onclick = clickFunction;
       selectionIndicator.onmouseout = () => hideIndicator();
-    };
+    }
 
     const rect = image.getBoundingClientRect();
     if (mouseX >= rect.left && mouseX <= rect.right &&
