@@ -8,48 +8,49 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details. */
 
-export const Rules = {
-  NUMBER_CARDS: 52,
-  NUMBER_TABLEAUS: 7,
-  ACE_TYPE: 0,
-  KING_TYPE: 12,
-  NUMBER_CARDS_IN_SUIT: 13,
-  NUMBER_FOUNDATIONS: 4,
+export const NUMBER_CARDS = 52;
+export const NUMBER_TABLEAUS = 7;
+const ACE_TYPE = 0;
+const KING_TYPE = 12;
+const NUMBER_CARDS_IN_SUIT = 13;
+export const NUMBER_FOUNDATIONS = 4;
 
-  getSuit(cardNumber: number) {
-    return Math.floor(cardNumber / Rules.NUMBER_CARDS_IN_SUIT);
-  },
-  getType(cardNumber: number) {
-    return cardNumber % Rules.NUMBER_CARDS_IN_SUIT;
-  },
-  getCard(suit: number, type: number) {
-    return suit * Rules.NUMBER_CARDS_IN_SUIT + type;
-  },
-  canPlaceOnInTableau(cardNumber: number | undefined) {
-    if (cardNumber === undefined) {
-      // Empty tableau ... will take Kings.
-      return [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
-        Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
-    }
-    const type = Rules.getType(cardNumber);
-    if (type === Rules.ACE_TYPE) {
-      return []; // Nothing goes on aces.
-    }
-    return Rules.getSuit(cardNumber) < 2
-        ? [Rules.getCard(2, type - 1), Rules.getCard(3, type - 1)]
-        : [Rules.getCard(0, type - 1), Rules.getCard(1, type - 1)];
-  },
+function getCard(suit: number, type: number) {
+  return suit * NUMBER_CARDS_IN_SUIT + type;
+}
 
-  canPlaceOnInFoundation(cardNumber: number | undefined) {
-    if (cardNumber === undefined) {
-      // Empty foundation ... will take Aces.
-      return [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
-          Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
-    }
-    const type = Rules.getType(cardNumber);
-    if (type === Rules.KING_TYPE) {
-      return []; // Nothing goes on kings.
-    }
-    return [Rules.getCard(Rules.getSuit(cardNumber), type + 1)];
+export function getSuit(cardNumber: number) {
+  return Math.floor(cardNumber / NUMBER_CARDS_IN_SUIT);
+}
+
+export function getType(cardNumber: number) {
+  return cardNumber % NUMBER_CARDS_IN_SUIT;
+}
+
+export function canPlaceOnInTableau(cardNumber: number | undefined) {
+  if (cardNumber === undefined) {
+    // Empty tableau ... will take Kings.
+    return [getCard(0, KING_TYPE), getCard(1, KING_TYPE),
+      getCard(2, KING_TYPE), getCard(3, KING_TYPE)];
   }
-};
+  const type = getType(cardNumber);
+  if (type === ACE_TYPE) {
+    return []; // Nothing goes on aces.
+  }
+  return getSuit(cardNumber) < 2
+      ? [getCard(2, type - 1), getCard(3, type - 1)]
+      : [getCard(0, type - 1), getCard(1, type - 1)];
+}
+
+export function canPlaceOnInFoundation(cardNumber: number | undefined) {
+  if (cardNumber === undefined) {
+    // Empty foundation ... will take Aces.
+    return [getCard(0, ACE_TYPE), getCard(1, ACE_TYPE),
+        getCard(2, ACE_TYPE), getCard(3, ACE_TYPE)];
+  }
+  const type = getType(cardNumber);
+  if (type === KING_TYPE) {
+    return []; // Nothing goes on kings.
+  }
+  return [getCard(getSuit(cardNumber), type + 1)];
+}

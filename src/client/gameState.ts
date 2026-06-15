@@ -11,7 +11,7 @@
 import alea from 'alea';
 import {assertDefined} from '../common/check/defined';
 import {remove as removeCard, shuffle} from './cardList';
-import {Rules} from './rules';
+import {canPlaceOnInFoundation, canPlaceOnInTableau, NUMBER_CARDS, NUMBER_FOUNDATIONS, NUMBER_TABLEAUS} from './rules';
 
 export type GameRules = {
   cardsToDraw: number;
@@ -46,7 +46,7 @@ export type GameState = {
 
 function remove(gameState: GameState, cardNumber: number) {
   // In tableau cards?
-  for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+  for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
     const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
     if (removeCard(tableau, cardNumber)) {
       // Reveal undercard if needed.
@@ -70,7 +70,7 @@ function remove(gameState: GameState, cardNumber: number) {
   }
 
   // Foundations
-  for (let idx = 0; idx !== Rules.NUMBER_FOUNDATIONS; idx++) {
+  for (let idx = 0; idx !== NUMBER_FOUNDATIONS; idx++) {
     const foundation = assertDefined(gameState.foundations[idx]);
     if (removeCard(foundation, cardNumber)) {
       return true;
@@ -82,7 +82,7 @@ function remove(gameState: GameState, cardNumber: number) {
 
 function stackedUnder(gameState: GameState, cardNumber: number) {
   // In tableau cards?
-  for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+  for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
     const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
     const idx = tableau.indexOf(cardNumber);
     if (idx !== -1 && idx < tableau.length - 1) {
@@ -103,19 +103,19 @@ export function getStack(gameState: GameState, cardNumber: number) {
 }
 
 export function newGame(rules: GameRules): GameState {
-  const deck: number[] = Array.from({length: Rules.NUMBER_CARDS}).map((_, idx) => idx);
+  const deck: number[] = Array.from({length: NUMBER_CARDS}).map((_, idx) => idx);
   shuffle(deck, alea(localStorage.getItem('seed')));
 
   return {
     rules,
-    tableausFaceDown: Array.from({length: Rules.NUMBER_TABLEAUS}).map((_, tableau) =>
+    tableausFaceDown: Array.from({length: NUMBER_TABLEAUS}).map((_, tableau) =>
         Array.from({length: tableau}).map(() => assertDefined(deck.pop()))
     ),
-    tableausFaceUp: Array.from({length: Rules.NUMBER_TABLEAUS}).map(() => [
+    tableausFaceUp: Array.from({length: NUMBER_TABLEAUS}).map(() => [
       assertDefined(deck.pop())
     ]),
     waste: [],
-    foundations: Array.from({length: Rules.NUMBER_FOUNDATIONS}).map(() => []),
+    foundations: Array.from({length: NUMBER_FOUNDATIONS}).map(() => []),
     stock: deck
   };
 }
@@ -198,7 +198,7 @@ export function getActions(gameState: GameState) {
 
   // Position foundation cards.
   gameState.foundations.forEach((foundation, foundationIdx) => {
-    Rules.canPlaceOnInFoundation(foundation.at(-1))
+    canPlaceOnInFoundation(foundation.at(-1))
         .filter(card => movableToFoundation.has(card))
         .forEach(card => addAction({
           card,
@@ -209,7 +209,7 @@ export function getActions(gameState: GameState) {
 
   // Position tableau cards.
   gameState.tableausFaceUp.forEach((tableau, tableauIdx) => {
-    Rules.canPlaceOnInTableau(tableau.at(-1))
+    canPlaceOnInTableau(tableau.at(-1))
         .filter(card => movableToTableau.has(card))
         .forEach(card => addAction({
           card,

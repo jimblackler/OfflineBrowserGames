@@ -9,7 +9,7 @@
  * GNU General Public License for more details. */
 
 import {assertDefined} from '../common/check/defined';
-import {Rules} from './rules';
+import {getSuit, getType, NUMBER_CARDS} from './rules';
 
 const CARD_WIDTH = 103;
 const CARD_HEIGHT = 143;
@@ -71,7 +71,7 @@ export function createRenderer(gameDiv: HTMLElement) {
     }
   }
 
-  for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
+  for (let idx = 0; idx !== NUMBER_CARDS; idx++) {
     const cardImage = document.createElement('span');
     cardImage.style.width = `${CARD_WIDTH}px`;
     cardImage.style.height = `${CARD_HEIGHT}px`;
@@ -169,8 +169,8 @@ export function createRenderer(gameDiv: HTMLElement) {
     },
 
     faceUp(cardNumber: number) {
-      const suit = Rules.getSuit(cardNumber);
-      const type = Rules.getType(cardNumber);
+      const suit = getSuit(cardNumber);
+      const type = getType(cardNumber);
       const cardImage = assertDefined(cardImages[cardNumber]);
       cardImage.style.backgroundPosition = `-${CARD_WIDTH * type}px -${CARD_HEIGHT * suit}px`;
     },

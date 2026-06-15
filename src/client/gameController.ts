@@ -3,7 +3,7 @@ import {type Action, execute, getActions, getStack, type GameState} from './game
 import {store, erase} from './gameStore';
 import {toT, tInRange} from './mathUtils';
 import type {Renderer} from './renderer';
-import {Rules} from './rules';
+import {NUMBER_CARDS, NUMBER_FOUNDATIONS, NUMBER_TABLEAUS} from './rules';
 
 const STOCK_X = 42;
 const STOCK_Y = 42;
@@ -107,7 +107,7 @@ export function createGameController(renderer: Renderer) {
     }
 
     // Position foundation cards.
-    for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
+    for (let foundationIdx = 0; foundationIdx !== NUMBER_FOUNDATIONS; foundationIdx++) {
       const foundation = assertDefined(gameState.foundations[foundationIdx]);
       const foundationLength = foundation.length;
 
@@ -120,7 +120,7 @@ export function createGameController(renderer: Renderer) {
     }
 
     // Position tableau cards.
-    for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+    for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
       const tableauFaceDown = assertDefined(gameState.tableausFaceDown[tableauIdx]);
       const faceDownLength = tableauFaceDown.length;
       for (let position = 0; position < faceDownLength; position++) {
@@ -146,7 +146,7 @@ export function createGameController(renderer: Renderer) {
     if (gameState.stock.length === 0 && gameState.waste.length === 0) {
       const actionsFor = getActions(gameState);
       let anyFaceDown = false;
-      for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+      for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
         const tableau = assertDefined(gameState.tableausFaceDown[tableauIdx]);
         if (tableau.length > 0) {
           anyFaceDown = true;
@@ -155,7 +155,7 @@ export function createGameController(renderer: Renderer) {
       }
       if (!anyFaceDown) {
         window.setTimeout(() => {
-          for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+          for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
             const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
             if (tableau.length <= 0) {
               continue;
@@ -190,7 +190,7 @@ export function createGameController(renderer: Renderer) {
     render();
   }
 
-  for (let idx = 0; idx !== Rules.NUMBER_CARDS; idx++) {
+  for (let idx = 0; idx !== NUMBER_CARDS; idx++) {
     renderer.faceDown(idx);
   }
 
@@ -198,12 +198,12 @@ export function createGameController(renderer: Renderer) {
   renderer.placeHolder(STOCK_X, STOCK_Y, () => draw());
 
   // Placeholder; tableau
-  for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
+  for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
     renderer.placeHolder(TABLEAU_X + TABLEAU_X_SPACING * tableauIdx, TABLEAU_Y);
   }
 
   // Placeholder; foundation
-  for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
+  for (let foundationIdx = 0; foundationIdx !== NUMBER_FOUNDATIONS; foundationIdx++) {
     renderer.placeHolder(FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y);
   }
 
