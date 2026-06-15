@@ -207,28 +207,14 @@ export function getActions(gameState: GameState) {
   });
 
   // Position tableau cards.
-  for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-    const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
-    const cardNumber = tableau.at(-1);
-    let canPlaceOn: number[];
-    if (cardNumber === undefined) {
-      // Empty tableau ... will take Kings
-      canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
-        Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
-    } else {
-      canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
-    }
-    for (const other of canPlaceOn) {
-      if (!movableToTableau.has(other)) {
-        continue;
-      }
-
-      addAction({
-        card: other,
-        moveType: 'toTableau',
-        destinationIdx: tableauIdx
-      });
-    }
-  }
+  gameState.tableausFaceUp.forEach((tableau, tableauIdx) => {
+    Rules.canPlaceOnInTableau(tableau.at(-1))
+        .filter(card => movableToTableau.has(card))
+        .forEach(card => addAction({
+          card,
+          moveType: 'toTableau',
+          destinationIdx: tableauIdx
+        }));
+  });
   return actionsFor;
 }

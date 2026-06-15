@@ -25,7 +25,12 @@ export const Rules = {
   getCard(suit: number, type: number) {
     return suit * Rules.NUMBER_CARDS_IN_SUIT + type;
   },
-  canPlaceOnInTableau(cardNumber: number) {
+  canPlaceOnInTableau(cardNumber: number | undefined) {
+    if (cardNumber === undefined) {
+      // Empty tableau ... will take Kings
+      return [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
+        Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
+    }
     const suit = Rules.getSuit(cardNumber);
     const type = Rules.getType(cardNumber);
     if (type === Rules.ACE_TYPE) {
