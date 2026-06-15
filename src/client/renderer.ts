@@ -144,7 +144,7 @@ export function createRenderer(gameDiv: HTMLElement) {
   }
 
   return {
-    placeHolder(x: number, y: number, onClick: ((ev: MouseEvent) => void) | null) {
+    placeHolder(x: number, y: number, onClick?: (ev: MouseEvent) => void) {
       const image = document.createElement('span');
       image.style.width = `${CARD_WIDTH}px`;
       image.style.height = `${CARD_HEIGHT}px`;
