@@ -1,5 +1,5 @@
 import {assertDefined} from '../common/check/defined';
-import {type Action, execute, getActions, getStack, type GameState,} from './gameState';
+import {type Action, execute, getActions, getStack, type GameState} from './gameState';
 import {store, erase} from './gameStore';
 import {toT, tInRange} from './mathUtils';
 import type {Renderer} from './renderer';
@@ -185,7 +185,7 @@ export function createGameController(renderer: Renderer) {
 
   function draw() {
     execute(gameState, {
-      moveType: 'draw',
+      moveType: 'draw'
     });
     store(gameState);
     render();
@@ -305,7 +305,7 @@ export function createGameController(renderer: Renderer) {
           const actionPriority = {
             draw: 1,
             toTableau: 2,
-            toFoundation: 3,
+            toFoundation: 3
           } as const;
           let mostUseful = Number.MIN_VALUE;
           let mostUsefulActions: Action[] = [];

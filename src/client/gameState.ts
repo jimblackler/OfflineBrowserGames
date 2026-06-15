@@ -144,11 +144,11 @@ export function newGame(rules: GameRules): GameState {
         Array.from({length: tableau}).map(() => assertDefined(deck.pop()))
     ),
     tableausFaceUp: Array.from({length: Rules.NUMBER_TABLEAUS}).map(() => [
-      assertDefined(deck.pop()),
+      assertDefined(deck.pop())
     ]),
     waste: [],
     foundations: Array.from({length: Rules.NUMBER_FOUNDATIONS}).map(() => []),
-    stock: deck,
+    stock: deck
   };
 }
 
@@ -257,7 +257,7 @@ export function getActions(gameState: GameState) {
       addAction({
         card: other,
         moveType: 'toTableau',
-        destinationIdx: tableauIdx,
+        destinationIdx: tableauIdx
       });
     }
   }
