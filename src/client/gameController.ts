@@ -160,8 +160,7 @@ export function createGameController(renderer: Renderer) {
             if (tableau.length <= 0) {
               continue;
             }
-            const position = tableau.length - 1;
-            const cardNumber = assertDefined(tableau[position]);
+            const cardNumber = assertDefined(tableau.at(-1));
             const actions = actionsFor.get(cardNumber);
             if (!actions) {
               continue;
