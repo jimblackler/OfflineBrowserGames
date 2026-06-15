@@ -198,25 +198,13 @@ export function getActions(gameState: GameState) {
 
   for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
     const foundation = assertDefined(gameState.foundations[foundationIdx]);
-    const cardNumber = foundation.at(-1);
-    let canPlaceOn: number[];
-    if (cardNumber === undefined) {
-      // Empty foundation ... will take Aces
-      canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
-        Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
-    } else {
-      canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
-    }
-    for (const other of canPlaceOn) {
-      if (!movableToFoundation.has(other)) {
-        continue;
-      }
-      addAction({
-        card: other,
-        moveType: 'toFoundation',
-        destinationIdx: foundationIdx
-      });
-    }
+    Rules.canPlaceOnInFoundation(foundation.at(-1))
+        .filter(other => movableToFoundation.has(other))
+        .forEach(other => addAction({
+          card: other,
+          moveType: 'toFoundation',
+          destinationIdx: foundationIdx
+        }));
   }
 
   // Position tableau cards.

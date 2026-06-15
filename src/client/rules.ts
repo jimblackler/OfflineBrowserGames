@@ -38,7 +38,11 @@ export const Rules = {
 
   },
 
-  canPlaceOnInFoundation(cardNumber: number) {
+  canPlaceOnInFoundation(cardNumber: number | undefined) {
+    if (cardNumber === undefined) {
+      return [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
+          Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
+    }
     const suit = Rules.getSuit(cardNumber);
     const type = Rules.getType(cardNumber);
     if (type === Rules.KING_TYPE) {
