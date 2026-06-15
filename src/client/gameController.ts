@@ -43,7 +43,7 @@ export function createGameController(renderer: Renderer) {
   const curves = new Map<number, Curve>();
   let lastCardMoved = -1;
   let cardHistory = new Map<string, number>();
-  let raisingCards: number[] | null = null;
+  let raisingCards: number[] | undefined;
   let riseStarted = 0;
 
   function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean, delay: number) {
@@ -81,7 +81,7 @@ export function createGameController(renderer: Renderer) {
       curves.delete(k);
     }
 
-    raisingCards = null;
+    raisingCards = undefined;
 
     // Position stock cards.
     const stockLength = gameState.stock.length;
@@ -246,7 +246,7 @@ export function createGameController(renderer: Renderer) {
         renderer.positionCard(cardNumber, position[0], position[1], RAISE_HEIGHT * t);
       }
       if (t === 1) {
-        raisingCards = null;
+        raisingCards = undefined;
       }
     }
   }
