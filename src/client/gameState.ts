@@ -70,8 +70,7 @@ function remove(gameState: GameState, cardNumber: number) {
   }
 
   // Foundations
-  for (let idx = 0; idx !== NUMBER_FOUNDATIONS; idx++) {
-    const foundation = assertDefined(gameState.foundations[idx]);
+  for (const foundation of gameState.foundations) {
     if (removeCard(foundation, cardNumber)) {
       return true;
     }
