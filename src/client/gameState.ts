@@ -99,8 +99,7 @@ function stackedUnder(gameState: GameState, cardNumber: number) {
     const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
     const idx = tableau.indexOf(cardNumber);
     if (idx !== -1 && idx < tableau.length - 1) {
-      const val = assertDefined(tableau[idx + 1]);
-      return val;
+      return assertDefined(tableau[idx + 1]);
     }
   }
   return undefined;
