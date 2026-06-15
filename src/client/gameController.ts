@@ -115,18 +115,19 @@ export function createGameController(renderer: Renderer) {
     // Position tableau cards.
     for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
       const tableauFaceDown = assertDefined(gameState.tableausFaceDown[tableauIdx]);
+      const tableauX = TABLEAU_X + TABLEAU_X_SPACING * tableauIdx;
       for (const [position, cardNumber] of tableauFaceDown.entries()) {
-        _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
+        _placeCard(cardNumber, tableauX,
             TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0);
         renderer.faceDown(cardNumber);
       }
 
       const tableauFaceUp = assertDefined(gameState.tableausFaceUp[tableauIdx]);
+      const faceDownOffset = TABLEAU_Y_SPACING_FACE_DOWN * tableauFaceDown.length;
       for (const [position, cardNumber] of tableauFaceUp.entries()) {
         renderer.faceUp(cardNumber);
-        _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_UP * position +
-            TABLEAU_Y_SPACING_FACE_DOWN * tableauFaceDown.length, true, 0);
+        _placeCard(cardNumber, tableauX,
+            TABLEAU_Y + faceDownOffset + TABLEAU_Y_SPACING_FACE_UP * position, true, 0);
       }
     }
 
