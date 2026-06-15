@@ -103,11 +103,11 @@ function stackedUnder(gameState: GameState, cardNumber: number) {
       return val;
     }
   }
-  return null;
+  return undefined;
 }
 
 function _moveToTableau(gameState: GameState, cardNumber: number, tableauIdx: number) {
-  let movingCard: number | null = cardNumber;
+  let movingCard: number | undefined = cardNumber;
   const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
   do {
     const stackedOn = stackedUnder(gameState, movingCard);
@@ -115,7 +115,7 @@ function _moveToTableau(gameState: GameState, cardNumber: number, tableauIdx: nu
       tableau.push(movingCard);
     }
     movingCard = stackedOn;
-  } while (movingCard !== null);
+  } while (movingCard !== undefined);
 }
 
 function _moveToFoundation(gameState: GameState, cardNumber: number, foundationIdx: number) {
@@ -126,9 +126,9 @@ function _moveToFoundation(gameState: GameState, cardNumber: number, foundationI
 }
 
 export function getStack(gameState: GameState, cardNumber: number) {
-  let card: number | null = cardNumber;
+  let card: number | undefined = cardNumber;
   const cards: number[] = [];
-  while (card !== null) {
+  while (card !== undefined) {
     cards.push(card);
     card = stackedUnder(gameState, card);
   }
