@@ -103,18 +103,16 @@ export function createGameController(renderer: Renderer) {
     }
 
     // Position foundation cards.
-    for (let foundationIdx = 0; foundationIdx !== NUMBER_FOUNDATIONS; foundationIdx++) {
-      const foundation = assertDefined(gameState.foundations[foundationIdx]);
+    gameState.foundations.forEach((foundation, foundationIdx) => {
       for (const cardNumber of foundation) {
         renderer.faceUp(cardNumber);
         _placeCard(cardNumber,
             FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0);
       }
-    }
+    });
 
     // Position tableau cards.
-    for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
-      const tableauFaceDown = assertDefined(gameState.tableausFaceDown[tableauIdx]);
+    gameState.tableausFaceDown.forEach((tableauFaceDown, tableauIdx) => {
       const tableauX = TABLEAU_X + TABLEAU_X_SPACING * tableauIdx;
       for (const [position, cardNumber] of tableauFaceDown.entries()) {
         _placeCard(cardNumber, tableauX,
@@ -129,7 +127,7 @@ export function createGameController(renderer: Renderer) {
         _placeCard(cardNumber, tableauX,
             TABLEAU_Y + faceDownOffset + TABLEAU_Y_SPACING_FACE_UP * position, true, 0);
       }
-    }
+    });
 
     // Auto play
     if (gameState.stock.length === 0 && gameState.waste.length === 0) {
