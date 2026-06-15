@@ -20,15 +20,13 @@ export function remove(cards: number[], cardNumber: number): boolean {
 }
 
 export function shuffle(cards: number[], random: () => number): void {
-  let current: number;
-  let top = cards.length;
+  let pos = cards.length;
 
-  if (top) {
-    while (--top) {
-      current = Math.floor(random() * (top + 1));
-      const tmp = assertDefined(cards[current]);
-      cards[current] = assertDefined(cards[top]);
-      cards[top] = tmp;
-    }
+  while (pos > 1) {
+    const current = Math.floor(random() * pos);
+    pos--;
+    const tmp = assertDefined(cards[current]);
+    cards[current] = assertDefined(cards[pos]);
+    cards[pos] = tmp;
   }
 }
