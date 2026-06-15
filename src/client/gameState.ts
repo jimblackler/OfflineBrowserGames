@@ -162,20 +162,18 @@ export function getActions(gameState: GameState) {
   const movableToTableau = new Set<number>();
   const movableToFoundation = new Set<number>();
 
-  const wasteLength = gameState.waste.length;
-  if (wasteLength !== 0) {
-    const cardNumber = assertDefined(gameState.waste[wasteLength - 1]);
-    movableToTableau.add(cardNumber);
-    movableToFoundation.add(cardNumber);
+  const wasteCard = gameState.waste.at(-1);
+  if (wasteCard !== undefined) {
+    movableToTableau.add(wasteCard);
+    movableToFoundation.add(wasteCard);
   }
 
   for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
     const foundation = assertDefined(gameState.foundations[foundationIdx]);
-    const foundationLength = foundation.length;
-    if (foundationLength !== 0) {
-      const cardNumber = assertDefined(foundation[foundationLength - 1]);
-      movableToTableau.add(cardNumber);
-      movableToFoundation.add(cardNumber);
+    const foundationCard = foundation.at(-1);
+    if (foundationCard !== undefined) {
+      movableToTableau.add(foundationCard);
+      movableToFoundation.add(foundationCard);
     }
   }
 
@@ -201,14 +199,13 @@ export function getActions(gameState: GameState) {
 
   for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
     const foundation = assertDefined(gameState.foundations[foundationIdx]);
-    const foundationLength = foundation.length;
+    const cardNumber = foundation.at(-1);
     let canPlaceOn: number[];
-    if (foundationLength === 0) {
+    if (cardNumber === undefined) {
       // Empty foundation ... will take Aces
       canPlaceOn = [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
         Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
     } else {
-      const cardNumber = assertDefined(foundation[foundationLength - 1]);
       canPlaceOn = Rules.canPlaceOnInFoundation(cardNumber);
     }
     for (const other of canPlaceOn) {
@@ -226,14 +223,13 @@ export function getActions(gameState: GameState) {
   // Position tableau cards.
   for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
     const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
-    const tableauLength = tableau.length;
+    const cardNumber = tableau.at(-1);
     let canPlaceOn: number[];
-    if (tableauLength === 0) {
+    if (cardNumber === undefined) {
       // Empty tableau ... will take Kings
       canPlaceOn = [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
         Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
     } else {
-      const cardNumber = assertDefined(tableau[tableauLength - 1]);
       canPlaceOn = Rules.canPlaceOnInTableau(cardNumber);
     }
     for (const other of canPlaceOn) {
