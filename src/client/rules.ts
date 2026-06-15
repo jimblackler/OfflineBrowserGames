@@ -27,7 +27,7 @@ export const Rules = {
   },
   canPlaceOnInTableau(cardNumber: number | undefined) {
     if (cardNumber === undefined) {
-      // Empty tableau ... will take Kings
+      // Empty tableau ... will take Kings.
       return [Rules.getCard(0, Rules.KING_TYPE), Rules.getCard(1, Rules.KING_TYPE),
         Rules.getCard(2, Rules.KING_TYPE), Rules.getCard(3, Rules.KING_TYPE)];
     }
@@ -45,6 +45,7 @@ export const Rules = {
 
   canPlaceOnInFoundation(cardNumber: number | undefined) {
     if (cardNumber === undefined) {
+      // Empty foundation ... will take Aces.
       return [Rules.getCard(0, Rules.ACE_TYPE), Rules.getCard(1, Rules.ACE_TYPE),
           Rules.getCard(2, Rules.ACE_TYPE), Rules.getCard(3, Rules.ACE_TYPE)];
     }

@@ -196,6 +196,7 @@ export function getActions(gameState: GameState) {
     actions.add(action);
   }
 
+  // Position foundation cards.
   gameState.foundations.forEach((foundation, foundationIdx) => {
     Rules.canPlaceOnInFoundation(foundation.at(-1))
         .filter(card => movableToFoundation.has(card))
