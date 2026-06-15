@@ -46,8 +46,7 @@ export type GameState = {
 
 function remove(gameState: GameState, cardNumber: number) {
   // In tableau cards?
-  for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
-    const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
+  for (const [tableauIdx, tableau] of gameState.tableausFaceUp.entries()) {
     if (removeCard(tableau, cardNumber)) {
       // Reveal undercard if needed.
       if (tableau.length === 0) {
