@@ -168,8 +168,7 @@ export function getActions(gameState: GameState) {
     movableToFoundation.add(wasteCard);
   }
 
-  for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-    const foundation = assertDefined(gameState.foundations[foundationIdx]);
+  for (const foundation of gameState.foundations) {
     const foundationCard = foundation.at(-1);
     if (foundationCard !== undefined) {
       movableToTableau.add(foundationCard);
