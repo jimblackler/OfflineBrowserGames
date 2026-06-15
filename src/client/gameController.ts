@@ -271,11 +271,11 @@ export function createGameController(renderer: Renderer) {
         // otherwise it is proximity
         if (click) {
           // Filter actions to oldest actions.
-          let oldest = Number.MAX_VALUE;
+          let oldest = Infinity;
           let oldestActions: Action[] = [];
           for (const action of actions) {
             const actionKey = JSON.stringify(action);
-            const time = cardHistory.get(actionKey) ?? Number.MIN_VALUE;
+            const time = cardHistory.get(actionKey) ?? -Infinity;
             if (time === oldest) {
               oldestActions.push(action);
             } else if (time < oldest) {
@@ -293,7 +293,7 @@ export function createGameController(renderer: Renderer) {
             toTableau: 2,
             toFoundation: 3
           } as const;
-          let mostUseful = Number.MIN_VALUE;
+          let mostUseful = -Infinity;
           let mostUsefulActions: Action[] = [];
           for (const action of actions) {
             const useful = actionPriority[action.moveType];
@@ -311,7 +311,7 @@ export function createGameController(renderer: Renderer) {
 
         // Find closet action.
         const position = renderer.getCardPosition(cardNumber);
-        let closest = Number.MAX_VALUE;
+        let closest = Infinity;
         let closestAction: Action | undefined;
         for (const action of actions) {
           if (cards.length === 1 || action.moveType === 'toTableau') {
