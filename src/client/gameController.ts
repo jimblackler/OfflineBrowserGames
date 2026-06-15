@@ -84,35 +84,28 @@ export function createGameController(renderer: Renderer) {
     raisingCards = undefined;
 
     // Position stock cards.
-    const stockLength = gameState.stock.length;
-    for (let idx = 0; idx !== stockLength; idx++) {
-      const cardNumber = assertDefined(gameState.stock[idx]);
+    for (const cardNumber of gameState.stock) {
       renderer.faceDown(cardNumber);
       _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0);
     }
 
     // Position waste cards.
-    const wasteLength = gameState.waste.length;
-    for (let idx = 0; idx !== wasteLength; idx++) {
-      const cardNumber = assertDefined(gameState.waste[idx]);
+    for (const [idx, cardNumber] of gameState.waste.entries()) {
       renderer.faceUp(cardNumber);
-      const staggerOrder = Math.max(idx - wasteLength + gameState.rules.cardsToDraw, 0);
+      const staggerOrder = Math.max(idx - gameState.waste.length + gameState.rules.cardsToDraw, 0);
       const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
-      let position = idx - (wasteLength - Math.min(gameState.rules.cardsToDraw, wasteLength));
+      let position = idx - (gameState.waste.length - Math.min(gameState.rules.cardsToDraw, gameState.waste.length));
       if (position < 0) {
         position = 0;
       }
       _placeCard(cardNumber,
-          WASTE_X + WASTE_X_SPACING * position, WASTE_Y, idx === wasteLength - 1, delay);
+          WASTE_X + WASTE_X_SPACING * position, WASTE_Y, idx === gameState.waste.length - 1, delay);
     }
 
     // Position foundation cards.
     for (let foundationIdx = 0; foundationIdx !== NUMBER_FOUNDATIONS; foundationIdx++) {
       const foundation = assertDefined(gameState.foundations[foundationIdx]);
-      const foundationLength = foundation.length;
-
-      for (let position = 0; position < foundationLength; position++) {
-        const cardNumber = assertDefined(foundation[position]);
+      for (const cardNumber of foundation) {
         renderer.faceUp(cardNumber);
         _placeCard(cardNumber,
             FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0);
@@ -122,23 +115,18 @@ export function createGameController(renderer: Renderer) {
     // Position tableau cards.
     for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
       const tableauFaceDown = assertDefined(gameState.tableausFaceDown[tableauIdx]);
-      const faceDownLength = tableauFaceDown.length;
-      for (let position = 0; position < faceDownLength; position++) {
-        const cardNumber = assertDefined(tableauFaceDown[position]);
+      for (const [position, cardNumber] of tableauFaceDown.entries()) {
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0);
         renderer.faceDown(cardNumber);
       }
 
       const tableauFaceUp = assertDefined(gameState.tableausFaceUp[tableauIdx]);
-      const tableauLength = tableauFaceUp.length;
-
-      for (let position = 0; position < tableauLength; position++) {
-        const cardNumber = assertDefined(tableauFaceUp[position]);
+      for (const [position, cardNumber] of tableauFaceUp.entries()) {
         renderer.faceUp(cardNumber);
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
             TABLEAU_Y + TABLEAU_Y_SPACING_FACE_UP * position +
-            TABLEAU_Y_SPACING_FACE_DOWN * faceDownLength, true, 0);
+            TABLEAU_Y_SPACING_FACE_DOWN * tableauFaceDown.length, true, 0);
       }
     }
 
