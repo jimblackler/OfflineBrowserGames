@@ -42,7 +42,7 @@ export default defineConfig([
         rules: {
             '@stylistic/arrow-parens': 'off',
             '@stylistic/brace-style': ['warn', '1tbs', {allowSingleLine: true}],
-            '@stylistic/comma-dangle': 'off',
+            '@stylistic/comma-dangle': ['warn', 'never'],
             '@stylistic/indent': 'off',
             '@stylistic/indent-binary-ops': 'off',
             '@stylistic/member-delimiter-style': ['warn', {
