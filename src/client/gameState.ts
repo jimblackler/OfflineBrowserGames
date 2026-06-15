@@ -179,15 +179,13 @@ export function getActions(gameState: GameState) {
     }
   }
 
-  for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-    const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
-    const tableauLength = tableau.length;
-    for (let position = 0; position < tableauLength; position++) {
-      const cardNumber = assertDefined(tableau[position]);
+  for (const tableau of gameState.tableausFaceUp) {
+    for (const cardNumber of tableau) {
       movableToTableau.add(cardNumber);
-      if (position === tableauLength - 1) {
-        movableToFoundation.add(cardNumber);
-      }
+    }
+    const lastCard = tableau.at(-1);
+    if (lastCard !== undefined) {
+      movableToFoundation.add(lastCard);
     }
   }
 
