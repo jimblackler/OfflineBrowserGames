@@ -44,19 +44,6 @@ export type GameState = {
   foundations: number[][];
 };
 
-function _draw(gameState: GameState) {
-  if (gameState.stock.length === 0) {
-    while (gameState.waste.length > 0) {
-      gameState.stock.push(assertDefined(gameState.waste.pop()));
-    }
-  } else {
-    // X cards from stock to waste.
-    for (let idx = 0; idx !== gameState.rules.cardsToDraw && gameState.stock.length > 0; idx++) {
-      gameState.waste.push(assertDefined(gameState.stock.pop()));
-    }
-  }
-}
-
 function remove(gameState: GameState, cardNumber: number) {
   // In tableau cards?
   for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
@@ -105,25 +92,6 @@ function stackedUnder(gameState: GameState, cardNumber: number) {
   return undefined;
 }
 
-function _moveToTableau(gameState: GameState, cardNumber: number, tableauIdx: number) {
-  let movingCard: number | undefined = cardNumber;
-  const tableau = assertDefined(gameState.tableausFaceUp[tableauIdx]);
-  do {
-    const stackedOn = stackedUnder(gameState, movingCard);
-    if (remove(gameState, movingCard)) {
-      tableau.push(movingCard);
-    }
-    movingCard = stackedOn;
-  } while (movingCard !== undefined);
-}
-
-function _moveToFoundation(gameState: GameState, cardNumber: number, foundationIdx: number) {
-  if (remove(gameState, cardNumber)) {
-    const foundation = assertDefined(gameState.foundations[foundationIdx]);
-    foundation.push(cardNumber);
-  }
-}
-
 export function getStack(gameState: GameState, cardNumber: number) {
   let card: number | undefined = cardNumber;
   const cards: number[] = [];
@@ -155,16 +123,37 @@ export function newGame(rules: GameRules): GameState {
 export function execute(gameState: GameState, action: Action) {
   switch (action.moveType) {
     case 'draw':
-      _draw(gameState);
+      if (gameState.stock.length === 0) {
+        while (gameState.waste.length > 0) {
+          gameState.stock.push(assertDefined(gameState.waste.pop()));
+        }
+      } else {
+        // X cards from stock to waste.
+        for (let idx = 0; idx !== gameState.rules.cardsToDraw && gameState.stock.length > 0; idx++) {
+          gameState.waste.push(assertDefined(gameState.stock.pop()));
+        }
+      }
       break;
-    case 'toTableau':
-      _moveToTableau(gameState, action.card, action.destinationIdx);
+    case 'toTableau': {
+      let movingCard: number | undefined = action.card;
+      const tableau = assertDefined(gameState.tableausFaceUp[action.destinationIdx]);
+      do {
+        const stackedOn = stackedUnder(gameState, movingCard);
+        if (remove(gameState, movingCard)) {
+          tableau.push(movingCard);
+        }
+        movingCard = stackedOn;
+      } while (movingCard !== undefined);
       break;
+    }
     case 'toFoundation':
-      _moveToFoundation(gameState, action.card, action.destinationIdx);
+      if (remove(gameState, action.card)) {
+        const foundation = assertDefined(gameState.foundations[action.destinationIdx]);
+        foundation.push(action.card);
+      }
       break;
     default:
-      break;
+      throw Error('Unknown action move type');
   }
 }
 
