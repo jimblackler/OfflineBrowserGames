@@ -196,16 +196,15 @@ export function getActions(gameState: GameState) {
     actions.add(action);
   }
 
-  for (let foundationIdx = 0; foundationIdx !== Rules.NUMBER_FOUNDATIONS; foundationIdx++) {
-    const foundation = assertDefined(gameState.foundations[foundationIdx]);
+  gameState.foundations.forEach((foundation, foundationIdx) => {
     Rules.canPlaceOnInFoundation(foundation.at(-1))
-        .filter(other => movableToFoundation.has(other))
-        .forEach(other => addAction({
-          card: other,
+        .filter(card => movableToFoundation.has(card))
+        .forEach(card => addAction({
+          card,
           moveType: 'toFoundation',
           destinationIdx: foundationIdx
         }));
-  }
+  });
 
   // Position tableau cards.
   for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
