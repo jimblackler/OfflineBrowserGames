@@ -57,31 +57,24 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
   const cardGeometry = new THREE.BoxGeometry(CARD_WIDTH, CARD_HEIGHT, 1.5);
   const edgeMaterial = new THREE.MeshStandardMaterial({color: 0xDDDDDD, roughness: 0.5});
-  const cardMeshes: THREE.Mesh[] = [];
-  const cardMaterials: THREE.MeshStandardMaterial[][] = [];
-  const cardOrder: number[] = [];
-
-  for (let index = 0; index < NUMBER_CARDS; index++) {
-    const materials = [
-      edgeMaterial, // +X
-      edgeMaterial, // -X
-      edgeMaterial, // +Y
-      edgeMaterial, // -Y
-      new THREE.MeshStandardMaterial({color: 0xFFFFFF, roughness: 0.2}), // +Z (Front)
-      new THREE.MeshStandardMaterial({color: 0xD32F2F, roughness: 0.3})  // -Z (Back)
-    ];
-
+  const cardMaterials = Array.from({length: NUMBER_CARDS}, () => [
+    edgeMaterial, // +X
+    edgeMaterial, // -X
+    edgeMaterial, // +Y
+    edgeMaterial, // -Y
+    new THREE.MeshStandardMaterial({color: 0xFFFFFF, roughness: 0.2}), // +Z (Front)
+    new THREE.MeshStandardMaterial({color: 0xD32F2F, roughness: 0.3})  // -Z (Back)
+  ]);
+  const cardMeshes = cardMaterials.map(materials => {
     const mesh = new THREE.Mesh(cardGeometry, materials);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.rotation.y = Math.PI;
     mesh.position.set(-200, 200, 0);
-
     scene.add(mesh);
-    cardMeshes[index] = mesh;
-    cardMaterials[index] = materials;
-    cardOrder.push(index);
-  }
+    return mesh;
+  });
+  const cardOrder = Array.from({length: NUMBER_CARDS}, (_, index) => index);
 
   const draggableCards = new Uint8Array(NUMBER_CARDS);
   const placeholders: ClickablePlaceholder[] = [];
