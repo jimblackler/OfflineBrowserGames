@@ -74,15 +74,8 @@ const gears = assertNotNull(document.getElementById('gears'));
 
 gears.onmouseover = () => {
   if (menu.className !== 'visible') {
-    const undoItem = document.getElementById('undoItem');
-    if (undoItem) {
-      if (canUndo()) {
-        undoItem.style.display = 'block';
-      } else {
-        undoItem.style.display = 'none';
-      }
-    }
-
+    const undoItem = assertNotNull(document.getElementById('undoItem'));
+    undoItem.style.display = canUndo() ? 'block' : 'none';
     menu.className = 'visible';
     menuFocused = false;
   }
