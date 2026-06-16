@@ -1,21 +1,21 @@
-import * as THREE from 'three';
+import {type Object3D, type Texture, AmbientLight, BoxGeometry, DirectionalLight, DoubleSide, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera, Plane, PlaneGeometry, Raycaster, Scene, SRGBColorSpace, TextureLoader, Vector2, Vector3, WebGLRenderer} from 'three';
 import {assertDefined} from '../common/check/defined';
 import type {Renderer, DragHandler} from './renderer';
 import {getSuit, getType, NUMBER_CARDS} from './rules';
 import {BLANK_ROW, CARDBACK_COLUMN, CARD_HEIGHT, CARD_WIDTH, INDICATOR_HEIGHT, INDICATOR_WIDTH, INDICATOR_X, INDICATOR_Y, PLACEHOLDER_COLUMN, SHEET_WIDTH, SHEET_HEIGHT} from './spriteConstants';
 
 type ClickablePlaceholder = {
-  mesh: THREE.Mesh;
-  material: THREE.MeshBasicMaterial;
+  mesh: Mesh;
+  material: MeshBasicMaterial;
   onClick?(ev: MouseEvent): void;
 };
 
 export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, 1, 10, 5000);
-  const webGLRenderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+  const scene = new Scene();
+  const camera = new PerspectiveCamera(45, 1, 10, 5000);
+  const webGLRenderer = new WebGLRenderer({antialias: true, alpha: true});
   webGLRenderer.shadowMap.enabled = true;
-  webGLRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  webGLRenderer.shadowMap.type = PCFSoftShadowMap;
   webGLRenderer.setPixelRatio(window.devicePixelRatio);
 
   const {domElement: canvas} = webGLRenderer;
@@ -29,9 +29,9 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   camera.position.set(500, -550, 900);
   camera.lookAt(500, -380, 0);
 
-  scene.add(new THREE.AmbientLight(0xFFFFFF, 3));
+  scene.add(new AmbientLight(0xFFFFFF, 3));
 
-  const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 2.5);
+  const directionalLight = new DirectionalLight(0xFFFFFF, 2.5);
   directionalLight.position.set(450, -200, 800);
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 1024;
@@ -45,28 +45,28 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   directionalLight.shadow.bias = -0.001;
   scene.add(directionalLight);
 
-  const floorMaterial = new THREE.MeshStandardMaterial({
+  const floorMaterial = new MeshStandardMaterial({
     color: 0x2B7E42,
     roughness: 0.9,
     metalness: 0.1
   });
-  const floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), floorMaterial);
+  const floorMesh = new Mesh(new PlaneGeometry(3000, 3000), floorMaterial);
   floorMesh.position.set(450, -400, -2);
   floorMesh.receiveShadow = true;
   scene.add(floorMesh);
 
-  const cardGeometry = new THREE.BoxGeometry(CARD_WIDTH, CARD_HEIGHT, 1.5);
-  const edgeMaterial = new THREE.MeshStandardMaterial({color: 0xDDDDDD, roughness: 0.5});
+  const cardGeometry = new BoxGeometry(CARD_WIDTH, CARD_HEIGHT, 1.5);
+  const edgeMaterial = new MeshStandardMaterial({color: 0xDDDDDD, roughness: 0.5});
   const cardMaterials = Array.from({length: NUMBER_CARDS}, () => [
     edgeMaterial, // +X
     edgeMaterial, // -X
     edgeMaterial, // +Y
     edgeMaterial, // -Y
-    new THREE.MeshStandardMaterial({color: 0xFFFFFF, roughness: 0.2}), // +Z (Front)
-    new THREE.MeshStandardMaterial({color: 0xD32F2F, roughness: 0.3})  // -Z (Back)
+    new MeshStandardMaterial({color: 0xFFFFFF, roughness: 0.2}), // +Z (Front)
+    new MeshStandardMaterial({color: 0xD32F2F, roughness: 0.3})  // -Z (Back)
   ]);
   const cardMeshes = cardMaterials.map(materials => {
-    const mesh = new THREE.Mesh(cardGeometry, materials);
+    const mesh = new Mesh(cardGeometry, materials);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.rotation.y = Math.PI;
@@ -79,22 +79,22 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   const draggableCards = new Uint8Array(NUMBER_CARDS);
   const placeholders: ClickablePlaceholder[] = [];
 
-  const indicatorGeometry = new THREE.PlaneGeometry(INDICATOR_WIDTH, INDICATOR_HEIGHT);
-  const indicatorMaterial = new THREE.MeshBasicMaterial({
+  const indicatorGeometry = new PlaneGeometry(INDICATOR_WIDTH, INDICATOR_HEIGHT);
+  const indicatorMaterial = new MeshBasicMaterial({
     color: 0xFFFFFF,
     transparent: true,
     depthWrite: false
   });
-  const indicatorMesh = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
+  const indicatorMesh = new Mesh(indicatorGeometry, indicatorMaterial);
   indicatorMesh.visible = false;
   scene.add(indicatorMesh);
 
-  const textureLoader = new THREE.TextureLoader();
-  let textureSheet: THREE.Texture | undefined;
+  const textureLoader = new TextureLoader();
+  let textureSheet: Texture | undefined;
 
   textureLoader.load('images/cards206x286.png', texture => {
     textureSheet = texture;
-    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.colorSpace = SRGBColorSpace;
 
     cardMaterials.forEach((materials, index) => {
       const frontTexture = texture.clone();
@@ -151,11 +151,11 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   let draggingCards: number[] = [];
   let isDragging = false;
   let click = false;
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-  const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-  const dragIntersection = new THREE.Vector3();
-  const dragOffsets: THREE.Vector3[] = [];
+  const raycaster = new Raycaster();
+  const mouse = new Vector2();
+  const dragPlane = new Plane(new Vector3(0, 0, 1), 0);
+  const dragIntersection = new Vector3();
+  const dragOffsets: Vector3[] = [];
 
   const cardX = new Float32Array(NUMBER_CARDS);
   const cardY = new Float32Array(NUMBER_CARDS);
@@ -184,8 +184,8 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
     raycaster.setFromCamera(mouse, camera);
 
-    const candidates: THREE.Object3D[] = [];
-    const meshToCardMap = new Map<THREE.Object3D, number>();
+    const candidates: Object3D[] = [];
+    const meshToCardMap = new Map<Object3D, number>();
 
     for (let index = 0; index < NUMBER_CARDS; index++) {
       if (draggableCards[index]) {
@@ -232,7 +232,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       indicatorMesh.visible = false;
 
       const firstMesh = assertDefined(cardMeshes[card]);
-      dragPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1), firstMesh.position);
+      dragPlane.setFromNormalAndCoplanarPoint(new Vector3(0, 0, 1), firstMesh.position);
       raycaster.setFromCamera(mouse, camera);
       raycaster.ray.intersectPlane(dragPlane, dragIntersection);
 
@@ -322,11 +322,11 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
   return {
     placeHolder(x: number, y: number, onClick?: (event: MouseEvent) => void) {
-      const material = new THREE.MeshBasicMaterial({
+      const material = new MeshBasicMaterial({
         color: 0x228B22,
         transparent: true,
         opacity: 0.3,
-        side: THREE.DoubleSide
+        side: DoubleSide
       });
 
       if (textureSheet) {
@@ -342,8 +342,8 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
         material.opacity = 1;
       }
 
-      const placeholderGeometry = new THREE.PlaneGeometry(CARD_WIDTH, CARD_HEIGHT);
-      const mesh = new THREE.Mesh(placeholderGeometry, material);
+      const placeholderGeometry = new PlaneGeometry(CARD_WIDTH, CARD_HEIGHT);
+      const mesh = new Mesh(placeholderGeometry, material);
       mesh.position.set(x + CARD_WIDTH / 2, -(y + CARD_HEIGHT / 2), 0.1);
       mesh.receiveShadow = true;
       scene.add(mesh);
