@@ -2,14 +2,16 @@ import {assertNotNull} from '../common/check/null';
 import {createGameController} from './gameController';
 import {type GameRules, type GameState, newGame} from './gameState';
 import {restore, store} from './gameStore';
-import {createRenderer} from './renderer';
+import {createRendererDom} from './rendererDom';
+import {createThreeRenderer} from './rendererThree';
 
 let gameState: GameState;
 const gameDiv = document.getElementById('gameDiv');
 if (!gameDiv) {
   throw new Error('gameDiv not found');
 }
-const renderer = createRenderer(gameDiv);
+const urlParams = new URLSearchParams(window.location.search);
+const renderer = urlParams.has('three') ? createThreeRenderer(gameDiv) : createRendererDom(gameDiv);
 const controller = createGameController(renderer);
 renderer.setDragHandler(controller);
 

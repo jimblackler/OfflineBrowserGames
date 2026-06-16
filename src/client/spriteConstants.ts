@@ -1,0 +1,11 @@
+export const SHEET_WIDTH = 1339;
+export const SHEET_HEIGHT = 900;
+export const CARD_WIDTH = 103;
+export const CARD_HEIGHT = 143;
+export const CARDBACK_COLUMN = 0;
+export const PLACEHOLDER_COLUMN = 1;
+export const BLANK_ROW = 4;
+export const INDICATOR_WIDTH = 109;
+export const INDICATOR_HEIGHT = 149;
+export const INDICATOR_X = 1;
+export const INDICATOR_Y = 716;
