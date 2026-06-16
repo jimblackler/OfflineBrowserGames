@@ -96,9 +96,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     textureSheet = texture;
     texture.colorSpace = THREE.SRGBColorSpace;
 
-    for (let index = 0; index < NUMBER_CARDS; index++) {
-      const materials = assertDefined(cardMaterials[index]);
-
+    cardMaterials.forEach((materials, index) => {
       const frontTexture = texture.clone();
       frontTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
       frontTexture.offset.set(
@@ -122,7 +120,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       backMaterial.map = backTexture;
       backMaterial.color.set(0xFFFFFF);
       backMaterial.needsUpdate = true;
-    }
+    });
 
     const indicatorTexture = texture.clone();
     indicatorTexture.repeat.set(INDICATOR_WIDTH / SHEET_WIDTH, INDICATOR_HEIGHT / SHEET_HEIGHT);
