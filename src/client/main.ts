@@ -48,9 +48,8 @@ if (restored) {
 
 function canUndo() {
   const gamePositionStr = localStorage.getItem('gamePosition');
-  const gamePosition = gamePositionStr ? parseInt(gamePositionStr, 10) : 0;
-  return gamePosition > 1 &&
-      localStorage.getItem(`gamePosition${gamePosition - 1}`) !== null;
+  const gamePosition = Number(gamePositionStr);
+  return gamePosition > 1 && localStorage.getItem(`gamePosition${gamePosition - 1}`) !== null;
 }
 
 function undo() {
