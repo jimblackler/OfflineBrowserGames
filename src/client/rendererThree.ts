@@ -56,14 +56,30 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   scene.add(floorMesh);
 
   const cardGeometry = new BoxGeometry(CARD_WIDTH, CARD_HEIGHT, 1.5);
-  const edgeMaterial = new MeshStandardMaterial({color: 0xDDDDDD, roughness: 0.5});
-  const backMaterial = new MeshStandardMaterial({color: 0xD32F2F, roughness: 0.3});
+  const edgeMaterial = new MeshStandardMaterial({
+    color: 0x000000,
+    roughness: 0.5,
+    transparent: true,
+    opacity: 0.0,
+    depthWrite: false
+  });
+  const backMaterial = new MeshStandardMaterial({
+    color: 0xD32F2F,
+    roughness: 0.3,
+    transparent: true,
+    depthWrite: false
+  });
   const cardMaterials = Array.from({length: NUMBER_CARDS}, () => [
     edgeMaterial, // +X
     edgeMaterial, // -X
     edgeMaterial, // +Y
     edgeMaterial, // -Y
-    new MeshStandardMaterial({color: 0xFFFFFF, roughness: 0.2}), // +Z (Front)
+    new MeshStandardMaterial({
+      color: 0xFFFFFF,
+      roughness: 0.2,
+      transparent: true,
+      depthWrite: false
+    }), // +Z (Front)
     backMaterial  // -Z (Back)
   ]);
   const cardMeshes = cardMaterials.map(materials => {
@@ -95,6 +111,9 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
   textureLoader.load('images/cards206x286.png', texture => {
     texture.colorSpace = SRGBColorSpace;
+    texture.generateMipmaps = false;
+    texture.minFilter = 1003;
+    texture.magFilter = 1003;
 
     const backTexture = texture.clone();
     backTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
@@ -105,6 +124,8 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
     backMaterial.map = backTexture;
     backMaterial.color.set(0xFFFFFF);
+    backMaterial.transparent = true;
+    backMaterial.depthWrite = false;
     backMaterial.needsUpdate = true;
 
     placeholderTexture = texture.clone();
@@ -125,6 +146,8 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       const frontMaterial = assertDefined(materials[4]);
       frontMaterial.map = frontTexture;
       frontMaterial.color.set(0xFFFFFF);
+      frontMaterial.transparent = true;
+      frontMaterial.depthWrite = false;
       frontMaterial.needsUpdate = true;
     });
 
@@ -142,7 +165,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       placeholder.material.map = placeholderTexture;
       placeholder.material.color.set(0xFFFFFF);
       placeholder.material.opacity = 1;
-      placeholder.material.needsUpdate = true;
     }
   });
 
