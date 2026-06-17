@@ -151,7 +151,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   let draggingCards: number[] = [];
   let isDragging = false;
   let click = false;
-  const raycaster = new Raycaster();
   const dragPlane = new Plane(new Vector3(0, 0, 1), 0);
   const dragIntersection = new Vector3();
   const dragOffsets: Vector3[] = [];
@@ -185,6 +184,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   }
 
   function getRaycastIntersect(event: MouseEvent) {
+    const raycaster = new Raycaster();
     raycaster.setFromCamera(getMouseCoords(event), camera);
 
     const candidates: Object3D[] = [];
@@ -236,6 +236,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
       const firstMesh = assertDefined(cardMeshes[card]);
       dragPlane.setFromNormalAndCoplanarPoint(new Vector3(0, 0, 1), firstMesh.position);
+      const raycaster = new Raycaster();
       raycaster.setFromCamera(getMouseCoords(event), camera);
       raycaster.ray.intersectPlane(dragPlane, dragIntersection);
 
@@ -252,6 +253,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   function onMouseMove(event: MouseEvent) {
     if (isDragging) {
       click = false;
+      const raycaster = new Raycaster();
       raycaster.setFromCamera(getMouseCoords(event), camera);
       raycaster.ray.intersectPlane(dragPlane, dragIntersection);
 
