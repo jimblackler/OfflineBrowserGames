@@ -57,13 +57,14 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
   const cardGeometry = new BoxGeometry(CARD_WIDTH, CARD_HEIGHT, 1.5);
   const edgeMaterial = new MeshStandardMaterial({color: 0xDDDDDD, roughness: 0.5});
+  const backMaterial = new MeshStandardMaterial({color: 0xD32F2F, roughness: 0.3});
   const cardMaterials = Array.from({length: NUMBER_CARDS}, () => [
     edgeMaterial, // +X
     edgeMaterial, // -X
     edgeMaterial, // +Y
     edgeMaterial, // -Y
     new MeshStandardMaterial({color: 0xFFFFFF, roughness: 0.2}), // +Z (Front)
-    new MeshStandardMaterial({color: 0xD32F2F, roughness: 0.3})  // -Z (Back)
+    backMaterial  // -Z (Back)
   ]);
   const cardMeshes = cardMaterials.map(materials => {
     const mesh = new Mesh(cardGeometry, materials);
@@ -90,11 +91,28 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   scene.add(indicatorMesh);
 
   const textureLoader = new TextureLoader();
-  let textureSheet: Texture | undefined;
+  let placeholderTexture: Texture | undefined;
 
   textureLoader.load('images/cards206x286.png', texture => {
-    textureSheet = texture;
     texture.colorSpace = SRGBColorSpace;
+
+    const backTexture = texture.clone();
+    backTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
+    backTexture.offset.set(
+        CARD_WIDTH * CARDBACK_COLUMN / SHEET_WIDTH,
+        1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
+    backTexture.needsUpdate = true;
+
+    backMaterial.map = backTexture;
+    backMaterial.color.set(0xFFFFFF);
+    backMaterial.needsUpdate = true;
+
+    placeholderTexture = texture.clone();
+    placeholderTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
+    placeholderTexture.offset.set(
+        CARD_WIDTH * PLACEHOLDER_COLUMN / SHEET_WIDTH,
+        1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
+    placeholderTexture.needsUpdate = true;
 
     cardMaterials.forEach((materials, index) => {
       const frontTexture = texture.clone();
@@ -108,18 +126,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       frontMaterial.map = frontTexture;
       frontMaterial.color.set(0xFFFFFF);
       frontMaterial.needsUpdate = true;
-
-      const backTexture = texture.clone();
-      backTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
-      backTexture.offset.set(
-          CARD_WIDTH * CARDBACK_COLUMN / SHEET_WIDTH,
-          1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT
-      );
-      backTexture.needsUpdate = true;
-      const backMaterial = assertDefined(materials[5]);
-      backMaterial.map = backTexture;
-      backMaterial.color.set(0xFFFFFF);
-      backMaterial.needsUpdate = true;
     });
 
     const indicatorTexture = texture.clone();
@@ -133,13 +139,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     indicatorMaterial.needsUpdate = true;
 
     for (const placeholder of placeholders) {
-      const placeholderTexture = texture.clone();
-      placeholderTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
-      placeholderTexture.offset.set(
-          CARD_WIDTH * PLACEHOLDER_COLUMN / SHEET_WIDTH,
-          1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT
-      );
-      placeholderTexture.needsUpdate = true;
       placeholder.material.map = placeholderTexture;
       placeholder.material.color.set(0xFFFFFF);
       placeholder.material.opacity = 1;
@@ -163,24 +162,24 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     );
   }
 
-  const cardX = new Float32Array(NUMBER_CARDS);
-  const cardY = new Float32Array(NUMBER_CARDS);
-  const cardElevation = new Float32Array(NUMBER_CARDS);
+  const cardPositions = Array.from({length: NUMBER_CARDS}, () => ({x: 0, y: 0, elevation: 0}));
 
   function getCardPosition(cardNumber: number): [number, number, number] {
-    const x = assertDefined(cardX[cardNumber]);
-    const y = assertDefined(cardY[cardNumber]);
-    const elevation = assertDefined(cardElevation[cardNumber]);
-    return [x, y + elevation, elevation];
+    const position = assertDefined(cardPositions[cardNumber]);
+    return [position.x, position.y, position.elevation];
   }
 
   function positionCard(cardNumber: number, x: number, y: number, elevation: number) {
-    cardX[cardNumber] = x;
-    cardY[cardNumber] = y - elevation;
-    cardElevation[cardNumber] = elevation;
+    const position = assertDefined(cardPositions[cardNumber]);
+    position.x = x;
+    position.y = y;
+    position.elevation = elevation;
 
     assertDefined(cardMeshes[cardNumber]).position.set(
-        x + CARD_WIDTH / 2, -(y + CARD_HEIGHT / 2), elevation + cardOrder.indexOf(cardNumber) * 0.1);
+        x + CARD_WIDTH / 2,
+        -(y + CARD_HEIGHT / 2),
+        elevation + cardOrder.indexOf(cardNumber) * 0.1
+    );
   }
 
   function getRaycastIntersect(event: MouseEvent) {
@@ -204,19 +203,16 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       }
     }
 
-    const intersects = raycaster.intersectObjects(candidates);
-    if (intersects.length > 0) {
-      const [firstIntersect] = intersects;
-      if (firstIntersect) {
-        const {object: hitObject} = firstIntersect;
-        const cardIndex = meshToCardMap.get(hitObject);
-        if (cardIndex !== undefined) {
-          return {card: cardIndex};
-        }
-        const placeholder = placeholders.find(placeholder => placeholder.mesh === hitObject);
-        if (placeholder) {
-          return {placeholder};
-        }
+    const [firstIntersect] = raycaster.intersectObjects(candidates);
+    if (firstIntersect) {
+      const {object: hitObject} = firstIntersect;
+      const cardIndex = meshToCardMap.get(hitObject);
+      if (cardIndex !== undefined) {
+        return {card: cardIndex};
+      }
+      const placeholder = placeholders.find(placeholder => placeholder.mesh === hitObject);
+      if (placeholder) {
+        return {placeholder};
       }
     }
     return {};
@@ -263,9 +259,10 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
         const zIndex = cardOrder.indexOf(cardNumber);
         const elevation = newPosition.z - zIndex * 0.1;
-        cardX[cardNumber] = newPosition.x - CARD_WIDTH / 2;
-        cardY[cardNumber] = -newPosition.y - CARD_HEIGHT / 2 - elevation;
-        cardElevation[cardNumber] = elevation;
+        const position = assertDefined(cardPositions[cardNumber]);
+        position.x = newPosition.x - CARD_WIDTH / 2;
+        position.y = -newPosition.y - CARD_HEIGHT / 2;
+        position.elevation = elevation;
       }
     } else {
       const {card, placeholder} = getRaycastIntersect(event);
@@ -308,10 +305,8 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     const {innerWidth: width, innerHeight: height} = window;
     webGLRenderer.setSize(width, height);
 
-    const verticalHeight = 800;
     camera.fov = 45;
-    const distance = verticalHeight / 2 / Math.tan(camera.fov * Math.PI / 360);
-    camera.position.set(500, -550, distance * 0.9);
+    camera.position.set(500, -550, 400 / Math.tan(camera.fov * Math.PI / 360) * 0.9);
     camera.lookAt(500, -380, 0);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -329,15 +324,8 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
         side: DoubleSide
       });
 
-      if (textureSheet) {
-        const texture = textureSheet.clone();
-        texture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
-        texture.offset.set(
-            CARD_WIDTH * PLACEHOLDER_COLUMN / SHEET_WIDTH,
-            1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT
-        );
-        texture.needsUpdate = true;
-        material.map = texture;
+      if (placeholderTexture) {
+        material.map = placeholderTexture;
         material.color.set(0xFFFFFF);
         material.opacity = 1;
       }
