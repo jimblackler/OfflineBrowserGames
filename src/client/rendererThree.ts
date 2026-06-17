@@ -26,9 +26,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   canvas.style.height = '100%';
   gameDiv.appendChild(canvas);
 
-  camera.position.set(500, -550, 900);
-  camera.lookAt(500, -380, 0);
-
   scene.add(new AmbientLight(0xFFFFFF, 3));
 
   const directionalLight = new DirectionalLight(0xFFFFFF, 2.5);
@@ -60,7 +57,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     color: 0x000000,
     roughness: 0.5,
     transparent: true,
-    opacity: 0.0,
+    opacity: 0,
     depthWrite: false
   });
   const backMaterial = new MeshStandardMaterial({
@@ -327,8 +324,8 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     webGLRenderer.setSize(width, height);
 
     camera.fov = 45;
-    camera.position.set(500, -550, 400 / Math.tan(camera.fov * Math.PI / 360) * 0.8);
-    camera.lookAt(500, -380, 0);
+    camera.position.set(450, -500, 450 / Math.tan(camera.fov * Math.PI / 360) * 0.8);
+    camera.lookAt(460, -380, 0);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   }
