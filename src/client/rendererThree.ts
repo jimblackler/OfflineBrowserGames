@@ -152,10 +152,17 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   let isDragging = false;
   let click = false;
   const raycaster = new Raycaster();
-  const mouse = new Vector2();
   const dragPlane = new Plane(new Vector3(0, 0, 1), 0);
   const dragIntersection = new Vector3();
   const dragOffsets: Vector3[] = [];
+
+  function getMouseCoords(event: MouseEvent) {
+    const rectangle = canvas.getBoundingClientRect();
+    return new Vector2(
+        (event.clientX - rectangle.left) / rectangle.width * 2 - 1,
+        -(event.clientY - rectangle.top) / rectangle.height * 2 + 1
+    );
+  }
 
   const cardX = new Float32Array(NUMBER_CARDS);
   const cardY = new Float32Array(NUMBER_CARDS);
@@ -178,11 +185,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   }
 
   function getRaycastIntersect(event: MouseEvent) {
-    const rectangle = canvas.getBoundingClientRect();
-    mouse.x = (event.clientX - rectangle.left) / rectangle.width * 2 - 1;
-    mouse.y = -(event.clientY - rectangle.top) / rectangle.height * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
+    raycaster.setFromCamera(getMouseCoords(event), camera);
 
     const candidates: Object3D[] = [];
     const meshToCardMap = new Map<Object3D, number>();
@@ -233,7 +236,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
       const firstMesh = assertDefined(cardMeshes[card]);
       dragPlane.setFromNormalAndCoplanarPoint(new Vector3(0, 0, 1), firstMesh.position);
-      raycaster.setFromCamera(mouse, camera);
+      raycaster.setFromCamera(getMouseCoords(event), camera);
       raycaster.ray.intersectPlane(dragPlane, dragIntersection);
 
       dragOffsets.length = 0;
@@ -247,13 +250,9 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   }
 
   function onMouseMove(event: MouseEvent) {
-    const rectangle = canvas.getBoundingClientRect();
-    mouse.x = (event.clientX - rectangle.left) / rectangle.width * 2 - 1;
-    mouse.y = -(event.clientY - rectangle.top) / rectangle.height * 2 + 1;
-    raycaster.setFromCamera(mouse, camera);
-
     if (isDragging) {
       click = false;
+      raycaster.setFromCamera(getMouseCoords(event), camera);
       raycaster.ray.intersectPlane(dragPlane, dragIntersection);
 
       for (let index = 0; index < draggingCards.length; index++) {
