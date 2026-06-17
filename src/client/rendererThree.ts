@@ -228,8 +228,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     }
     const {card, placeholder} = getRaycastIntersect(event);
     if (typeof card === 'number') {
-      const cards = dragHandler.startDrag(card);
-      draggingCards = cards;
+      draggingCards = dragHandler.startDrag(card);
       isDragging = true;
       click = true;
       indicatorMesh.visible = false;
