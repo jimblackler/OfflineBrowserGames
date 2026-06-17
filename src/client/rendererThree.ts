@@ -327,7 +327,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     webGLRenderer.setSize(width, height);
 
     camera.fov = 45;
-    camera.position.set(500, -550, 400 / Math.tan(camera.fov * Math.PI / 360) * 0.9);
+    camera.position.set(500, -550, 400 / Math.tan(camera.fov * Math.PI / 360) * 0.8);
     camera.lookAt(500, -380, 0);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
