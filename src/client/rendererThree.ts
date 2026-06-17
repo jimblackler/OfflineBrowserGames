@@ -278,14 +278,12 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       for (let index = 0; index < draggingCards.length; index++) {
         const cardNumber = assertDefined(draggingCards[index]);
         const newPosition = dragIntersection.clone().add(assertDefined(dragOffsets[index]));
-        assertDefined(cardMeshes[cardNumber]).position.copy(newPosition);
-
-        const zIndex = cardOrder.indexOf(cardNumber);
-        const elevation = newPosition.z - zIndex * 0.1;
-        const position = assertDefined(cardPositions[cardNumber]);
-        position.x = newPosition.x - CARD_WIDTH / 2;
-        position.y = -newPosition.y - CARD_HEIGHT / 2;
-        position.elevation = elevation;
+        positionCard(
+            cardNumber,
+            newPosition.x - CARD_WIDTH / 2,
+            -newPosition.y - CARD_HEIGHT / 2,
+            assertDefined(cardPositions[cardNumber]).elevation
+        );
       }
     } else {
       const {card, placeholder} = getRaycastIntersect(event);
