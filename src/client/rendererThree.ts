@@ -1,4 +1,4 @@
-import {type Object3D, type Texture, AmbientLight, BoxGeometry, DirectionalLight, DoubleSide, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera, Plane, PlaneGeometry, Raycaster, Scene, SRGBColorSpace, TextureLoader, Vector2, Vector3, WebGLRenderer} from 'three';
+import {type Object3D, type Texture, AmbientLight, BoxGeometry, DirectionalLight, DoubleSide, LinearFilter, LinearMipmapLinearFilter, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera, Plane, PlaneGeometry, Raycaster, Scene, SRGBColorSpace, TextureLoader, Vector2, Vector3, WebGLRenderer} from 'three';
 import {assertDefined} from '../common/check/defined';
 import type {Renderer, DragHandler} from './renderer';
 import {getSuit, getType, NUMBER_CARDS} from './rules';
@@ -111,9 +111,10 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
   textureLoader.load('images/cards206x286.png', texture => {
     texture.colorSpace = SRGBColorSpace;
-    texture.generateMipmaps = false;
-    texture.minFilter = 1003;
-    texture.magFilter = 1003;
+    texture.generateMipmaps = true;
+    texture.minFilter = LinearMipmapLinearFilter;
+    texture.magFilter = LinearFilter;
+    texture.anisotropy = webGLRenderer.capabilities.getMaxAnisotropy();
 
     const backTexture = texture.clone();
     backTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
