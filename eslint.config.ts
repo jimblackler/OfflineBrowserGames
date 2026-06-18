@@ -12,7 +12,7 @@ export default defineConfig([
 
     eslint.configs.all,
     ...tseslint.configs.all,
-    stylistic.configs.recommended,
+    stylistic.configs.all,
 
     {
         plugins: {
@@ -40,11 +40,17 @@ export default defineConfig([
         },
 
         rules: {
+            '@stylistic/array-bracket-newline': 'off',
+            '@stylistic/array-element-newline': 'off',
             '@stylistic/arrow-parens': 'off',
             '@stylistic/brace-style': ['warn', '1tbs', {allowSingleLine: true}],
             '@stylistic/comma-dangle': ['warn', 'never'],
+            '@stylistic/dot-location': ['warn', 'property'],
             '@stylistic/indent': 'off',
             '@stylistic/indent-binary-ops': 'off',
+            '@stylistic/function-call-argument-newline': 'off',
+            '@stylistic/function-paren-newline': 'off',
+            '@stylistic/implicit-arrow-linebreak': 'off',
             '@stylistic/member-delimiter-style': ['warn', {
                 multiline: {
                     delimiter: 'semi',
@@ -56,21 +62,26 @@ export default defineConfig([
                 },
                 multilineDetection: 'brackets'
             }],
+            '@stylistic/lines-between-class-members': 'off',
+            '@stylistic/multiline-comment-style': 'off',
             '@stylistic/multiline-ternary': 'off',
             '@stylistic/no-mixed-operators': 'off',
             '@stylistic/no-multi-spaces': 'off',
             '@stylistic/no-multiple-empty-lines': 'warn',
             '@stylistic/no-trailing-spaces': 'warn',
+            '@stylistic/newline-per-chained-call': 'off',
             '@stylistic/object-curly-newline': ['warn', {
                 ImportDeclaration: 'never'
             }],
             '@stylistic/object-curly-spacing': 'off',
+            '@stylistic/object-property-newline': 'off',
             '@stylistic/operator-linebreak': 'off',
             '@stylistic/padded-blocks': 'off',
             '@stylistic/quote-props': ['warn', 'as-needed'],
-            '@stylistic/quotes': 'warn',
+            '@stylistic/quotes': ['warn', 'single', {avoidEscape: true}],
             '@stylistic/semi': 'off',
             '@stylistic/spaced-comment': 'off',
+            '@stylistic/space-before-function-paren': 'off',
             '@stylistic/type-annotation-spacing': 'warn',
             '@stylistic/yield-star-spacing': 'warn',
             '@typescript-eslint/ban-tslint-comment': 'off',
