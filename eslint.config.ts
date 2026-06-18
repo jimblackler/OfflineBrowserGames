@@ -138,6 +138,7 @@ export default defineConfig([
             '@typescript-eslint/require-await': 'warn',
             '@typescript-eslint/restrict-template-expressions': 'warn',
             '@typescript-eslint/return-await': 'warn',
+            '@typescript-eslint/sort-type-constituents': 'warn',
             '@typescript-eslint/strict-boolean-expressions': 'off',
             '@typescript-eslint/strict-void-return': 'warn',
             '@typescript-eslint/switch-exhaustiveness-check': 'warn',
