@@ -36,6 +36,7 @@ type Curve = {
   endY: number;
   flyHeight: number;
   draggable: boolean;
+  destinationUndercard?: number;
 };
 
 export function createGameController(renderer: Renderer) {
@@ -46,7 +47,8 @@ export function createGameController(renderer: Renderer) {
   let raisingCards: number[] | undefined;
   let riseStarted = 0;
 
-  function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean, delay: number) {
+  function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean, delay: number,
+                      undercard: number | undefined) {
     const timeNow = new Date().getTime();
     renderer.raiseCard(cardNumber);
     renderer.setDraggable(cardNumber, false);
@@ -70,7 +72,8 @@ export function createGameController(renderer: Renderer) {
       endX: x,
       endY: y,
       flyHeight,
-      draggable
+      draggable,
+      destinationUndercard: undercard
     });
   }
 
@@ -84,12 +87,15 @@ export function createGameController(renderer: Renderer) {
     raisingCards = undefined;
 
     // Position stock cards.
+    let undercard: number | undefined;
     for (const cardNumber of gameState.stock) {
       renderer.faceDown(cardNumber);
-      _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0);
+      _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0, undercard);
+      undercard = cardNumber;
     }
 
     // Position waste cards.
+    undercard = undefined;
     for (const [idx, cardNumber] of gameState.waste.entries()) {
       renderer.faceUp(cardNumber);
       const staggerOrder = Math.max(idx - gameState.waste.length + gameState.rules.cardsToDraw, 0);
@@ -98,26 +104,31 @@ export function createGameController(renderer: Renderer) {
       if (position < 0) {
         position = 0;
       }
-      _placeCard(cardNumber,
-          WASTE_X + WASTE_X_SPACING * position, WASTE_Y, idx === gameState.waste.length - 1, delay);
+      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y,
+          idx === gameState.waste.length - 1, delay, undercard);
+      undercard = cardNumber;
     }
 
     // Position foundation cards.
     gameState.foundations.forEach((foundation, foundationIdx) => {
+      undercard = undefined;
       for (const cardNumber of foundation) {
         renderer.faceUp(cardNumber);
         _placeCard(cardNumber,
-            FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0);
+            FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0, undercard);
+        undercard = cardNumber;
       }
     });
 
     // Position tableau cards.
     gameState.tableausFaceDown.forEach((tableauFaceDown, tableauIdx) => {
+      undercard = undefined;
       const tableauX = TABLEAU_X + TABLEAU_X_SPACING * tableauIdx;
       for (const [position, cardNumber] of tableauFaceDown.entries()) {
         _placeCard(cardNumber, tableauX,
-            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0);
+            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0, undercard);
         renderer.faceDown(cardNumber);
+        undercard = cardNumber;
       }
 
       const tableauFaceUp = assertDefined(gameState.tableausFaceUp[tableauIdx]);
@@ -125,7 +136,8 @@ export function createGameController(renderer: Renderer) {
       for (const [position, cardNumber] of tableauFaceUp.entries()) {
         renderer.faceUp(cardNumber);
         _placeCard(cardNumber, tableauX,
-            TABLEAU_Y + faceDownOffset + TABLEAU_Y_SPACING_FACE_UP * position, true, 0);
+            TABLEAU_Y + faceDownOffset + TABLEAU_Y_SPACING_FACE_UP * position, true, 0, undercard);
+        undercard = cardNumber;
       }
     });
 
