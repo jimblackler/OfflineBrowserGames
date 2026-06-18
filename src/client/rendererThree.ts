@@ -334,7 +334,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   resize();
 
   return {
-    placeHolder(x: number, y: number, onClick?: (event: MouseEvent) => void) {
+    placeHolder(x, y, onClick) {
       const material = new MeshBasicMaterial({
         color: 0x228B22,
         transparent: true,
@@ -361,21 +361,21 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       indicatorMesh.visible = false;
     },
 
-    faceDown(cardNumber: number) {
+    faceDown(cardNumber) {
       const mesh = assertDefined(cardMeshes[cardNumber]);
       mesh.rotation.y = Math.PI;
     },
 
-    faceUp(cardNumber: number) {
+    faceUp(cardNumber) {
       const mesh = assertDefined(cardMeshes[cardNumber]);
       mesh.rotation.y = 0;
     },
 
-    setDraggable(cardNumber: number, draggable: boolean) {
+    setDraggable(cardNumber, draggable) {
       draggableCards[cardNumber] = draggable ? 1 : 0;
     },
 
-    raiseCard(cardNumber: number) {
+    raiseCard(cardNumber) {
       const positionIndex = cardOrder.indexOf(cardNumber);
       if (positionIndex > -1) {
         cardOrder.splice(positionIndex, 1);
@@ -386,7 +386,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     getCardPosition,
     positionCard,
 
-    setDragHandler(handler: DragHandler) {
+    setDragHandler(handler) {
       dragHandler = handler;
     }
   };
