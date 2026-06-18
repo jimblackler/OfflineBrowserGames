@@ -33,7 +33,7 @@ type ToFoundationAction = {
   destinationIdx: number;
 };
 
-export type Action = DrawAction | ToTableauAction | ToFoundationAction;
+export type Action = DrawAction | ToFoundationAction | ToTableauAction;
 
 export type GameState = {
   stock: number[];
@@ -182,7 +182,7 @@ export function getActions(gameState: GameState) {
     }
   }
 
-  function addAction(action: ToTableauAction | ToFoundationAction) {
+  function addAction(action: ToFoundationAction | ToTableauAction) {
     const {card} = action;
     let actions = actionsFor.get(card);
     if (!actions) {
