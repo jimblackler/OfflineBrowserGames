@@ -6,8 +6,7 @@ export type DragHandler = {
 export type Renderer = {
   placeHolder(x: number, y: number, onClick?: (ev: MouseEvent) => void): void;
   hideIndicator(): void;
-  faceDown(cardNumber: number): void;
-  faceUp(cardNumber: number): void;
+  setFaceUp(cardNumber: number, faceUp: boolean): void;
   setDraggable(cardNumber: number, draggable: boolean): void;
   raiseCard(cardNumber: number): void;
   getCardPosition(cardNumber: number): [number, number, number];

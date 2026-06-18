@@ -137,17 +137,16 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
 
     hideIndicator,
 
-    faceDown(cardNumber) {
+    setFaceUp(cardNumber, faceUp) {
       const cardImage = assertDefined(cardImages[cardNumber]);
-      cardImage.style.backgroundPosition =
-          `${CARD_WIDTH * CARDBACK_COLUMN}px -${CARD_HEIGHT * BLANK_ROW}px`;
-    },
-
-    faceUp(cardNumber) {
-      const suit = getSuit(cardNumber);
-      const type = getType(cardNumber);
-      const cardImage = assertDefined(cardImages[cardNumber]);
-      cardImage.style.backgroundPosition = `-${CARD_WIDTH * type}px -${CARD_HEIGHT * suit}px`;
+      if (faceUp) {
+        const suit = getSuit(cardNumber);
+        const type = getType(cardNumber);
+        cardImage.style.backgroundPosition = `-${CARD_WIDTH * type}px -${CARD_HEIGHT * suit}px`;
+      } else {
+        cardImage.style.backgroundPosition =
+            `${CARD_WIDTH * CARDBACK_COLUMN}px -${CARD_HEIGHT * BLANK_ROW}px`;
+      }
     },
 
     setDraggable(cardNumber, draggable) {

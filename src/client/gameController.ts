@@ -89,7 +89,7 @@ export function createGameController(renderer: Renderer) {
     // Position stock cards.
     let undercard: number | undefined;
     for (const cardNumber of gameState.stock) {
-      renderer.faceDown(cardNumber);
+      renderer.setFaceUp(cardNumber, false);
       _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0, undercard);
       undercard = cardNumber;
     }
@@ -97,7 +97,7 @@ export function createGameController(renderer: Renderer) {
     // Position waste cards.
     undercard = undefined;
     for (const [idx, cardNumber] of gameState.waste.entries()) {
-      renderer.faceUp(cardNumber);
+      renderer.setFaceUp(cardNumber, true);
       const staggerOrder = Math.max(idx - gameState.waste.length + gameState.rules.cardsToDraw, 0);
       const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
       let position = idx - (gameState.waste.length - Math.min(gameState.rules.cardsToDraw, gameState.waste.length));
@@ -113,7 +113,7 @@ export function createGameController(renderer: Renderer) {
     gameState.foundations.forEach((foundation, foundationIdx) => {
       undercard = undefined;
       for (const cardNumber of foundation) {
-        renderer.faceUp(cardNumber);
+        renderer.setFaceUp(cardNumber, true);
         _placeCard(cardNumber,
             FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0, undercard);
         undercard = cardNumber;
@@ -127,14 +127,14 @@ export function createGameController(renderer: Renderer) {
       for (const [position, cardNumber] of tableauFaceDown.entries()) {
         _placeCard(cardNumber, tableauX,
             TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0, undercard);
-        renderer.faceDown(cardNumber);
+        renderer.setFaceUp(cardNumber, false);
         undercard = cardNumber;
       }
 
       const tableauFaceUp = assertDefined(gameState.tableausFaceUp[tableauIdx]);
       const faceDownOffset = TABLEAU_Y_SPACING_FACE_DOWN * tableauFaceDown.length;
       for (const [position, cardNumber] of tableauFaceUp.entries()) {
-        renderer.faceUp(cardNumber);
+        renderer.setFaceUp(cardNumber, true);
         _placeCard(cardNumber, tableauX,
             TABLEAU_Y + faceDownOffset + TABLEAU_Y_SPACING_FACE_UP * position, true, 0, undercard);
         undercard = cardNumber;
@@ -190,7 +190,7 @@ export function createGameController(renderer: Renderer) {
   }
 
   for (let idx = 0; idx !== NUMBER_CARDS; idx++) {
-    renderer.faceDown(idx);
+    renderer.setFaceUp(idx, false);
   }
 
   // Placeholder; stock

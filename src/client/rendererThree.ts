@@ -361,14 +361,9 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       indicatorMesh.visible = false;
     },
 
-    faceDown(cardNumber) {
+    setFaceUp(cardNumber, faceUp) {
       const mesh = assertDefined(cardMeshes[cardNumber]);
-      mesh.rotation.y = Math.PI;
-    },
-
-    faceUp(cardNumber) {
-      const mesh = assertDefined(cardMeshes[cardNumber]);
-      mesh.rotation.y = 0;
+      mesh.rotation.y = faceUp ? 0 : Math.PI;
     },
 
     setDraggable(cardNumber, draggable) {
