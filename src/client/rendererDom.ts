@@ -120,7 +120,7 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
   }
 
   return {
-    placeHolder(x: number, y: number, onClick?: (ev: MouseEvent) => void) {
+    placeHolder(x, y, onClick) {
       const image = document.createElement('span');
       image.style.width = `${CARD_WIDTH}px`;
       image.style.height = `${CARD_HEIGHT}px`;
@@ -137,20 +137,20 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
 
     hideIndicator,
 
-    faceDown(cardNumber: number) {
+    faceDown(cardNumber) {
       const cardImage = assertDefined(cardImages[cardNumber]);
       cardImage.style.backgroundPosition =
           `${CARD_WIDTH * CARDBACK_COLUMN}px -${CARD_HEIGHT * BLANK_ROW}px`;
     },
 
-    faceUp(cardNumber: number) {
+    faceUp(cardNumber) {
       const suit = getSuit(cardNumber);
       const type = getType(cardNumber);
       const cardImage = assertDefined(cardImages[cardNumber]);
       cardImage.style.backgroundPosition = `-${CARD_WIDTH * type}px -${CARD_HEIGHT * suit}px`;
     },
 
-    setDraggable(cardNumber: number, draggable: boolean) {
+    setDraggable(cardNumber, draggable) {
       const cardImage = assertDefined(cardImages[cardNumber]);
       if (draggable) {
         _setClickable(cardImage, () => {
@@ -168,7 +168,7 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
       }
     },
 
-    raiseCard(cardNumber: number) {
+    raiseCard(cardNumber) {
       const cardImage = assertDefined(cardImages[cardNumber]);
       cardsDiv.removeChild(cardImage);
       cardsDiv.appendChild(cardImage);
@@ -177,7 +177,7 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
     getCardPosition,
     positionCard,
 
-    setDragHandler(handler: DragHandler) {
+    setDragHandler(handler) {
       dragHandler = handler;
     }
   };
