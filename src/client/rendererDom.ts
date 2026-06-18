@@ -135,8 +135,6 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
       placeholdersDiv.appendChild(image);
     },
 
-    hideIndicator,
-
     setFaceUp(cardNumber, faceUp) {
       const cardImage = assertDefined(cardImages[cardNumber]);
       if (faceUp) {

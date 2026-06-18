@@ -357,10 +357,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       placeholders.push({mesh, onClick, material});
     },
 
-    hideIndicator() {
-      indicatorMesh.visible = false;
-    },
-
     setFaceUp(cardNumber, faceUp) {
       const mesh = assertDefined(cardMeshes[cardNumber]);
       mesh.rotation.y = faceUp ? 0 : Math.PI;
