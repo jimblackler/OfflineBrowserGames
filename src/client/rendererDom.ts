@@ -8,7 +8,7 @@ const INDICATOR_OFFSET_Y = -3;
 
 export function createRendererDom(gameDiv: HTMLElement): Renderer {
   const cardImages: HTMLSpanElement[] = [];
-  const cardVPos: number[] = [];
+  const cardZPos: number[] = [];
   const placeholdersDiv = document.createElement('div');
   gameDiv.appendChild(placeholdersDiv);
   const cardsDiv = document.createElement('div');
@@ -22,22 +22,22 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
 
   function getCardPosition(cardNumber: number): [number, number, number] {
     const cardImage = assertDefined(cardImages[cardNumber]);
-    const vPos = assertDefined(cardVPos[cardNumber]);
-    return [cardImage.offsetLeft, cardImage.offsetTop + vPos, vPos];
+    const zPos = assertDefined(cardZPos[cardNumber]);
+    return [cardImage.offsetLeft, cardImage.offsetTop + zPos, zPos];
   }
 
-  function positionCard(cardNumber: number, x: number, y: number, v: number) {
+  function positionCard(cardNumber: number, x: number, y: number, z: number) {
     const cardImage = assertDefined(cardImages[cardNumber]);
-    cardVPos[cardNumber] = v;
+    cardZPos[cardNumber] = z;
     cardImage.style.left = `${x}px`;
-    cardImage.style.top = `${y - v}px`;
-    if (v) {
+    cardImage.style.top = `${y - z}px`;
+    if (z) {
       if (!cardImage.style.boxShadow) {
         activeShadows++;
       }
       cardImage.style.boxShadow =
-          `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, ${0.4 / activeShadows}) 4px ${v}px 5px`;
-      cardImage.style.zIndex = String(v);
+          `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, ${0.4 / activeShadows}) 4px ${z}px 5px`;
+      cardImage.style.zIndex = String(z);
     } else {
       if (cardImage.style.boxShadow) {
         activeShadows--;
@@ -54,7 +54,7 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
     cardImage.style.pointerEvents = 'none';
     cardImage.className = 'card';
     cardImages[idx] = cardImage;
-    cardVPos[idx] = 0;
+    cardZPos[idx] = 0;
     cardsDiv.appendChild(cardImage);
   }
 

@@ -221,18 +221,18 @@ export function createGameController(renderer: Renderer) {
         curves.delete(k);
       } else {
         const multiplier1 = Math.sin(t * Math.PI / 2);
-        let v;
+        let z;
 
         if (curve.start[2] < curve.flyHeight) {
           const start = Math.PI - Math.asin(curve.start[2] / curve.flyHeight);
           const a = tInRange(start, 0, t);
-          v = Math.sin(a) * curve.flyHeight;
+          z = Math.sin(a) * curve.flyHeight;
         } else {
-          v = curve.start[2] * (1 - t);
+          z = curve.start[2] * (1 - t);
         }
 
         renderer.positionCard(k, tInRange(curve.start[0], curve.endX, multiplier1),
-            tInRange(curve.start[1], curve.endY, multiplier1), v);
+            tInRange(curve.start[1], curve.endY, multiplier1), z);
       }
     }
     if (raisingCards) {
