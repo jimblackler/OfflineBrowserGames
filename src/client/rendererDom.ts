@@ -37,7 +37,7 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
       }
       cardImage.style.boxShadow =
           `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, ${0.4 / activeShadows}) 4px ${v}px 5px`;
-      cardImage.style.zIndex = '1';
+      cardImage.style.zIndex = String(v);
     } else {
       if (cardImage.style.boxShadow) {
         activeShadows--;
@@ -163,12 +163,6 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
         cardImage.onmouseup = null;
         cardImage.style.pointerEvents = 'none';
       }
-    },
-
-    raiseCard(cardNumber) {
-      const cardImage = assertDefined(cardImages[cardNumber]);
-      cardsDiv.removeChild(cardImage);
-      cardsDiv.appendChild(cardImage);
     },
 
     getCardPosition,

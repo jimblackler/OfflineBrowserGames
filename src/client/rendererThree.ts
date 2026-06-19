@@ -88,8 +88,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     scene.add(mesh);
     return mesh;
   });
-  const cardOrder = Array.from({length: NUMBER_CARDS}, (_, index) => index);
-
   const draggableCards = new Uint8Array(NUMBER_CARDS);
   const placeholders: ClickablePlaceholder[] = [];
 
@@ -198,7 +196,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     assertDefined(cardMeshes[cardNumber]).position.set(
         x + CARD_WIDTH / 2,
         -(y + CARD_HEIGHT / 2),
-        elevation + cardOrder.indexOf(cardNumber) * 0.1
+        elevation
     );
   }
 
@@ -364,14 +362,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
     setDraggable(cardNumber, draggable) {
       draggableCards[cardNumber] = draggable ? 1 : 0;
-    },
-
-    raiseCard(cardNumber) {
-      const positionIndex = cardOrder.indexOf(cardNumber);
-      if (positionIndex > -1) {
-        cardOrder.splice(positionIndex, 1);
-        cardOrder.push(cardNumber);
-      }
     },
 
     getCardPosition,

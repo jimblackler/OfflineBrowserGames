@@ -56,7 +56,6 @@ export function createGameController(renderer: Renderer) {
     }
 
     const timeNow = new Date().getTime();
-    renderer.raiseCard(cardNumber);
     renderer.setDraggable(cardNumber, false);
 
     const deltaX = position[0] - x;
