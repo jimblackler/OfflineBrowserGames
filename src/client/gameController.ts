@@ -34,6 +34,7 @@ type Curve = {
   start: [number, number, number];
   endX: number;
   endY: number;
+  endZ: number;
   flyHeight: number;
   draggable: boolean;
   destinationUndercard?: number;
@@ -47,10 +48,10 @@ export function createGameController(renderer: Renderer) {
   let raisingCards: number[] | undefined;
   let riseStarted = 0;
 
-  function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean, delay: number,
+  function _placeCard(cardNumber: number, x: number, y: number, z: number, draggable: boolean, delay: number,
                       undercard: number | undefined) {
     const position = renderer.getCardPosition(cardNumber);
-    if (position[0] === x && position[1] === y && position[2] === 0) {
+    if (position[0] === x && position[1] === y && position[2] === z) {
       renderer.setDraggable(cardNumber, draggable);
       return;
     }
@@ -74,6 +75,7 @@ export function createGameController(renderer: Renderer) {
       start: position,
       endX: x,
       endY: y,
+      endZ: z,
       flyHeight,
       draggable,
       destinationUndercard: undercard
@@ -83,7 +85,7 @@ export function createGameController(renderer: Renderer) {
   function render() {
     // Stop all animations immediately
     for (const [k, curve] of curves) {
-      renderer.positionCard(k, curve.endX, curve.endY, 0);
+      renderer.positionCard(k, curve.endX, curve.endY, curve.endZ);
       curves.delete(k);
     }
 
@@ -93,7 +95,7 @@ export function createGameController(renderer: Renderer) {
     let undercard: number | undefined;
     for (const cardNumber of gameState.stock) {
       renderer.setFaceUp(cardNumber, false);
-      _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0, undercard);
+      _placeCard(cardNumber, STOCK_X, STOCK_Y, 0, false, 0, undercard);
       undercard = cardNumber;
     }
 
@@ -105,7 +107,7 @@ export function createGameController(renderer: Renderer) {
       const staggerOrder = Math.max(idx - gameState.waste.length + gameState.rules.cardsToDraw, 0);
       const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
       const position = Math.max(0, idx + wasteCardsVisible - gameState.waste.length);
-      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y,
+      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, 0,
           idx === gameState.waste.length - 1, delay, undercard);
       undercard = cardNumber;
     }
@@ -116,7 +118,7 @@ export function createGameController(renderer: Renderer) {
       for (const cardNumber of foundation) {
         renderer.setFaceUp(cardNumber, true);
         _placeCard(cardNumber,
-            FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0, undercard);
+            FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, 0, true, 0, undercard);
         undercard = cardNumber;
       }
     });
@@ -127,7 +129,7 @@ export function createGameController(renderer: Renderer) {
       const tableauX = TABLEAU_X + TABLEAU_X_SPACING * tableauIdx;
       for (const [position, cardNumber] of tableauFaceDown.entries()) {
         _placeCard(cardNumber, tableauX,
-            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0, undercard);
+            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, 0, false, 0, undercard);
         renderer.setFaceUp(cardNumber, false);
         undercard = cardNumber;
       }
@@ -137,7 +139,7 @@ export function createGameController(renderer: Renderer) {
       for (const [position, cardNumber] of tableauFaceUp.entries()) {
         renderer.setFaceUp(cardNumber, true);
         _placeCard(cardNumber, tableauX,
-            TABLEAU_Y + faceDownOffset + TABLEAU_Y_SPACING_FACE_UP * position, true, 0, undercard);
+            TABLEAU_Y + faceDownOffset + TABLEAU_Y_SPACING_FACE_UP * position, 0, true, 0, undercard);
         undercard = cardNumber;
       }
     });
@@ -216,23 +218,15 @@ export function createGameController(renderer: Renderer) {
       }
       const t = toT(curve.startTime, curve.endTime, timeNow);
       if (t > 1) {
-        renderer.positionCard(k, curve.endX, curve.endY, 0);
+        renderer.positionCard(k, curve.endX, curve.endY, curve.endZ);
         renderer.setDraggable(k, curve.draggable);
         curves.delete(k);
       } else {
-        const multiplier1 = Math.sin(t * Math.PI / 2);
-        let z;
-
-        if (curve.start[2] < curve.flyHeight) {
-          const start = Math.PI - Math.asin(curve.start[2] / curve.flyHeight);
-          const a = tInRange(start, 0, t);
-          z = Math.sin(a) * curve.flyHeight;
-        } else {
-          z = curve.start[2] * (1 - t);
-        }
-
-        renderer.positionCard(k, tInRange(curve.start[0], curve.endX, multiplier1),
-            tInRange(curve.start[1], curve.endY, multiplier1), z);
+        const multiplier = Math.sin(t * Math.PI / 2);
+        renderer.positionCard(k, tInRange(curve.start[0], curve.endX, multiplier),
+            tInRange(curve.start[1], curve.endY, multiplier),
+            tInRange(curve.start[2], curve.endZ, multiplier) +
+            Math.sin(t * Math.PI) * curve.flyHeight);
       }
     }
     if (raisingCards) {
