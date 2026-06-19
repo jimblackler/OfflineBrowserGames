@@ -49,11 +49,15 @@ export function createGameController(renderer: Renderer) {
 
   function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean, delay: number,
                       undercard: number | undefined) {
+    const position = renderer.getCardPosition(cardNumber);
+    if (position[0] === x && position[1] === y && position[2] === 0) {
+      renderer.setDraggable(cardNumber, draggable);
+      return;
+    }
+
     const timeNow = new Date().getTime();
     renderer.raiseCard(cardNumber);
     renderer.setDraggable(cardNumber, false);
-
-    const position = renderer.getCardPosition(cardNumber);
 
     const deltaX = position[0] - x;
     const deltaY = position[1] - y;
