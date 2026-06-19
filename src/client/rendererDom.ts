@@ -37,7 +37,7 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
       }
       cardImage.style.boxShadow =
           `rgba(0, 0, 0, 0.497656) 0 0 12px inset, rgba(0, 0, 0, ${0.4 / activeShadows}) 4px ${z}px 5px`;
-      cardImage.style.zIndex = String(z);
+      cardImage.style.zIndex = String(Math.floor(z * 100));
     } else {
       if (cardImage.style.boxShadow) {
         activeShadows--;

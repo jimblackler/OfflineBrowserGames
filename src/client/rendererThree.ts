@@ -12,7 +12,7 @@ type ClickablePlaceholder = {
 
 export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   const scene = new Scene();
-  const camera = new PerspectiveCamera(45, 1, 10, 5000);
+  const camera = new PerspectiveCamera(45, 1, 100, 5000);
   const webGLRenderer = new WebGLRenderer({antialias: true, alpha: true});
   webGLRenderer.shadowMap.enabled = true;
   webGLRenderer.shadowMap.type = PCFSoftShadowMap;
@@ -321,7 +321,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     const {innerWidth: width, innerHeight: height} = window;
     webGLRenderer.setSize(width, height);
 
-    camera.fov = 45;
     camera.position.set(450, -500, 450 / Math.tan(camera.fov * Math.PI / 360) * 0.8);
     camera.lookAt(460, -380, 0);
     camera.aspect = width / height;
