@@ -212,18 +212,18 @@ export function createGameController(renderer: Renderer) {
   function _animate() {
     requestAnimationFrame(() => _animate());
     const timeNow = new Date().getTime();
-    for (const [k, curve] of curves) {
+    for (const [card, curve] of curves) {
       if (timeNow < curve.startTime) {
         continue;
       }
       const t = toT(curve.startTime, curve.endTime, timeNow);
       if (t > 1) {
-        renderer.positionCard(k, curve.endX, curve.endY, curve.endZ);
-        renderer.setDraggable(k, curve.draggable);
-        curves.delete(k);
+        renderer.positionCard(card, curve.endX, curve.endY, curve.endZ);
+        renderer.setDraggable(card, curve.draggable);
+        curves.delete(card);
       } else {
         const multiplier = Math.sin(t * Math.PI / 2);
-        renderer.positionCard(k, tInRange(curve.start[0], curve.endX, multiplier),
+        renderer.positionCard(card, tInRange(curve.start[0], curve.endX, multiplier),
             tInRange(curve.start[1], curve.endY, multiplier),
             tInRange(curve.start[2], curve.endZ, multiplier) +
             Math.sin(t * Math.PI) * curve.flyHeight);
