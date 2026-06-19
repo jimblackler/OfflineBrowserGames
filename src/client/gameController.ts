@@ -99,15 +99,13 @@ export function createGameController(renderer: Renderer) {
     }
 
     // Position waste cards.
+    const wasteCardsVisible = Math.min(gameState.rules.cardsToDraw, gameState.waste.length);
     undercard = undefined;
     for (const [idx, cardNumber] of gameState.waste.entries()) {
       renderer.setFaceUp(cardNumber, true);
       const staggerOrder = Math.max(idx - gameState.waste.length + gameState.rules.cardsToDraw, 0);
       const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
-      let position = idx - (gameState.waste.length - Math.min(gameState.rules.cardsToDraw, gameState.waste.length));
-      if (position < 0) {
-        position = 0;
-      }
+      const position = Math.max(0, idx + wasteCardsVisible - gameState.waste.length);
       _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y,
           idx === gameState.waste.length - 1, delay, undercard);
       undercard = cardNumber;
