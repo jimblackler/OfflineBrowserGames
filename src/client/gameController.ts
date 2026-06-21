@@ -25,7 +25,7 @@ const ANIMATION_TIME = 400;
 const ANIMATION_DISTANCE_MAX = 800;
 const ANIMATION_TIME_SUPPLEMENT = 125;
 const WASTE_DRAW_STAGGER = 20;
-const ANIMATION_TEST_SLOWDOWN = 1;
+
 const FLY_HEIGHT = 50;
 const FLY_DISTANCE_MAX = 800;
 
@@ -45,9 +45,9 @@ export function createGameController(renderer: Renderer) {
   const curves = new Map<number, Curve>();
   let lastCardMoved = -1;
   let cardHistory = new Map<string, number>();
-  const raisingCards = new Map<number, [number, number, number]>();
   let riseStarted = Infinity;
-  const undercards = new Map<number, number>();
+
+
   const cardPositions: [number, number, number][] = Array.from({length: NUMBER_CARDS}, () => [0, 0, 0]);
   let draggingCards: number[] = [];
   const dragStartPositions = new Map<number, [number, number, number]>();
@@ -57,39 +57,26 @@ export function createGameController(renderer: Renderer) {
     renderer.positionCard(cardNumber, x, y, z);
   }
 
-  function getZ(cardNumber: number) {
-    let z = 0;
-    while (cardNumber !== -1) {
-      cardNumber = assertDefined(undercards.get(cardNumber));
-      z += CARD_HEIGHT;
-    }
-    return z;
-  }
-
   const previouslySet = new Map<number, string>();
 
   function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean, delay: number,
-                      undercard: number) {
-    const digest = JSON.stringify({x, y, delay, undercard});
-    const previouslySet0 = previouslySet.get(cardNumber);
-    if (previouslySet0 === digest) {
+                      z: number) {
+    const digest = JSON.stringify({x, y, delay, z});
+    if (previouslySet.get(cardNumber) === digest) {
       renderer.setDraggable(cardNumber, draggable);
       return;
     }
     previouslySet.set(cardNumber, digest);
-    undercards.set(cardNumber, undercard);
-    const z = getZ(cardNumber);
     const position = assertDefined(cardPositions[cardNumber]);
     const timeNow = Date.now();
     renderer.setDraggable(cardNumber, false);
 
-    const deltaX = position[0] - x;
-    const deltaY = position[1] - y;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const distance = Math.sqrt((position[0] - x) ** 2 + (position[1] - y) ** 2);
     const flyHeight = FLY_HEIGHT * Math.min(distance, FLY_DISTANCE_MAX) / FLY_DISTANCE_MAX;
 
-    const animationTime = ANIMATION_TEST_SLOWDOWN *
-        (ANIMATION_TIME * Math.min(distance, ANIMATION_DISTANCE_MAX) / ANIMATION_DISTANCE_MAX + ANIMATION_TIME_SUPPLEMENT);
+    const animationTime = ANIMATION_TIME * Math.min(distance, ANIMATION_DISTANCE_MAX) /
+            ANIMATION_DISTANCE_MAX +
+        ANIMATION_TIME_SUPPLEMENT;
 
     curves.set(cardNumber, {
       startTime: timeNow + delay,
@@ -111,69 +98,62 @@ export function createGameController(renderer: Renderer) {
     curves.clear();
 
     // Position stock cards.
-    let undercard = -1;
+    let depth = 0;
     for (const cardNumber of gameState.stock) {
       renderer.setFaceUp(cardNumber, false);
-      _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0, undercard);
-      undercard = cardNumber;
+      depth++;
+      _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0, depth * CARD_HEIGHT);
     }
 
     // Position waste cards.
     const wasteCardsVisible = Math.min(gameState.rules.cardsToDraw, gameState.waste.length);
-    undercard = -1;
+    depth = 0;
     for (const [idx, cardNumber] of gameState.waste.entries()) {
       renderer.setFaceUp(cardNumber, true);
       const staggerOrder = Math.max(idx - gameState.waste.length + gameState.rules.cardsToDraw, 0);
-      const delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
+      const delay = staggerOrder * WASTE_DRAW_STAGGER;
       const position = Math.max(0, idx + wasteCardsVisible - gameState.waste.length);
+      depth++;
       _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y,
-          idx === gameState.waste.length - 1, delay, undercard);
-      undercard = cardNumber;
+          idx === gameState.waste.length - 1, delay, depth * CARD_HEIGHT);
     }
 
     // Position foundation cards.
     gameState.foundations.forEach((foundation, foundationIdx) => {
-      undercard = -1;
+      depth = 0;
       for (const cardNumber of foundation) {
         renderer.setFaceUp(cardNumber, true);
+        depth++;
         _placeCard(cardNumber,
-            FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0, undercard);
-        undercard = cardNumber;
+            FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0, depth * CARD_HEIGHT);
       }
     });
 
     // Position tableau cards.
     gameState.tableausFaceDown.forEach((tableauFaceDown, tableauIdx) => {
-      undercard = -1;
+      depth = 0;
       const tableauX = TABLEAU_X + TABLEAU_X_SPACING * tableauIdx;
       for (const [position, cardNumber] of tableauFaceDown.entries()) {
+        depth++;
         _placeCard(cardNumber, tableauX,
-            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0, undercard);
+            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0, depth * CARD_HEIGHT);
         renderer.setFaceUp(cardNumber, false);
-        undercard = cardNumber;
       }
 
       const tableauFaceUp = assertDefined(gameState.tableausFaceUp[tableauIdx]);
       for (const [position, cardNumber] of tableauFaceUp.entries()) {
         renderer.setFaceUp(cardNumber, true);
+        depth++;
         _placeCard(cardNumber, tableauX,
             TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * tableauFaceDown.length +
-            TABLEAU_Y_SPACING_FACE_UP * position, true, 0, undercard);
-        undercard = cardNumber;
+            TABLEAU_Y_SPACING_FACE_UP * position, true, 0, depth * CARD_HEIGHT);
       }
     });
 
     // Auto play
     if (gameState.stock.length === 0 && gameState.waste.length === 0) {
       const actionsFor = getActions(gameState);
-      let anyFaceDown = false;
-      for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
-        const tableau = assertDefined(gameState.tableausFaceDown[tableauIdx]);
-        if (tableau.length > 0) {
-          anyFaceDown = true;
-          break;
-        }
-      }
+      const anyFaceDown = gameState.tableausFaceDown.some((t) => t.length > 0);
       if (!anyFaceDown) {
         window.setTimeout(() => {
           for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
@@ -252,9 +232,10 @@ export function createGameController(renderer: Renderer) {
       if (t === 1) {
         riseStarted = Infinity;
       }
-      for (const [cardNumber, [, , z]] of raisingCards) {
+      for (const cardNumber of draggingCards) {
+        const startPos = assertDefined(dragStartPositions.get(cardNumber));
         const currentPos = assertDefined(cardPositions[cardNumber]);
-        setPosition(cardNumber, currentPos[0], currentPos[1], z + RAISE_HEIGHT * t);
+        setPosition(cardNumber, currentPos[0], currentPos[1], startPos[2] + RAISE_HEIGHT * t);
       }
     }
   }
@@ -271,13 +252,11 @@ export function createGameController(renderer: Renderer) {
     startDrag(card: number) {
       const cards = getStack(gameState, card);
       riseStarted = Date.now();
-      raisingCards.clear();
       dragStartPositions.clear();
       draggingCards = cards;
       for (const c of cards) {
         previouslySet.delete(c);
         const pos = assertDefined(cardPositions[c]);
-        raisingCards.set(c, pos);
         dragStartPositions.set(c, pos);
       }
     },
@@ -291,7 +270,7 @@ export function createGameController(renderer: Renderer) {
     },
 
     endDrag(click: boolean) {
-      const cardNumber = draggingCards[0];
+      const [cardNumber] = draggingCards;
       draggingCards = [];
       dragStartPositions.clear();
 
