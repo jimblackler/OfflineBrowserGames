@@ -1,4 +1,4 @@
-import {type Object3D, AmbientLight, BoxGeometry, DirectionalLight, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera, Plane, PlaneGeometry, Raycaster, Scene, SRGBColorSpace, TextureLoader, Vector2, Vector3, WebGLRenderer} from 'three';
+import {type Object3D, AmbientLight, BoxGeometry, DirectionalLight, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera, Plane, PlaneGeometry, Raycaster, Scene, SRGBColorSpace, TextureLoader, Vector2, Vector3, WebGLRenderer, DataTexture, RGBAFormat, RepeatWrapping} from 'three';
 import {assertDefined} from '../common/check/defined';
 import type {Renderer, DragHandler} from './renderer';
 import {getSuit, getType, NUMBER_CARDS} from './rules';
@@ -42,10 +42,27 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   directionalLight.shadow.bias = -0.001;
   scene.add(directionalLight);
 
+  const noiseSize = 512;
+  const noiseData = new Uint8Array(noiseSize * noiseSize * 4);
+  for (let i = 0; i < noiseSize * noiseSize * 4; i += 4) {
+    const val = Math.random() * 255;
+    noiseData[i] = val;
+    noiseData[i + 1] = val;
+    noiseData[i + 2] = val;
+    noiseData[i + 3] = 255;
+  }
+  const noiseTexture = new DataTexture(noiseData, noiseSize, noiseSize, RGBAFormat);
+  noiseTexture.needsUpdate = true;
+  noiseTexture.wrapS = RepeatWrapping;
+  noiseTexture.wrapT = RepeatWrapping;
+  noiseTexture.repeat.set(10, 10);
+
   const floorMaterial = new MeshStandardMaterial({
     color: 0x40A040,
     roughness: 0.9,
-    metalness: 0.1
+    metalness: 0.1,
+    bumpMap: noiseTexture,
+    bumpScale: 1.75
   });
   const floorMesh = new Mesh(new PlaneGeometry(3000, 3000), floorMaterial);
   floorMesh.position.set(450, -400, -2);
