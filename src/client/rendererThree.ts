@@ -165,29 +165,21 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     const raycaster = new Raycaster();
     raycaster.setFromCamera(getMouseCoords(event), camera);
 
-    const candidates: Object3D[] = [];
-    const meshToCardMap = new Map<Object3D, number>();
+    const meshToCardMap = new Map<Object3D, number>(
+        cardMeshes
+            .map((mesh, index) => [mesh, index] as const)
+            .filter(([, index]) => draggableCards[index])
+    );
 
-    for (let index = 0; index < NUMBER_CARDS; index++) {
-      if (draggableCards[index]) {
-        const mesh = assertDefined(cardMeshes[index]);
-        candidates.push(mesh);
-        meshToCardMap.set(mesh, index);
-      }
-    }
-
-    for (const placeholder of placeholders) {
-      if (placeholder.onClick) {
-        candidates.push(placeholder.mesh);
-      }
-    }
-
-    const [firstIntersect] = raycaster.intersectObjects(candidates);
+    const [firstIntersect] = raycaster.intersectObjects([
+      ...meshToCardMap.keys(),
+      ...placeholders.filter(p => p.onClick).map(p => p.mesh)
+    ]);
     if (firstIntersect) {
       const {object: hitObject} = firstIntersect;
-      const cardIndex = meshToCardMap.get(hitObject);
-      if (cardIndex !== undefined) {
-        return {card: cardIndex};
+      const card = meshToCardMap.get(hitObject);
+      if (card !== undefined) {
+        return {card};
       }
       const placeholder = placeholders.find(placeholder => placeholder.mesh === hitObject);
       if (placeholder) {
