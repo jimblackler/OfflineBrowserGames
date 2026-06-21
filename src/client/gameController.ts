@@ -60,10 +60,7 @@ export function createGameController(renderer: Renderer) {
   function _placeCard(cardNumber: number, x: number, y: number, z: number, draggable: boolean,
                       delay: number) {
     const position = assertDefined(cardPositions[cardNumber]);
-    if (position[0] === x && position[1] === y && position[2] === z) {
-      renderer.setDraggable(cardNumber, draggable);
-      return;
-    }
+
     const timeNow = Date.now();
     renderer.setDraggable(cardNumber, false);
 
