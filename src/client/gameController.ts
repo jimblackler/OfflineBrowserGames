@@ -38,7 +38,6 @@ type Curve = {
   endZ: number;
   flyHeight: number;
   draggable: boolean;
-  destinationUndercard?: number;
 };
 
 export function createGameController(renderer: Renderer) {
@@ -299,13 +298,11 @@ export function createGameController(renderer: Renderer) {
       if (cardNumber === undefined) {
         return;
       }
-      const cards = getStack(gameState, cardNumber);
       if (lastCardMoved !== cardNumber) {
         cardHistory = new Map();
         lastCardMoved = cardNumber;
       }
-      const actionsFor = getActions(gameState);
-      let actions = actionsFor.get(cardNumber);
+      let actions = getActions(gameState).get(cardNumber);
 
       if (actions) {
         // if click ... priority is (age-> usefulness -> proximity)
@@ -315,8 +312,7 @@ export function createGameController(renderer: Renderer) {
           let oldest = Infinity;
           let oldestActions: Action[] = [];
           for (const action of actions) {
-            const actionKey = JSON.stringify(action);
-            const time = cardHistory.get(actionKey) ?? -Infinity;
+            const time = cardHistory.get(JSON.stringify(action)) ?? -Infinity;
             if (time === oldest) {
               oldestActions.push(action);
             } else if (time < oldest) {
@@ -351,28 +347,26 @@ export function createGameController(renderer: Renderer) {
         let closest = Infinity;
         let closestAction: Action | undefined;
         for (const action of actions) {
-          if (cards.length === 1 || action.moveType === 'toTableau') {
-            let x = 0;
-            let y = 0;
-            if (action.moveType === 'toTableau') {
-              const {destinationIdx} = action;
-              x = TABLEAU_X + TABLEAU_X_SPACING * destinationIdx;
-              y = TABLEAU_Y +
-                  assertDefined(gameState.tableausFaceUp[destinationIdx]).length *
-                  TABLEAU_Y_SPACING_FACE_DOWN +
-                  assertDefined(gameState.tableausFaceDown[destinationIdx]).length *
-                  TABLEAU_Y_SPACING_FACE_UP;
-            } else if (action.moveType === 'toFoundation') {
-              const {destinationIdx} = action;
-              x = FOUNDATION_X + FOUNDATION_X_SPACING * destinationIdx;
-              y = FOUNDATION_Y;
-            }
+          let x = 0;
+          let y = 0;
+          if (action.moveType === 'toTableau') {
+            const {destinationIdx} = action;
+            x = TABLEAU_X + TABLEAU_X_SPACING * destinationIdx;
+            y = TABLEAU_Y +
+                assertDefined(gameState.tableausFaceUp[destinationIdx]).length *
+                TABLEAU_Y_SPACING_FACE_DOWN +
+                assertDefined(gameState.tableausFaceDown[destinationIdx]).length *
+                TABLEAU_Y_SPACING_FACE_UP;
+          } else if (action.moveType === 'toFoundation') {
+            const {destinationIdx} = action;
+            x = FOUNDATION_X + FOUNDATION_X_SPACING * destinationIdx;
+            y = FOUNDATION_Y;
+          }
 
-            const distance = (position[0] - x) ** 2 + (position[1] - y) ** 2;
-            if (distance < closest) {
-              closest = distance;
-              closestAction = action;
-            }
+          const distance = (position[0] - x) ** 2 + (position[1] - y) ** 2;
+          if (distance < closest) {
+            closest = distance;
+            closestAction = action;
           }
         }
         if (closestAction) {
