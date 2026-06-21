@@ -8,27 +8,21 @@ const INDICATOR_OFFSET_Y = -3;
 
 export function createRendererDom(gameDiv: HTMLElement): Renderer {
   const cardImages: HTMLSpanElement[] = [];
-  const cardZPos: number[] = [];
   const placeholdersDiv = document.createElement('div');
   gameDiv.appendChild(placeholdersDiv);
   const cardsDiv = document.createElement('div');
   gameDiv.appendChild(cardsDiv);
   let activeShadows = 0;
-  let draggingCards: number[] = [];
+  let isDragging = false;
   let click = false;
   let mouseX = 0;
   let mouseY = 0;
+  let dragStartX = 0;
+  let dragStartY = 0;
   let dragHandler: DragHandler;
-
-  function getCardPosition(cardNumber: number): [number, number, number] {
-    const cardImage = assertDefined(cardImages[cardNumber]);
-    const zPos = assertDefined(cardZPos[cardNumber]);
-    return [cardImage.offsetLeft, cardImage.offsetTop + zPos, zPos];
-  }
 
   function positionCard(cardNumber: number, x: number, y: number, z: number) {
     const cardImage = assertDefined(cardImages[cardNumber]);
-    cardZPos[cardNumber] = z;
     cardImage.style.left = `${x}px`;
     cardImage.style.top = `${y - z}px`;
     if (z) {
@@ -54,7 +48,6 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
     cardImage.style.pointerEvents = 'none';
     cardImage.className = 'card';
     cardImages[idx] = cardImage;
-    cardZPos[idx] = 0;
     cardsDiv.appendChild(cardImage);
   }
 
@@ -72,10 +65,8 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
   gameDiv.append(selectionIndicator);
 
   document.addEventListener('mousemove', evt => {
-    for (const card of draggingCards) {
-      const position = getCardPosition(card);
-      positionCard(card, position[0] + evt.clientX - mouseX,
-          position[1] + evt.clientY - mouseY, position[2]);
+    if (isDragging) {
+      dragHandler.drag(evt.clientX - dragStartX, evt.clientY - dragStartY);
     }
     click = false;
     mouseX = evt.clientX;
@@ -83,10 +74,10 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
   });
 
   document.addEventListener('mouseup', () => {
-    if (draggingCards.length > 0) {
-      dragHandler.cardClickedOrDropped(draggingCards[0], click);
+    if (isDragging) {
+      dragHandler.endDrag(click);
+      isDragging = false;
     }
-    draggingCards = [];
   });
 
   function _setClickable(
@@ -95,7 +86,7 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
       clickFunction: ((ev: MouseEvent) => void) | null
   ) {
     function highlight() {
-      if (draggingCards.length) {
+      if (isDragging) {
         return;
       }
       selectionIndicator.style.left = `${image.offsetLeft + INDICATOR_OFFSET_X}px`;
@@ -150,11 +141,13 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
     setDraggable(cardNumber, draggable) {
       const cardImage = assertDefined(cardImages[cardNumber]);
       if (draggable) {
-        _setClickable(cardImage, () => {
-          const cards = dragHandler.startDrag(cardNumber);
+        _setClickable(cardImage, ev => {
+          dragHandler.startDrag(cardNumber);
           click = true;
           hideIndicator();
-          draggingCards = cards;
+          isDragging = true;
+          dragStartX = ev.clientX;
+          dragStartY = ev.clientY;
         }, null);
         cardImage.style.pointerEvents = 'auto';
       } else {

@@ -50,6 +50,8 @@ export function createGameController(renderer: Renderer) {
   let riseStarted = Infinity;
   const undercards = new Map<number, number>();
   const cardPositions: [number, number, number][] = Array.from({length: NUMBER_CARDS}, () => [0, 0, 0]);
+  let draggingCards: number[] = [];
+  const dragStartPositions = new Map<number, [number, number, number]>();
 
   function setPosition(cardNumber: number, x: number, y: number, z: number) {
     cardPositions[cardNumber] = [x, y, z];
@@ -256,8 +258,9 @@ export function createGameController(renderer: Renderer) {
         t = 1;
         riseStarted = Infinity;
       }
-      for (const [cardNumber, [x, y, z]] of raisingCards) {
-        setPosition(cardNumber, x, y, z + RAISE_HEIGHT * t);
+      for (const [cardNumber, [, , z]] of raisingCards) {
+        const currentPos = assertDefined(cardPositions[cardNumber]);
+        setPosition(cardNumber, currentPos[0], currentPos[1], z + RAISE_HEIGHT * t);
       }
     }
   }
@@ -275,19 +278,33 @@ export function createGameController(renderer: Renderer) {
       const cards = getStack(gameState, card);
       riseStarted = new Date().getTime();
       raisingCards.clear();
-      for (const card of cards) {
-        previouslySet.delete(card);
-        raisingCards.set(card, assertDefined(cardPositions[card]));
+      dragStartPositions.clear();
+      draggingCards = cards;
+      for (const c of cards) {
+        previouslySet.delete(c);
+        const pos = assertDefined(cardPositions[c]);
+        raisingCards.set(c, pos);
+        dragStartPositions.set(c, pos);
       }
-      return cards;
     },
 
-    cardClickedOrDropped(card: number | undefined, click: boolean) {
-      if (card === undefined) {
+    drag(dx: number, dy: number) {
+      for (const card of draggingCards) {
+        const startPosition = assertDefined(dragStartPositions.get(card));
+        const currentPosition = assertDefined(cardPositions[card]);
+        setPosition(card, startPosition[0] + dx, startPosition[1] + dy, currentPosition[2]);
+      }
+    },
+
+    endDrag(click: boolean) {
+      const cardNumber = draggingCards[0];
+      draggingCards = [];
+      dragStartPositions.clear();
+
+      if (cardNumber === undefined) {
         return;
       }
-      const cards = getStack(gameState, card);
-      const cardNumber = assertDefined(cards[0]);
+      const cards = getStack(gameState, cardNumber);
       if (lastCardMoved !== cardNumber) {
         cardHistory = new Map();
         lastCardMoved = cardNumber;

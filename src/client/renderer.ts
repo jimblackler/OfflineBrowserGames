@@ -1,6 +1,7 @@
 export type DragHandler = {
-  cardClickedOrDropped(card: number | undefined, click: boolean): void;
-  startDrag(cardNumber: number): number[];
+  startDrag(cardNumber: number): void;
+  drag(dx: number, dy: number): void;
+  endDrag(click: boolean): void;
 };
 
 export type Renderer = {

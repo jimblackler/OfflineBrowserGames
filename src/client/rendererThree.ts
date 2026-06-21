@@ -165,12 +165,11 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   });
 
   let dragHandler: DragHandler;
-  let draggingCards: number[] = [];
   let isDragging = false;
   let click = false;
   const dragPlane = new Plane(new Vector3(0, 0, 1), 0);
   const dragIntersection = new Vector3();
-  const dragOffsets: Vector3[] = [];
+  const dragStartIntersection = new Vector3();
 
   function getMouseCoords(event: MouseEvent) {
     const rectangle = canvas.getBoundingClientRect();
@@ -180,14 +179,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     );
   }
 
-  const cardPositions = Array.from({length: NUMBER_CARDS}, () => ({x: 0, y: 0, elevation: 0}));
-
   function positionCard(cardNumber: number, x: number, y: number, elevation: number) {
-    const position = assertDefined(cardPositions[cardNumber]);
-    position.x = x;
-    position.y = y;
-    position.elevation = elevation;
-
     assertDefined(cardMeshes[cardNumber]).position.set(
         x + CARD_WIDTH / 2,
         -(y + CARD_HEIGHT / 2),
@@ -237,7 +229,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
     }
     const {card, placeholder} = getRaycastIntersect(event);
     if (typeof card === 'number') {
-      draggingCards = dragHandler.startDrag(card);
+      dragHandler.startDrag(card);
       isDragging = true;
       click = true;
       indicatorMesh.visible = false;
@@ -246,13 +238,7 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       dragPlane.setFromNormalAndCoplanarPoint(new Vector3(0, 0, 1), firstMesh.position);
       const raycaster = new Raycaster();
       raycaster.setFromCamera(getMouseCoords(event), camera);
-      raycaster.ray.intersectPlane(dragPlane, dragIntersection);
-
-      dragOffsets.length = 0;
-      for (const cardNumber of draggingCards) {
-        const mesh = assertDefined(cardMeshes[cardNumber]);
-        dragOffsets.push(mesh.position.clone().sub(dragIntersection));
-      }
+      raycaster.ray.intersectPlane(dragPlane, dragStartIntersection);
     } else {
       placeholder?.onClick?.(event);
     }
@@ -265,16 +251,9 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       raycaster.setFromCamera(getMouseCoords(event), camera);
       raycaster.ray.intersectPlane(dragPlane, dragIntersection);
 
-      for (let index = 0; index < draggingCards.length; index++) {
-        const cardNumber = assertDefined(draggingCards[index]);
-        const newPosition = dragIntersection.clone().add(assertDefined(dragOffsets[index]));
-        positionCard(
-            cardNumber,
-            newPosition.x - CARD_WIDTH / 2,
-            -newPosition.y - CARD_HEIGHT / 2,
-            assertDefined(cardPositions[cardNumber]).elevation
-        );
-      }
+      const dx = dragIntersection.x - dragStartIntersection.x;
+      const dy = -(dragIntersection.y - dragStartIntersection.y);
+      dragHandler.drag(dx, dy);
     } else {
       const {card, placeholder} = getRaycastIntersect(event);
       if (typeof card === 'number') {
@@ -293,11 +272,8 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
   function onMouseUp() {
     if (isDragging) {
-      if (draggingCards.length > 0) {
-        dragHandler.cardClickedOrDropped(assertDefined(draggingCards[0]), click);
-      }
+      dragHandler.endDrag(click);
       isDragging = false;
-      draggingCards = [];
     }
   }
 
