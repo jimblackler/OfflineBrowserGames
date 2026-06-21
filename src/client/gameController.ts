@@ -70,9 +70,8 @@ export function createGameController(renderer: Renderer) {
     const distance = Math.sqrt((position[0] - x) ** 2 + (position[1] - y) ** 2);
     const flyHeight = FLY_HEIGHT * Math.min(distance, FLY_DISTANCE_MAX) / FLY_DISTANCE_MAX;
 
-    const animationTime = ANIMATION_TIME * Math.min(distance, ANIMATION_DISTANCE_MAX) /
-        ANIMATION_DISTANCE_MAX +
-        ANIMATION_TIME_SUPPLEMENT;
+    const animationTime = ANIMATION_TIME_SUPPLEMENT +
+        ANIMATION_TIME * Math.min(distance, ANIMATION_DISTANCE_MAX) / ANIMATION_DISTANCE_MAX;
 
     curves.set(cardNumber, {
       startTime: timeNow + delay,
