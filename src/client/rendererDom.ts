@@ -6,7 +6,7 @@ import {BLANK_ROW, CARDBACK_COLUMN, CARD_HEIGHT, CARD_WIDTH, INDICATOR_HEIGHT, I
 const INDICATOR_OFFSET_X = -4;
 const INDICATOR_OFFSET_Y = -3;
 
-export function createRendererDom(gameDiv: HTMLElement): Renderer {
+export async function createRendererDom(gameDiv: HTMLElement): Promise<Renderer> {
   const cardImages: HTMLSpanElement[] = [];
   const placeholdersDiv = document.createElement('div');
   gameDiv.appendChild(placeholdersDiv);

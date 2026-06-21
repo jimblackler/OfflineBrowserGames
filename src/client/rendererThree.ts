@@ -10,7 +10,7 @@ type ClickablePlaceholder = {
   onClick?(ev: MouseEvent): void;
 };
 
-export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
+export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Renderer> {
   const scene = new Scene();
   const camera = new PerspectiveCamera(45, 1, 100, 5000);
   const webGLRenderer = new WebGLRenderer({antialias: true, alpha: true});
@@ -102,67 +102,61 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
   scene.add(indicatorMesh);
 
   const textureLoader = new TextureLoader();
-  let placeholderTexture: Texture | undefined;
 
-  textureLoader.load('images/cards206x286.png', texture => {
-    texture.colorSpace = SRGBColorSpace;
-    texture.generateMipmaps = true;
-    texture.minFilter = LinearMipmapLinearFilter;
-    texture.magFilter = LinearFilter;
-    texture.anisotropy = webGLRenderer.capabilities.getMaxAnisotropy();
-
-    const backTexture = texture.clone();
-    backTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
-    backTexture.offset.set(
-        CARD_WIDTH * CARDBACK_COLUMN / SHEET_WIDTH,
-        1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
-    backTexture.needsUpdate = true;
-
-    backMaterial.map = backTexture;
-    backMaterial.color.set(0xFFFFFF);
-    backMaterial.transparent = true;
-    backMaterial.depthWrite = false;
-    backMaterial.needsUpdate = true;
-
-    placeholderTexture = texture.clone();
-    placeholderTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
-    placeholderTexture.offset.set(
-        CARD_WIDTH * PLACEHOLDER_COLUMN / SHEET_WIDTH,
-        1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
-    placeholderTexture.needsUpdate = true;
-
-    cardMaterials.forEach((materials, index) => {
-      const frontTexture = texture.clone();
-      frontTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
-      frontTexture.offset.set(
-          CARD_WIDTH * getType(index) / SHEET_WIDTH,
-          1 - CARD_HEIGHT * (getSuit(index) + 1) / SHEET_HEIGHT
-      );
-      frontTexture.needsUpdate = true;
-      const frontMaterial = assertDefined(materials[4]);
-      frontMaterial.map = frontTexture;
-      frontMaterial.color.set(0xFFFFFF);
-      frontMaterial.transparent = true;
-      frontMaterial.depthWrite = false;
-      frontMaterial.needsUpdate = true;
-    });
-
-    const indicatorTexture = texture.clone();
-    indicatorTexture.repeat.set(INDICATOR_WIDTH / SHEET_WIDTH, INDICATOR_HEIGHT / SHEET_HEIGHT);
-    indicatorTexture.offset.set(
-        INDICATOR_X / SHEET_WIDTH,
-        1 - (INDICATOR_Y + INDICATOR_HEIGHT) / SHEET_HEIGHT
-    );
-    indicatorTexture.needsUpdate = true;
-    indicatorMaterial.map = indicatorTexture;
-    indicatorMaterial.needsUpdate = true;
-
-    for (const placeholder of placeholders) {
-      placeholder.material.map = placeholderTexture;
-      placeholder.material.color.set(0xFFFFFF);
-      placeholder.material.opacity = 1;
-    }
+  const texture = await new Promise<Texture>(resolve => {
+    textureLoader.load('images/cards206x286.png', resolve);
   });
+  texture.colorSpace = SRGBColorSpace;
+  texture.generateMipmaps = true;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.magFilter = LinearFilter;
+  texture.anisotropy = webGLRenderer.capabilities.getMaxAnisotropy();
+
+  const backTexture = texture.clone();
+  backTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
+  backTexture.offset.set(
+      CARD_WIDTH * CARDBACK_COLUMN / SHEET_WIDTH,
+      1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
+  backTexture.needsUpdate = true;
+
+  backMaterial.map = backTexture;
+  backMaterial.color.set(0xFFFFFF);
+  backMaterial.transparent = true;
+  backMaterial.depthWrite = false;
+  backMaterial.needsUpdate = true;
+
+  const placeholderTexture = texture.clone();
+  placeholderTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
+  placeholderTexture.offset.set(
+      CARD_WIDTH * PLACEHOLDER_COLUMN / SHEET_WIDTH,
+      1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
+  placeholderTexture.needsUpdate = true;
+
+  cardMaterials.forEach((materials, index) => {
+    const frontTexture = texture.clone();
+    frontTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
+    frontTexture.offset.set(
+        CARD_WIDTH * getType(index) / SHEET_WIDTH,
+        1 - CARD_HEIGHT * (getSuit(index) + 1) / SHEET_HEIGHT
+    );
+    frontTexture.needsUpdate = true;
+    const frontMaterial = assertDefined(materials[4]);
+    frontMaterial.map = frontTexture;
+    frontMaterial.color.set(0xFFFFFF);
+    frontMaterial.transparent = true;
+    frontMaterial.depthWrite = false;
+    frontMaterial.needsUpdate = true;
+  });
+
+  const indicatorTexture = texture.clone();
+  indicatorTexture.repeat.set(INDICATOR_WIDTH / SHEET_WIDTH, INDICATOR_HEIGHT / SHEET_HEIGHT);
+  indicatorTexture.offset.set(
+      INDICATOR_X / SHEET_WIDTH,
+      1 - (INDICATOR_Y + INDICATOR_HEIGHT) / SHEET_HEIGHT
+  );
+  indicatorTexture.needsUpdate = true;
+  indicatorMaterial.map = indicatorTexture;
+  indicatorMaterial.needsUpdate = true;
 
   let dragHandler: DragHandler;
   let isDragging = false;
@@ -310,11 +304,9 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
         side: DoubleSide
       });
 
-      if (placeholderTexture) {
-        material.map = placeholderTexture;
-        material.color.set(0xFFFFFF);
-        material.opacity = 1;
-      }
+      material.map = placeholderTexture;
+      material.color.set(0xFFFFFF);
+      material.opacity = 1;
 
       const placeholderGeometry = new PlaneGeometry(CARD_WIDTH, CARD_HEIGHT);
       const mesh = new Mesh(placeholderGeometry, material);
