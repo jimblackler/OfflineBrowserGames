@@ -175,18 +175,15 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
       ...meshToCardMap.keys(),
       ...placeholders.filter(p => p.onClick).map(p => p.mesh)
     ]);
-    if (firstIntersect) {
-      const {object: hitObject} = firstIntersect;
-      const card = meshToCardMap.get(hitObject);
-      if (card !== undefined) {
-        return {card};
-      }
-      const placeholder = placeholders.find(placeholder => placeholder.mesh === hitObject);
-      if (placeholder) {
-        return {placeholder};
-      }
+    if (!firstIntersect) {
+      return {};
     }
-    return {};
+    const {object: hitObject} = firstIntersect;
+    const card = meshToCardMap.get(hitObject);
+    if (card !== undefined) {
+      return {card};
+    }
+    return {placeholder: placeholders.find(placeholder => placeholder.mesh === hitObject)};
   }
 
   function onMouseDown(event: MouseEvent) {
