@@ -49,6 +49,12 @@ export function createGameController(renderer: Renderer) {
   const raisingCards = new Map<number, [number, number, number]>();
   let riseStarted = Infinity;
   const undercards = new Map<number, number>();
+  const cardPositions: [number, number, number][] = Array.from({length: NUMBER_CARDS}, () => [0, 0, 0]);
+
+  function setPosition(cardNumber: number, x: number, y: number, z: number) {
+    cardPositions[cardNumber] = [x, y, z];
+    renderer.positionCard(cardNumber, x, y, z);
+  }
 
   function getZ(cardNumber: number) {
     let z = 0;
@@ -72,7 +78,7 @@ export function createGameController(renderer: Renderer) {
     previouslySet.set(cardNumber, digest);
     undercards.set(cardNumber, undercard);
     const z = getZ(cardNumber);
-    const position = renderer.getCardPosition(cardNumber);
+    const position = assertDefined(cardPositions[cardNumber]);
     const timeNow = new Date().getTime();
     renderer.setDraggable(cardNumber, false);
 
@@ -102,7 +108,7 @@ export function createGameController(renderer: Renderer) {
   function render() {
     // Stop all animations immediately
     for (const [k, curve] of curves) {
-      renderer.positionCard(k, curve.endX, curve.endY, curve.endZ);
+      setPosition(k, curve.endX, curve.endY, curve.endZ);
       curves.delete(k);
     }
 
@@ -233,12 +239,12 @@ export function createGameController(renderer: Renderer) {
       }
       const t = toT(curve.startTime, curve.endTime, timeNow);
       if (t > 1) {
-        renderer.positionCard(card, curve.endX, curve.endY, curve.endZ);
+        setPosition(card, curve.endX, curve.endY, curve.endZ);
         renderer.setDraggable(card, curve.draggable);
         curves.delete(card);
       } else {
         const multiplier = Math.sin(t * Math.PI / 2);
-        renderer.positionCard(card, tInRange(curve.start[0], curve.endX, multiplier),
+        setPosition(card, tInRange(curve.start[0], curve.endX, multiplier),
             tInRange(curve.start[1], curve.endY, multiplier),
             tInRange(curve.start[2], curve.endZ, multiplier) +
             Math.sin(t * Math.PI) * curve.flyHeight);
@@ -251,7 +257,7 @@ export function createGameController(renderer: Renderer) {
         riseStarted = Infinity;
       }
       for (const [cardNumber, [x, y, z]] of raisingCards) {
-        renderer.positionCard(cardNumber, x, y, z + RAISE_HEIGHT * t);
+        setPosition(cardNumber, x, y, z + RAISE_HEIGHT * t);
       }
     }
   }
@@ -271,7 +277,7 @@ export function createGameController(renderer: Renderer) {
       raisingCards.clear();
       for (const card of cards) {
         previouslySet.delete(card);
-        raisingCards.set(card, renderer.getCardPosition(card));
+        raisingCards.set(card, assertDefined(cardPositions[card]));
       }
       return cards;
     },
@@ -333,7 +339,7 @@ export function createGameController(renderer: Renderer) {
         }
 
         // Find closet action.
-        const position = renderer.getCardPosition(cardNumber);
+        const position = assertDefined(cardPositions[cardNumber]);
         let closest = Infinity;
         let closestAction: Action | undefined;
         for (const action of actions) {

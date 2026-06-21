@@ -182,11 +182,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
 
   const cardPositions = Array.from({length: NUMBER_CARDS}, () => ({x: 0, y: 0, elevation: 0}));
 
-  function getCardPosition(cardNumber: number): [number, number, number] {
-    const position = assertDefined(cardPositions[cardNumber]);
-    return [position.x, position.y, position.elevation];
-  }
-
   function positionCard(cardNumber: number, x: number, y: number, elevation: number) {
     const position = assertDefined(cardPositions[cardNumber]);
     position.x = x;
@@ -363,7 +358,6 @@ export function createThreeRenderer(gameDiv: HTMLElement): Renderer {
       draggableCards[cardNumber] = draggable ? 1 : 0;
     },
 
-    getCardPosition,
     positionCard,
 
     setDragHandler(handler) {

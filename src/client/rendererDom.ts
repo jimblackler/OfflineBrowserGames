@@ -165,7 +165,6 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
       }
     },
 
-    getCardPosition,
     positionCard,
 
     setDragHandler(handler) {
