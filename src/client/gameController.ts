@@ -24,7 +24,7 @@ const RAISE_HEIGHT = 20;
 const ANIMATION_TIME = 400;
 const ANIMATION_DISTANCE_MAX = 800;
 const ANIMATION_TIME_SUPPLEMENT = 125;
-const WASTE_DRAW_STAGGER = 20;
+const WASTE_DRAW_STAGGER = 30;
 
 const FLY_HEIGHT = 50;
 const FLY_DISTANCE_MAX = 800;
@@ -106,11 +106,11 @@ export function createGameController(renderer: Renderer) {
     depth = 0;
     for (const [idx, cardNumber] of gameState.waste.entries()) {
       renderer.setFaceUp(cardNumber, true);
-      const staggerOrder = Math.max(idx - gameState.waste.length + gameState.rules.cardsToDraw, 0);
-      const delay = staggerOrder * WASTE_DRAW_STAGGER;
-      const position = Math.max(0, idx + wasteCardsVisible - gameState.waste.length);
+      const xOrder = Math.max(0, idx + wasteCardsVisible - gameState.waste.length);
+      const position = assertDefined(cardPositions[cardNumber]);
+      const delay = position[0] === STOCK_X ? xOrder * WASTE_DRAW_STAGGER : 0;
       depth++;
-      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, depth * CARD_HEIGHT,
+      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * xOrder, WASTE_Y, depth * CARD_HEIGHT,
           idx === gameState.waste.length - 1, delay);
     }
 
