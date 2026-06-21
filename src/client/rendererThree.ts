@@ -1,4 +1,4 @@
-import {type Object3D, type Texture, AmbientLight, BoxGeometry, DirectionalLight, DoubleSide, LinearFilter, LinearMipmapLinearFilter, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera, Plane, PlaneGeometry, Raycaster, Scene, SRGBColorSpace, TextureLoader, Vector2, Vector3, WebGLRenderer} from 'three';
+import {type Object3D, AmbientLight, BoxGeometry, DirectionalLight, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera, Plane, PlaneGeometry, Raycaster, Scene, SRGBColorSpace, TextureLoader, Vector2, Vector3, WebGLRenderer} from 'three';
 import {assertDefined} from '../common/check/defined';
 import type {Renderer, DragHandler} from './renderer';
 import {getSuit, getType, NUMBER_CARDS} from './rules';
@@ -61,7 +61,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     depthWrite: false
   });
   const backMaterial = new MeshStandardMaterial({
-    color: 0xD32F2F,
+    color: 0xFFFFFF,
     roughness: 0.3,
     transparent: true,
     depthWrite: false
@@ -101,15 +101,8 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   indicatorMesh.visible = false;
   scene.add(indicatorMesh);
 
-  const textureLoader = new TextureLoader();
-
-  const texture = await new Promise<Texture>(resolve => {
-    textureLoader.load('images/cards206x286.png', resolve);
-  });
+  const texture = await new TextureLoader().loadAsync('images/cards206x286.png');
   texture.colorSpace = SRGBColorSpace;
-  texture.generateMipmaps = true;
-  texture.minFilter = LinearMipmapLinearFilter;
-  texture.magFilter = LinearFilter;
   texture.anisotropy = webGLRenderer.capabilities.getMaxAnisotropy();
 
   const backTexture = texture.clone();
@@ -117,20 +110,14 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   backTexture.offset.set(
       CARD_WIDTH * CARDBACK_COLUMN / SHEET_WIDTH,
       1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
-  backTexture.needsUpdate = true;
 
   backMaterial.map = backTexture;
-  backMaterial.color.set(0xFFFFFF);
-  backMaterial.transparent = true;
-  backMaterial.depthWrite = false;
-  backMaterial.needsUpdate = true;
 
   const placeholderTexture = texture.clone();
   placeholderTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
   placeholderTexture.offset.set(
       CARD_WIDTH * PLACEHOLDER_COLUMN / SHEET_WIDTH,
       1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
-  placeholderTexture.needsUpdate = true;
 
   cardMaterials.forEach((materials, index) => {
     const frontTexture = texture.clone();
@@ -139,13 +126,8 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
         CARD_WIDTH * getType(index) / SHEET_WIDTH,
         1 - CARD_HEIGHT * (getSuit(index) + 1) / SHEET_HEIGHT
     );
-    frontTexture.needsUpdate = true;
     const frontMaterial = assertDefined(materials[4]);
     frontMaterial.map = frontTexture;
-    frontMaterial.color.set(0xFFFFFF);
-    frontMaterial.transparent = true;
-    frontMaterial.depthWrite = false;
-    frontMaterial.needsUpdate = true;
   });
 
   const indicatorTexture = texture.clone();
@@ -154,9 +136,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
       INDICATOR_X / SHEET_WIDTH,
       1 - (INDICATOR_Y + INDICATOR_HEIGHT) / SHEET_HEIGHT
   );
-  indicatorTexture.needsUpdate = true;
   indicatorMaterial.map = indicatorTexture;
-  indicatorMaterial.needsUpdate = true;
 
   let dragHandler: DragHandler;
   let isDragging = false;
@@ -222,7 +202,9 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
       return;
     }
     const {card, placeholder} = getRaycastIntersect(event);
-    if (typeof card === 'number') {
+    if (card === undefined) {
+      placeholder?.onClick?.(event);
+    } else {
       dragHandler.startDrag(card);
       isDragging = true;
       click = true;
@@ -233,8 +215,6 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
       const raycaster = new Raycaster();
       raycaster.setFromCamera(getMouseCoords(event), camera);
       raycaster.ray.intersectPlane(dragPlane, dragStartIntersection);
-    } else {
-      placeholder?.onClick?.(event);
     }
   }
 
@@ -250,13 +230,9 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
       dragHandler.drag(dx, dy);
     } else {
       const {card, placeholder} = getRaycastIntersect(event);
-      if (typeof card === 'number') {
-        const mesh = assertDefined(cardMeshes[card]);
-        indicatorMesh.position.set(mesh.position.x, mesh.position.y, mesh.position.z + 0.1);
-        indicatorMesh.visible = true;
-      } else if (placeholder) {
-        const {mesh} = placeholder;
-        indicatorMesh.position.set(mesh.position.x, mesh.position.y, mesh.position.z + 0.1);
+      const targetMesh = card === undefined ? placeholder?.mesh : assertDefined(cardMeshes[card]);
+      if (targetMesh) {
+        indicatorMesh.position.set(targetMesh.position.x, targetMesh.position.y, targetMesh.position.z + 0.1);
         indicatorMesh.visible = true;
       } else {
         indicatorMesh.visible = false;
@@ -298,15 +274,9 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   return {
     placeHolder(x, y, onClick) {
       const material = new MeshBasicMaterial({
-        color: 0x228B22,
         transparent: true,
-        opacity: 0.3,
-        side: DoubleSide
+        map: placeholderTexture
       });
-
-      material.map = placeholderTexture;
-      material.color.set(0xFFFFFF);
-      material.opacity = 1;
 
       const placeholderGeometry = new PlaneGeometry(CARD_WIDTH, CARD_HEIGHT);
       const mesh = new Mesh(placeholderGeometry, material);
