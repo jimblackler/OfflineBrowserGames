@@ -87,12 +87,10 @@ export function createGameController(renderer: Renderer) {
     const deltaX = position[0] - x;
     const deltaY = position[1] - y;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    const flyDistance = Math.min(distance, FLY_DISTANCE_MAX);
-    const flyHeight = FLY_HEIGHT * flyDistance / FLY_DISTANCE_MAX;
-    const animationDistance = Math.min(distance, ANIMATION_DISTANCE_MAX);
+    const flyHeight = FLY_HEIGHT * Math.min(distance, FLY_DISTANCE_MAX) / FLY_DISTANCE_MAX;
 
     const animationTime = ANIMATION_TEST_SLOWDOWN *
-        (ANIMATION_TIME * animationDistance / ANIMATION_DISTANCE_MAX + ANIMATION_TIME_SUPPLEMENT);
+        (ANIMATION_TIME * Math.min(distance, ANIMATION_DISTANCE_MAX) / ANIMATION_DISTANCE_MAX + ANIMATION_TIME_SUPPLEMENT);
 
     curves.set(cardNumber, {
       startTime: timeNow + delay,
@@ -102,8 +100,7 @@ export function createGameController(renderer: Renderer) {
       endY: y,
       endZ: z,
       flyHeight,
-      draggable,
-      destinationUndercard: undercard
+      draggable
     });
   }
 
@@ -158,11 +155,11 @@ export function createGameController(renderer: Renderer) {
       }
 
       const tableauFaceUp = assertDefined(gameState.tableausFaceUp[tableauIdx]);
-      const faceDownOffset = TABLEAU_Y_SPACING_FACE_DOWN * tableauFaceDown.length;
       for (const [position, cardNumber] of tableauFaceUp.entries()) {
         renderer.setFaceUp(cardNumber, true);
         _placeCard(cardNumber, tableauX,
-            TABLEAU_Y + faceDownOffset + TABLEAU_Y_SPACING_FACE_UP * position, true, 0, undercard);
+            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * tableauFaceDown.length +
+            TABLEAU_Y_SPACING_FACE_UP * position, true, 0, undercard);
         undercard = cardNumber;
       }
     });
@@ -185,8 +182,7 @@ export function createGameController(renderer: Renderer) {
             if (tableau.length <= 0) {
               continue;
             }
-            const cardNumber = assertDefined(tableau.at(-1));
-            const actions = actionsFor.get(cardNumber);
+            const actions = actionsFor.get(assertDefined(tableau.at(-1)));
             if (!actions) {
               continue;
             }
@@ -253,9 +249,8 @@ export function createGameController(renderer: Renderer) {
       }
     }
     if (riseStarted !== Infinity) {
-      let t = (timeNow - riseStarted) / RAISE_DURATION;
-      if (t > 1) {
-        t = 1;
+      const t = Math.min(1, (timeNow - riseStarted) / RAISE_DURATION);
+      if (t === 1) {
         riseStarted = Infinity;
       }
       for (const [cardNumber, [, , z]] of raisingCards) {
@@ -334,15 +329,11 @@ export function createGameController(renderer: Renderer) {
           }
 
           // Filter actions to most useful actions.
-          const actionPriority = {
-            draw: 1,
-            toTableau: 2,
-            toFoundation: 3
-          } as const;
           let mostUseful = -Infinity;
           let mostUsefulActions: Action[] = [];
           for (const action of actions) {
-            const useful = actionPriority[action.moveType];
+            const useful = action.moveType === 'toFoundation'
+                ? 3 : action.moveType === 'toTableau' ? 2 : 1;
             if (useful === mostUseful) {
               mostUsefulActions.push(action);
             } else if (useful > mostUseful) {
