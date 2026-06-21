@@ -111,8 +111,8 @@ export function createGameController(renderer: Renderer) {
     // Stop all animations immediately
     for (const [k, curve] of curves) {
       setPosition(k, curve.endX, curve.endY, curve.endZ);
-      curves.delete(k);
     }
+    curves.clear();
 
     // Position stock cards.
     let undercard = -1;
@@ -220,7 +220,7 @@ export function createGameController(renderer: Renderer) {
   }
 
   // Placeholder; stock
-  renderer.placeHolder(STOCK_X, STOCK_Y, () => draw());
+  renderer.placeHolder(STOCK_X, STOCK_Y, draw);
 
   // Placeholder; tableau
   for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {
@@ -233,7 +233,7 @@ export function createGameController(renderer: Renderer) {
   }
 
   function _animate() {
-    requestAnimationFrame(() => _animate());
+    requestAnimationFrame(_animate);
     const timeNow = Date.now();
     for (const [card, curve] of curves) {
       if (timeNow < curve.startTime) {
@@ -265,7 +265,7 @@ export function createGameController(renderer: Renderer) {
     }
   }
 
-  requestAnimationFrame(() => _animate());
+  requestAnimationFrame(_animate);
 
   return {
     draw,
