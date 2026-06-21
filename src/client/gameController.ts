@@ -61,7 +61,7 @@ export function createGameController(renderer: Renderer) {
 
   function _placeCard(cardNumber: number, x: number, y: number, z: number, draggable: boolean,
                       delay: number) {
-    const digest = JSON.stringify({x, y, delay, z});
+    const digest = JSON.stringify({x, y, z});
     if (previouslySet.get(cardNumber) === digest) {
       renderer.setDraggable(cardNumber, draggable);
       return;
