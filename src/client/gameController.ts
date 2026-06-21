@@ -47,7 +47,6 @@ export function createGameController(renderer: Renderer) {
   let cardHistory = new Map<string, number>();
   let riseStarted = Infinity;
 
-
   const cardPositions: [number, number, number][] = Array.from({length: NUMBER_CARDS}, () => [0, 0, 0]);
   let draggingCards: number[] = [];
   const dragStartPositions = new Map<number, [number, number, number]>();
@@ -59,8 +58,8 @@ export function createGameController(renderer: Renderer) {
 
   const previouslySet = new Map<number, string>();
 
-  function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean, delay: number,
-                      z: number) {
+  function _placeCard(cardNumber: number, x: number, y: number, z: number, draggable: boolean,
+                      delay: number) {
     const digest = JSON.stringify({x, y, delay, z});
     if (previouslySet.get(cardNumber) === digest) {
       renderer.setDraggable(cardNumber, draggable);
@@ -75,7 +74,7 @@ export function createGameController(renderer: Renderer) {
     const flyHeight = FLY_HEIGHT * Math.min(distance, FLY_DISTANCE_MAX) / FLY_DISTANCE_MAX;
 
     const animationTime = ANIMATION_TIME * Math.min(distance, ANIMATION_DISTANCE_MAX) /
-            ANIMATION_DISTANCE_MAX +
+        ANIMATION_DISTANCE_MAX +
         ANIMATION_TIME_SUPPLEMENT;
 
     curves.set(cardNumber, {
@@ -102,7 +101,7 @@ export function createGameController(renderer: Renderer) {
     for (const cardNumber of gameState.stock) {
       renderer.setFaceUp(cardNumber, false);
       depth++;
-      _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0, depth * CARD_HEIGHT);
+      _placeCard(cardNumber, STOCK_X, STOCK_Y, depth * CARD_HEIGHT, false, 0);
     }
 
     // Position waste cards.
@@ -114,8 +113,8 @@ export function createGameController(renderer: Renderer) {
       const delay = staggerOrder * WASTE_DRAW_STAGGER;
       const position = Math.max(0, idx + wasteCardsVisible - gameState.waste.length);
       depth++;
-      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y,
-          idx === gameState.waste.length - 1, delay, depth * CARD_HEIGHT);
+      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, depth * CARD_HEIGHT,
+          idx === gameState.waste.length - 1, delay);
     }
 
     // Position foundation cards.
@@ -124,8 +123,8 @@ export function createGameController(renderer: Renderer) {
       for (const cardNumber of foundation) {
         renderer.setFaceUp(cardNumber, true);
         depth++;
-        _placeCard(cardNumber,
-            FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, true, 0, depth * CARD_HEIGHT);
+        _placeCard(cardNumber, FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y,
+            depth * CARD_HEIGHT, true, 0);
       }
     });
 
@@ -135,8 +134,8 @@ export function createGameController(renderer: Renderer) {
       const tableauX = TABLEAU_X + TABLEAU_X_SPACING * tableauIdx;
       for (const [position, cardNumber] of tableauFaceDown.entries()) {
         depth++;
-        _placeCard(cardNumber, tableauX,
-            TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position, false, 0, depth * CARD_HEIGHT);
+        _placeCard(cardNumber, tableauX, TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position,
+            depth * CARD_HEIGHT, false, 0);
         renderer.setFaceUp(cardNumber, false);
       }
 
@@ -146,7 +145,7 @@ export function createGameController(renderer: Renderer) {
         depth++;
         _placeCard(cardNumber, tableauX,
             TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * tableauFaceDown.length +
-            TABLEAU_Y_SPACING_FACE_UP * position, true, 0, depth * CARD_HEIGHT);
+            TABLEAU_Y_SPACING_FACE_UP * position, depth * CARD_HEIGHT, true, 0);
       }
     });
 
