@@ -81,7 +81,7 @@ export function createGameController(renderer: Renderer) {
     undercards.set(cardNumber, undercard);
     const z = getZ(cardNumber);
     const position = assertDefined(cardPositions[cardNumber]);
-    const timeNow = new Date().getTime();
+    const timeNow = Date.now();
     renderer.setDraggable(cardNumber, false);
 
     const deltaX = position[0] - x;
@@ -234,7 +234,7 @@ export function createGameController(renderer: Renderer) {
 
   function _animate() {
     requestAnimationFrame(() => _animate());
-    const timeNow = new Date().getTime();
+    const timeNow = Date.now();
     for (const [card, curve] of curves) {
       if (timeNow < curve.startTime) {
         continue;
@@ -276,7 +276,7 @@ export function createGameController(renderer: Renderer) {
 
     startDrag(card: number) {
       const cards = getStack(gameState, card);
-      riseStarted = new Date().getTime();
+      riseStarted = Date.now();
       raisingCards.clear();
       dragStartPositions.clear();
       draggingCards = cards;
@@ -385,7 +385,7 @@ export function createGameController(renderer: Renderer) {
           }
         }
         if (closestAction) {
-          cardHistory.set(JSON.stringify(closestAction), new Date().getTime());
+          cardHistory.set(JSON.stringify(closestAction), Date.now());
           execute(gameState, closestAction);
           store(gameState);
         }
