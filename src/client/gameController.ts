@@ -47,7 +47,8 @@ export function createGameController(renderer: Renderer) {
   let cardHistory = new Map<string, number>();
   let riseStarted = Infinity;
 
-  const cardPositions: [number, number, number][] = Array.from({length: NUMBER_CARDS}, () => [0, 0, 0]);
+  const cardPositions: [number, number, number][] =
+      Array.from({length: NUMBER_CARDS}, () => [0, 0, 0]);
   let draggingCards: number[] = [];
   const dragStartPositions = new Map<number, [number, number, number]>();
 
