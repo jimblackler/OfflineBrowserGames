@@ -29,7 +29,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   scene.add(new AmbientLight(0xFFFFFF, Math.PI / 2));
 
   const directionalLight = new DirectionalLight(0xFFFFFF, Math.PI / 2);
-  directionalLight.position.set(450, -200, 800);
+  directionalLight.position.set(520, -100, 800);
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 1024;
   directionalLight.shadow.mapSize.height = 1024;
