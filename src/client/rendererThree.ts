@@ -26,9 +26,9 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   canvas.style.height = '100%';
   gameDiv.appendChild(canvas);
 
-  scene.add(new AmbientLight(0xFFFFFF, 3));
+  scene.add(new AmbientLight(0xFFFFFF, Math.PI / 2));
 
-  const directionalLight = new DirectionalLight(0xFFFFFF, 2.5);
+  const directionalLight = new DirectionalLight(0xFFFFFF, Math.PI / 2);
   directionalLight.position.set(450, -200, 800);
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 1024;
@@ -43,7 +43,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   scene.add(directionalLight);
 
   const floorMaterial = new MeshStandardMaterial({
-    color: 0x2B7E42,
+    color: 0x40A040,
     roughness: 0.9,
     metalness: 0.1
   });
