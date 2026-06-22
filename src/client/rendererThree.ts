@@ -195,12 +195,11 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     if (!firstIntersect) {
       return {};
     }
-    const {object: hitObject} = firstIntersect;
-    const card = meshToCardMap.get(hitObject);
+    const card = meshToCardMap.get(firstIntersect.object);
     if (card !== undefined) {
       return {card};
     }
-    return {placeholder: placeholders.find(placeholder => placeholder.mesh === hitObject)};
+    return {placeholder: placeholders.find(placeholder => placeholder.mesh === firstIntersect.object)};
   }
 
   function onMouseDown(event: MouseEvent) {
@@ -284,8 +283,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
         map: placeholderTexture
       });
 
-      const placeholderGeometry = new PlaneGeometry(CARD_WIDTH, CARD_HEIGHT);
-      const mesh = new Mesh(placeholderGeometry, material);
+      const mesh = new Mesh(new PlaneGeometry(CARD_WIDTH, CARD_HEIGHT), material);
       mesh.position.set(x + CARD_WIDTH / 2, -(y + CARD_HEIGHT / 2), 0.1);
       mesh.receiveShadow = true;
       scene.add(mesh);
@@ -294,8 +292,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     },
 
     setFaceUp(cardNumber, faceUp) {
-      const mesh = assertDefined(cardMeshes[cardNumber]);
-      mesh.rotation.y = faceUp ? 0 : Math.PI;
+      assertDefined(cardMeshes[cardNumber]).rotation.y = faceUp ? 0 : Math.PI;
     },
 
     setDraggable(cardNumber, draggable) {
