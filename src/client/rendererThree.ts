@@ -71,15 +71,8 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
 
   const cardGeometry = new PlaneGeometry(CARD_WIDTH, CARD_HEIGHT);
   cardGeometry.clearGroups();
-  cardGeometry.addGroup(0, 6, 4);
-  cardGeometry.addGroup(0, 6, 5);
-  const edgeMaterial = new MeshStandardMaterial({
-    color: 0x000000,
-    roughness: 0.5,
-    transparent: true,
-    opacity: 0,
-    depthWrite: false
-  });
+  cardGeometry.addGroup(0, 6, 0);
+  cardGeometry.addGroup(0, 6, 1);
   const backMaterial = new MeshStandardMaterial({
     color: 0xFFFFFF,
     roughness: 0.3,
@@ -88,17 +81,13 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     side: BackSide
   });
   const cardMaterials = Array.from({length: NUMBER_CARDS}, () => [
-    edgeMaterial, // +X
-    edgeMaterial, // -X
-    edgeMaterial, // +Y
-    edgeMaterial, // -Y
     new MeshStandardMaterial({
       color: 0xFFFFFF,
       roughness: 0.2,
       transparent: true,
       depthWrite: false
-    }), // +Z (Front)
-    backMaterial  // -Z (Back)
+    }), // Front
+    backMaterial  // Back
   ]);
   const cardMeshes = cardMaterials.map(materials => {
     const mesh = new Mesh(cardGeometry, materials);
@@ -145,7 +134,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
         CARD_WIDTH * getType(index) / SHEET_WIDTH,
         1 - CARD_HEIGHT * (getSuit(index) + 1) / SHEET_HEIGHT
     );
-    const frontMaterial = assertDefined(materials[4]);
+    const frontMaterial = assertDefined(materials[0]);
     frontMaterial.map = frontTexture;
   });
 
