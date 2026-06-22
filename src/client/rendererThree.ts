@@ -102,7 +102,6 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.rotation.y = Math.PI;
-    mesh.position.set(-200, 200, 0);
     scene.add(mesh);
     return mesh;
   });
