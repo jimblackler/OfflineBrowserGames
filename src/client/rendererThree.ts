@@ -80,13 +80,24 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     depthWrite: false,
     side: BackSide
   });
-  const cardMaterials = Array.from({length: NUMBER_CARDS}, () => new MeshStandardMaterial({
-    color: 0xFFFFFF,
-    roughness: 0.2,
-    transparent: true,
-    depthWrite: false
-  }));
-  const cardMeshes = cardMaterials.map(material => {
+  const texture = await new TextureLoader().loadAsync('images/cards206x286.png');
+  texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = webGLRenderer.capabilities.getMaxAnisotropy();
+  texture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
+
+  const cardMeshes = Array.from({length: NUMBER_CARDS}, (_, index) => {
+    const frontTexture = texture.clone();
+    frontTexture.offset.set(
+        CARD_WIDTH * getType(index) / SHEET_WIDTH,
+        1 - CARD_HEIGHT * (getSuit(index) + 1) / SHEET_HEIGHT
+    );
+    const material = new MeshStandardMaterial({
+      color: 0xFFFFFF,
+      roughness: 0.2,
+      transparent: true,
+      depthWrite: false,
+      map: frontTexture
+    });
     const mesh = new Mesh(cardGeometry, [material, backMaterial]);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -108,11 +119,6 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   indicatorMesh.visible = false;
   scene.add(indicatorMesh);
 
-  const texture = await new TextureLoader().loadAsync('images/cards206x286.png');
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = webGLRenderer.capabilities.getMaxAnisotropy();
-  texture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
-
   const backTexture = texture.clone();
   backTexture.offset.set(
       CARD_WIDTH * CARDBACK_COLUMN / SHEET_WIDTH,
@@ -124,15 +130,6 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   placeholderTexture.offset.set(
       CARD_WIDTH * PLACEHOLDER_COLUMN / SHEET_WIDTH,
       1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
-
-  cardMaterials.forEach((material, index) => {
-    const frontTexture = texture.clone();
-    frontTexture.offset.set(
-        CARD_WIDTH * getType(index) / SHEET_WIDTH,
-        1 - CARD_HEIGHT * (getSuit(index) + 1) / SHEET_HEIGHT
-    );
-    material.map = frontTexture;
-  });
 
   const indicatorTexture = texture.clone();
   indicatorTexture.repeat.set(INDICATOR_WIDTH / SHEET_WIDTH, INDICATOR_HEIGHT / SHEET_HEIGHT);
