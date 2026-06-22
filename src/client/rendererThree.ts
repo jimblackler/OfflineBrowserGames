@@ -7,7 +7,7 @@ import {BLANK_ROW, CARDBACK_COLUMN, CARD_HEIGHT, CARD_WIDTH, INDICATOR_HEIGHT, I
 type ClickablePlaceholder = {
   mesh: Mesh;
   material: MeshBasicMaterial;
-  onClick?(ev: MouseEvent): void;
+  onClick(ev: MouseEvent): void;
 };
 
 export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Renderer> {
@@ -106,7 +106,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     return mesh;
   });
   const draggableCards = new Uint8Array(NUMBER_CARDS);
-  const placeholders: ClickablePlaceholder[] = [];
+  const clickablePlaceholders: ClickablePlaceholder[] = [];
 
   const indicatorGeometry = new PlaneGeometry(INDICATOR_WIDTH, INDICATOR_HEIGHT);
   const indicatorMaterial = new MeshBasicMaterial({
@@ -173,7 +173,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
 
     const [firstIntersect] = raycaster.intersectObjects([
       ...meshToCardMap.keys(),
-      ...placeholders.filter(p => p.onClick).map(p => p.mesh)
+      ...clickablePlaceholders.map(p => p.mesh)
     ]);
     if (!firstIntersect) {
       return {};
@@ -182,7 +182,10 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     if (card !== undefined) {
       return {card};
     }
-    return {placeholder: placeholders.find(placeholder => placeholder.mesh === firstIntersect.object)};
+    return {
+      placeholder:
+          clickablePlaceholders.find(placeholder => placeholder.mesh === firstIntersect.object)
+    };
   }
 
   function onMouseDown(event: MouseEvent) {
@@ -191,7 +194,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     }
     const {card, placeholder} = getRaycastIntersect(event);
     if (card === undefined) {
-      placeholder?.onClick?.(event);
+      placeholder?.onClick(event);
     } else {
       dragHandler.startDrag(card);
       isDragging = true;
@@ -272,7 +275,9 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
       mesh.receiveShadow = true;
       scene.add(mesh);
 
-      placeholders.push({mesh, onClick, material});
+      if (onClick) {
+        clickablePlaceholders.push({mesh, onClick, material});
+      }
     },
 
     setFaceUp(cardNumber, faceUp) {
