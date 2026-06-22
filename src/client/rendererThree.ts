@@ -80,17 +80,14 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     depthWrite: false,
     side: BackSide
   });
-  const cardMaterials = Array.from({length: NUMBER_CARDS}, () => [
-    new MeshStandardMaterial({
-      color: 0xFFFFFF,
-      roughness: 0.2,
-      transparent: true,
-      depthWrite: false
-    }), // Front
-    backMaterial  // Back
-  ]);
-  const cardMeshes = cardMaterials.map(materials => {
-    const mesh = new Mesh(cardGeometry, materials);
+  const cardMaterials = Array.from({length: NUMBER_CARDS}, () => new MeshStandardMaterial({
+    color: 0xFFFFFF,
+    roughness: 0.2,
+    transparent: true,
+    depthWrite: false
+  }));
+  const cardMeshes = cardMaterials.map(material => {
+    const mesh = new Mesh(cardGeometry, [material, backMaterial]);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.rotation.y = Math.PI;
@@ -128,14 +125,13 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
       CARD_WIDTH * PLACEHOLDER_COLUMN / SHEET_WIDTH,
       1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
 
-  cardMaterials.forEach((materials, index) => {
+  cardMaterials.forEach((material, index) => {
     const frontTexture = texture.clone();
     frontTexture.offset.set(
         CARD_WIDTH * getType(index) / SHEET_WIDTH,
         1 - CARD_HEIGHT * (getSuit(index) + 1) / SHEET_HEIGHT
     );
-    const frontMaterial = assertDefined(materials[0]);
-    frontMaterial.map = frontTexture;
+    material.map = frontTexture;
   });
 
   const indicatorTexture = texture.clone();
