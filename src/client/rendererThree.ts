@@ -125,9 +125,9 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   const texture = await new TextureLoader().loadAsync('images/cards206x286.png');
   texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = webGLRenderer.capabilities.getMaxAnisotropy();
+  texture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
 
   const backTexture = texture.clone();
-  backTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
   backTexture.offset.set(
       CARD_WIDTH * CARDBACK_COLUMN / SHEET_WIDTH,
       1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
@@ -135,14 +135,12 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   backMaterial.map = backTexture;
 
   const placeholderTexture = texture.clone();
-  placeholderTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
   placeholderTexture.offset.set(
       CARD_WIDTH * PLACEHOLDER_COLUMN / SHEET_WIDTH,
       1 - CARD_HEIGHT * (BLANK_ROW + 1) / SHEET_HEIGHT);
 
   cardMaterials.forEach((materials, index) => {
     const frontTexture = texture.clone();
-    frontTexture.repeat.set(CARD_WIDTH / SHEET_WIDTH, CARD_HEIGHT / SHEET_HEIGHT);
     frontTexture.offset.set(
         CARD_WIDTH * getType(index) / SHEET_WIDTH,
         1 - CARD_HEIGHT * (getSuit(index) + 1) / SHEET_HEIGHT
