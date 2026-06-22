@@ -55,14 +55,14 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   noiseTexture.needsUpdate = true;
   noiseTexture.wrapS = RepeatWrapping;
   noiseTexture.wrapT = RepeatWrapping;
-  noiseTexture.repeat.set(10, 10);
+  noiseTexture.repeat.set(5, 5);
 
   const floorMaterial = new MeshStandardMaterial({
     color: 0x40A040,
     roughness: 0.9,
     metalness: 0.1,
     bumpMap: noiseTexture,
-    bumpScale: 1.75
+    bumpScale: 0.75
   });
   const floorMesh = new Mesh(new PlaneGeometry(3000, 3000), floorMaterial);
   floorMesh.position.set(450, -400, -2);
