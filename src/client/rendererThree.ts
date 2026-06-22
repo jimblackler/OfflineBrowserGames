@@ -284,7 +284,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
       });
 
       const mesh = new Mesh(new PlaneGeometry(CARD_WIDTH, CARD_HEIGHT), material);
-      mesh.position.set(x + CARD_WIDTH / 2, -(y + CARD_HEIGHT / 2), 0.1);
+      mesh.position.set(x + CARD_WIDTH / 2, -(y + CARD_HEIGHT / 2), 0);
       mesh.receiveShadow = true;
       scene.add(mesh);
 
