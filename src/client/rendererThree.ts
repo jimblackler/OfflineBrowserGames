@@ -237,7 +237,8 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
       const {card, placeholder} = getRaycastIntersect(event);
       const targetMesh = card === undefined ? placeholder?.mesh : assertDefined(cardMeshes[card]);
       if (targetMesh) {
-        indicatorMesh.position.set(targetMesh.position.x, targetMesh.position.y, targetMesh.position.z + 0.1);
+        indicatorMesh.position.set(
+            targetMesh.position.x, targetMesh.position.y, targetMesh.position.z);
         indicatorMesh.visible = true;
       } else {
         indicatorMesh.visible = false;
