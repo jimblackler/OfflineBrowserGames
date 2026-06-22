@@ -1,4 +1,4 @@
-import {type Object3D, AmbientLight, BoxGeometry, DirectionalLight, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera, Plane, PlaneGeometry, Raycaster, Scene, SRGBColorSpace, TextureLoader, Vector2, Vector3, WebGLRenderer, DataTexture, RGBAFormat, RepeatWrapping} from 'three';
+import {type Object3D, AmbientLight, BackSide, DirectionalLight, Mesh, MeshBasicMaterial, MeshStandardMaterial, PCFSoftShadowMap, PerspectiveCamera, Plane, PlaneGeometry, Raycaster, Scene, SRGBColorSpace, TextureLoader, Vector2, Vector3, WebGLRenderer, DataTexture, RGBAFormat, RepeatWrapping} from 'three';
 import {assertDefined} from '../common/check/defined';
 import type {Renderer, DragHandler} from './renderer';
 import {getSuit, getType, NUMBER_CARDS} from './rules';
@@ -69,7 +69,10 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   floorMesh.receiveShadow = true;
   scene.add(floorMesh);
 
-  const cardGeometry = new BoxGeometry(CARD_WIDTH, CARD_HEIGHT, 1.5);
+  const cardGeometry = new PlaneGeometry(CARD_WIDTH, CARD_HEIGHT);
+  cardGeometry.clearGroups();
+  cardGeometry.addGroup(0, 6, 4);
+  cardGeometry.addGroup(0, 6, 5);
   const edgeMaterial = new MeshStandardMaterial({
     color: 0x000000,
     roughness: 0.5,
@@ -81,7 +84,8 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
     color: 0xFFFFFF,
     roughness: 0.3,
     transparent: true,
-    depthWrite: false
+    depthWrite: false,
+    side: BackSide
   });
   const cardMaterials = Array.from({length: NUMBER_CARDS}, () => [
     edgeMaterial, // +X
