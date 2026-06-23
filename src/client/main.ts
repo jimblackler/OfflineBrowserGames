@@ -2,8 +2,9 @@ import {assertNotNull} from '../common/check/null';
 import {createGameController} from './gameController';
 import {type GameRules, type GameState, newGame} from './gameState';
 import {restore, store} from './gameStore';
+import type {Renderer} from './renderer';
 import {createRendererDom} from './rendererDom';
-import {createThreeRenderer} from './rendererThree';
+import {createThreeRenderer, defaultPreferences} from './rendererThree';
 
 let gameState: GameState;
 async function init() {
@@ -12,7 +13,14 @@ async function init() {
     throw new Error('gameDiv not found');
   }
   const urlParams = new URLSearchParams(window.location.search);
-  const renderer = await (urlParams.has('three') ? createThreeRenderer(gameDiv) : createRendererDom(gameDiv));
+  let renderer: Renderer;
+  if (urlParams.has('three')) {
+    const threeRenderer = await createThreeRenderer(gameDiv);
+    threeRenderer.receivePreferences(defaultPreferences);
+    renderer = threeRenderer;
+  } else {
+    renderer = createRendererDom(gameDiv);
+  }
   const controller = createGameController(renderer);
   renderer.setDragHandler(controller);
 

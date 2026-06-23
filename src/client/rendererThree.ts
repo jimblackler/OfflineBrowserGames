@@ -10,7 +10,23 @@ type ClickablePlaceholder = {
   onClick(ev: MouseEvent): void;
 };
 
-export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Renderer> {
+export type ThreePreferences = {
+  cameraX: number;
+  cameraY: number;
+  cameraZ: number;
+};
+
+export const defaultPreferences: ThreePreferences = {
+  cameraX: 450,
+  cameraY: -500,
+  cameraZ: 450
+};
+
+type ThreeRenderer = Renderer & {
+  receivePreferences(preferences: ThreePreferences): void;
+};
+
+export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRenderer> {
   const scene = new Scene();
   const camera = new PerspectiveCamera(45, 1, 100, 5000);
   const webGLRenderer = new WebGLRenderer({antialias: true, alpha: true});
@@ -253,9 +269,6 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
   function resize() {
     const {innerWidth: width, innerHeight: height} = window;
     webGLRenderer.setSize(width, height);
-
-    camera.position.set(450, -500, 450 / Math.tan(camera.fov * Math.PI / 360) * 0.8);
-    camera.lookAt(460, -380, 0);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   }
@@ -292,6 +305,13 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<Rendere
 
     setDragHandler(handler) {
       dragHandler = handler;
+    },
+
+    receivePreferences(preferences: ThreePreferences) {
+      camera.position.set(preferences.cameraX, preferences.cameraY,
+          preferences.cameraZ / Math.tan(camera.fov * Math.PI / 360) * 0.8);
+      camera.lookAt(460, -380, 0);
+      camera.updateProjectionMatrix();
     }
   };
 }
