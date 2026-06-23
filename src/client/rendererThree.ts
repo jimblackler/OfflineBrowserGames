@@ -13,7 +13,10 @@ type ClickablePlaceholder = {
 export const defaultPreferences = {
   cameraX: 450,
   cameraY: -500,
-  cameraZ: 450
+  cameraZ: 450,
+  lookAtX: 460,
+  lookAtY: -380,
+  lookAtZ: 0
 };
 
 export type ThreePreferences = typeof defaultPreferences;
@@ -306,7 +309,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
     receivePreferences(preferences: ThreePreferences) {
       camera.position.set(preferences.cameraX, preferences.cameraY,
           preferences.cameraZ / Math.tan(camera.fov * Math.PI / 360) * 0.8);
-      camera.lookAt(460, -380, 0);
+      camera.lookAt(preferences.lookAtX, preferences.lookAtY, preferences.lookAtZ);
       camera.updateProjectionMatrix();
     }
   };
