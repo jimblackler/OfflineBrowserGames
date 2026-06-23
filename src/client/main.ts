@@ -12,13 +12,121 @@ async function init() {
   if (!gameDiv) {
     throw new Error('gameDiv not found');
   }
+  const menu = assertNotNull(document.getElementById('menu'));
+  const gears = assertNotNull(document.getElementById('gears'));
+
   const urlParams = new URLSearchParams(window.location.search);
   let renderer: Renderer;
+  const threePreferencesItem = assertNotNull(document.getElementById('threePreferencesItem'));
+
   if (urlParams.has('three')) {
+    threePreferencesItem.style.display = 'block';
+
+    function getElement<T extends HTMLElement>(id: string, type: new () => T): T {
+      const element = assertNotNull(document.getElementById(id));
+      if (!(element instanceof type)) {
+        throw new Error(`${id} is not an instance of ${type.name}`);
+      }
+      return element;
+    }
+
+    function getNumber(o: {[key: string]: unknown}, key: string, fallback: number): number {
+      const {[key]: val} = o;
+      return typeof val === 'number' ? val : fallback;
+    }
+
+    const loadedPreferencesStr = localStorage.getItem('threePreferences');
+    let preferences = defaultPreferences;
+    if (loadedPreferencesStr) {
+      try {
+        const parsed = JSON.parse(loadedPreferencesStr) as unknown;
+        if (parsed && typeof parsed === 'object') {
+          const o = parsed as unknown as {[key: string]: unknown};
+          preferences = {
+            cameraX: getNumber(o, 'cameraX', defaultPreferences.cameraX),
+            cameraY: getNumber(o, 'cameraY', defaultPreferences.cameraY),
+            cameraZ: getNumber(o, 'cameraZ', defaultPreferences.cameraZ),
+            lookAtX: getNumber(o, 'lookAtX', defaultPreferences.lookAtX),
+            lookAtY: getNumber(o, 'lookAtY', defaultPreferences.lookAtY),
+            lookAtZ: getNumber(o, 'lookAtZ', defaultPreferences.lookAtZ)
+          };
+        }
+      } catch {
+        // Ignore parsing errors.
+      }
+    }
     const threeRenderer = await createThreeRenderer(gameDiv);
-    threeRenderer.receivePreferences(defaultPreferences);
+    threeRenderer.receivePreferences(preferences);
     renderer = threeRenderer;
+
+    const dialog = getElement('preferencesDialog', HTMLDialogElement);
+    const closeButton = getElement('closePreferences', HTMLButtonElement);
+
+    const keys = ['cameraX', 'cameraY', 'cameraZ', 'lookAtX', 'lookAtY', 'lookAtZ'] as const;
+
+    function getSliderValue(id: string) {
+      return getElement(id, HTMLInputElement).valueAsNumber;
+    }
+
+    for (const key of keys) {
+      const slider = getElement(key, HTMLInputElement);
+      const valueSpan = assertNotNull(document.getElementById(`${key}Val`));
+      slider.value = String(preferences[key]);
+      valueSpan.textContent = String(preferences[key]);
+
+      slider.oninput = () => {
+        valueSpan.textContent = slider.value;
+
+        const newPreferences = {
+          cameraX: getSliderValue('cameraX'),
+          cameraY: getSliderValue('cameraY'),
+          cameraZ: getSliderValue('cameraZ'),
+          lookAtX: getSliderValue('lookAtX'),
+          lookAtY: getSliderValue('lookAtY'),
+          lookAtZ: getSliderValue('lookAtZ')
+        };
+
+        threeRenderer.receivePreferences(newPreferences);
+        localStorage.setItem('threePreferences', JSON.stringify(newPreferences));
+      };
+    }
+
+    threePreferencesItem.onclick = () => {
+      const currentPreferencesStr = localStorage.getItem('threePreferences');
+      if (currentPreferencesStr) {
+        try {
+          const parsed = JSON.parse(currentPreferencesStr) as unknown;
+          if (parsed && typeof parsed === 'object') {
+            const o = parsed as unknown as {[key: string]: unknown};
+            const currentPreferences = {
+              cameraX: getNumber(o, 'cameraX', defaultPreferences.cameraX),
+              cameraY: getNumber(o, 'cameraY', defaultPreferences.cameraY),
+              cameraZ: getNumber(o, 'cameraZ', defaultPreferences.cameraZ),
+              lookAtX: getNumber(o, 'lookAtX', defaultPreferences.lookAtX),
+              lookAtY: getNumber(o, 'lookAtY', defaultPreferences.lookAtY),
+              lookAtZ: getNumber(o, 'lookAtZ', defaultPreferences.lookAtZ)
+            };
+            for (const key of keys) {
+              const slider = getElement(key, HTMLInputElement);
+              const valueSpan = assertNotNull(document.getElementById(`${key}Val`));
+              slider.value = String(currentPreferences[key]);
+              valueSpan.textContent = String(currentPreferences[key]);
+            }
+          }
+        } catch {
+          // Ignore parsing errors.
+        }
+      }
+      dialog.showModal();
+      menu.className = '';
+    };
+
+    closeButton.onclick = () => {
+      dialog.close();
+    };
+
   } else {
+    threePreferencesItem.style.display = 'none';
     renderer = createRendererDom(gameDiv);
   }
   const controller = createGameController(renderer);
@@ -79,9 +187,6 @@ async function init() {
   }
 
   let menuFocused = false;
-
-  const menu = assertNotNull(document.getElementById('menu'));
-  const gears = assertNotNull(document.getElementById('gears'));
 
   gears.onmouseover = () => {
     if (menu.className !== 'visible') {

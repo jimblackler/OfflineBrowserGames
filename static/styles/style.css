@@ -111,3 +111,74 @@ ul#menu li:hover a {
 ul#menu a:hover {
 	text-decoration: none;
 }
+
+/* 3D Preferences Dialog Styling */
+dialog#preferencesDialog {
+  background: color-mix(in srgb, midnightblue 85%, transparent);
+  border-radius: 20px;
+  color: aliceblue;
+  padding: 30px;
+  width: 90%;
+  max-width: 550px;
+}
+
+dialog#preferencesDialog h2 {
+  text-align: center;
+}
+
+.sliders-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+  margin-bottom: 28px;
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slider-label-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slider-value {
+  color: dodgerblue;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+/* Custom Slider Styling */
+.slider-input {
+  appearance: none;
+  height: 6px;
+  background: color-mix(in srgb, white 10%, transparent);
+}
+
+.slider-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, dodgerblue, blueviolet);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+button#closePreferences {
+  background: linear-gradient(135deg, dodgerblue, blueviolet);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
