@@ -10,17 +10,13 @@ type ClickablePlaceholder = {
   onClick(ev: MouseEvent): void;
 };
 
-export type ThreePreferences = {
-  cameraX: number;
-  cameraY: number;
-  cameraZ: number;
-};
-
-export const defaultPreferences: ThreePreferences = {
+export const defaultPreferences = {
   cameraX: 450,
   cameraY: -500,
   cameraZ: 450
 };
+
+export type ThreePreferences = typeof defaultPreferences;
 
 type ThreeRenderer = Renderer & {
   receivePreferences(preferences: ThreePreferences): void;
