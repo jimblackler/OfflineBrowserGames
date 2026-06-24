@@ -41,7 +41,7 @@ async function init() {
       try {
         const parsed = JSON.parse(loadedPreferencesStr) as unknown;
         if (parsed && typeof parsed === 'object') {
-          const o = parsed as unknown as {[key: string]: unknown};
+          const o = parsed as unknown as {[key: string]: number};
           preferences = {
             cameraX: getNumber(o, 'cameraX', defaultPreferences.cameraX),
             cameraY: getNumber(o, 'cameraY', defaultPreferences.cameraY),
