@@ -13,19 +13,13 @@ a:hover {
 	text-decoration: underline;
 }
 
-a#close {
-	float: right;
-}
-
 span.indicator,span.card,span.placeholder,span#gears {
-	background: url('cards103x143.png');
+	background: url('../images/cards103x143.png');
 }
 
 @media
 only screen and (-webkit-min-device-pixel-ratio: 1.25),
-only screen and ( min--moz-device-pixel-ratio: 1.25),
-only screen and ( -o-min-device-pixel-ratio: 1.25/1),
-only screen and ( min-device-pixel-ratio: 1.25) {
+only screen and (min-resolution: 1.25dppx) {
 	span.indicator, span.card, span.placeholder, span#gears {
 		background: url('../images/cards206x286.png');
 	}
@@ -36,10 +30,6 @@ span.indicator,span.card,span.placeholder,span#gears {
 	position: absolute;
 }
 
-span.overlay {
-	position: absolute;
-	z-index: 2; /* IE8 workaround */
-}
 
 span#gears {
 	width: 38px;
@@ -52,8 +42,7 @@ span#gears {
 
 	&:hover {
 		opacity: 1.0;
-		-webkit-transition: opacity 300ms ease-out;
-		-moz-transition: opacity 300ms ease-out;
+		transition: opacity 300ms ease-out;
 	}
 }
 
