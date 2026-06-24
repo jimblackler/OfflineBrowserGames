@@ -1,7 +1,7 @@
 body {
 	background-color: #40a040;
-	font-family: arial;
-	margin: 0px;
+	font-family: arial, serif;
+	margin: 0;
 }
 
 a {
@@ -16,17 +16,6 @@ a:hover {
 a#close {
 	float: right;
 }
-
-ul#menu {
-	background: rgba(255, 255, 0, 0.8);
-	box-shadow: 0px 2px 5px rgba(0, 0, 0, .5);
-}
-
-animateOn {
-	top: 0px;
-	-webkit-transition: top 1200ms ease-out;
-}
-
 
 span.indicator,span.card,span.placeholder,span#gears {
 	background: url('cards103x143.png');
@@ -47,7 +36,6 @@ span.indicator,span.card,span.placeholder,span#gears {
 	position: absolute;
 }
 
-
 span.overlay {
 	position: absolute;
 	z-index: 2; /* IE8 workaround */
@@ -61,15 +49,17 @@ span#gears {
 	right: 38px;
 	top: 38px;
 	opacity: 0.6;
-}
 
-span#gears:hover {
-	opacity: 1.0;
-	-webkit-transition: opacity 300ms ease-out;
-	-moz-transition: opacity 300ms ease-out;
+	&:hover {
+		opacity: 1.0;
+		-webkit-transition: opacity 300ms ease-out;
+		-moz-transition: opacity 300ms ease-out;
+	}
 }
 
 ul#menu {
+	background: rgba(255, 255, 0, 0.8);
+	box-shadow: 0px 2px 5px rgba(0, 0, 0, .5);
 	position: fixed;
 	right: 20px;
 	list-style: none;
@@ -77,39 +67,43 @@ ul#menu {
 	margin: 0px;
 	top: 70px;
 	display: none;
-}
 
-ul#menu.visible {
-	display: block;
-}
+	&.visible {
+		display: block;
+	}
 
-ul#menu lh,ul#menu li {
-	padding: 12px;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.5);
-	display: block;
-}
+	lh, li {
+		padding: 12px;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+		display: block;
 
-ul#menu lh:hover,ul#menu li:hover {
-	background: rgba(0, 0, 255, 1.0);
-	box-shadow: 0px 2px 5px rgba(0, 0, 0, .5);
-}
+		&:hover {
+			background: rgba(0, 0, 255, 1.0);
+			box-shadow: 0px 2px 5px rgba(0, 0, 0, .5);
+		}
+	}
 
-ul#menu lh {
-	background: rgba(0, 0, 0, 0.9);
-}
+	lh {
+		background: rgba(0, 0, 0, 0.9);
 
-ul#menu lh a {
-	color: white;
-	font-weight: bold;
-	font-size: small;
-}
+		a {
+			color: white;
+			font-weight: bold;
+			font-size: small;
+		}
+	}
 
-ul#menu li:hover a {
-	color: white;
-}
+	li {
+		&:hover {
+			a {
+				color: white;
+			}
+		}
+	}
 
-ul#menu a:hover {
-	text-decoration: none;
+	a:hover {
+		text-decoration: none;
+	}
 }
 
 /* 3D Preferences Dialog Styling */
@@ -120,65 +114,64 @@ dialog#preferencesDialog {
   padding: 30px;
   width: 90%;
   max-width: 550px;
-}
 
-dialog#preferencesDialog h2 {
-  text-align: center;
-}
+  h2 {
+    text-align: center;
+  }
 
-div.sliders-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px 24px;
-  margin-bottom: 28px;
-}
+  div.sliders-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 24px;
+    margin-bottom: 28px;
 
-div.slider-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+    div.slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
 
-div.slider-label-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+      div.slider-label-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
 
-span.slider-value {
-  color: dodgerblue;
-  padding: 2px 8px;
-  border-radius: 6px;
-}
+        span.slider-value {
+          color: dodgerblue;
+          padding: 2px 8px;
+          border-radius: 6px;
+        }
+      }
 
-/* Custom Slider Styling */
-input.slider-input {
-  appearance: none;
-  height: 6px;
-  background: color-mix(in srgb, white 10%, transparent);
-}
+      input.slider-input {
+        appearance: none;
+        height: 6px;
+        background: color-mix(in srgb, white 10%, transparent);
 
-input.slider-input::-webkit-slider-thumb {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, dodgerblue, blueviolet);
-  cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.1s;
-}
+        &::-webkit-slider-thumb {
+          appearance: none;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, dodgerblue, blueviolet);
+          cursor: pointer;
+          transition: transform 0.1s, box-shadow 0.1s;
+        }
+      }
+    }
+  }
 
-div.dialog-buttons {
-  display: flex;
-  justify-content: flex-end;
-}
+  div.dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
 
-button#closePreferences {
-  background: linear-gradient(135deg, dodgerblue, blueviolet);
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 10px;
-  cursor: pointer;
+    button#closePreferences {
+      background: linear-gradient(135deg, dodgerblue, blueviolet);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  }
 }
 
