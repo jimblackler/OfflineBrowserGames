@@ -126,39 +126,39 @@ dialog#preferencesDialog h2 {
   text-align: center;
 }
 
-.sliders-grid {
+div.sliders-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px 24px;
   margin-bottom: 28px;
 }
 
-.slider-group {
+div.slider-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.slider-label-container {
+div.slider-label-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.slider-value {
+span.slider-value {
   color: dodgerblue;
   padding: 2px 8px;
   border-radius: 6px;
 }
 
 /* Custom Slider Styling */
-.slider-input {
+input.slider-input {
   appearance: none;
   height: 6px;
   background: color-mix(in srgb, white 10%, transparent);
 }
 
-.slider-input::-webkit-slider-thumb {
+input.slider-input::-webkit-slider-thumb {
   appearance: none;
   width: 18px;
   height: 18px;
@@ -168,7 +168,7 @@ dialog#preferencesDialog h2 {
   transition: transform 0.1s, box-shadow 0.1s;
 }
 
-.dialog-buttons {
+div.dialog-buttons {
   display: flex;
   justify-content: flex-end;
 }
