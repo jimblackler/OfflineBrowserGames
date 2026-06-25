@@ -86,17 +86,13 @@ export function setupPreferences(
     closeButton.setAttribute('id', 'closePreferences');
     closeButton.append('Done');
 
-    function getSliderValue(key: keyof ThreePreferences) {
-      return assertDefined(inputs[key]).valueAsNumber;
-    }
-
     for (const key of keys) {
       const slider = assertDefined(inputs[key]);
       slider.oninput = () => {
         assertDefined(valueSpans[key]).textContent = slider.value;
 
         for (const preferenceKey of keys) {
-          preferences[preferenceKey] = getSliderValue(preferenceKey);
+          preferences[preferenceKey] = assertDefined(inputs[preferenceKey]).valueAsNumber;
         }
 
         threeRenderer.receivePreferences(preferences);
