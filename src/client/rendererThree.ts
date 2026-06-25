@@ -21,7 +21,7 @@ export const defaultPreferences = {
 
 export type ThreePreferences = typeof defaultPreferences;
 
-type ThreeRenderer = Renderer & {
+export type ThreeRenderer = Renderer & {
   receivePreferences(preferences: ThreePreferences): void;
 };
 
