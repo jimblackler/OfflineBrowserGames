@@ -93,6 +93,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
     roughness: 0.3,
     transparent: true,
     depthWrite: false,
+    depthTest: false,
     side: BackSide
   });
   const texture = await new TextureLoader().loadAsync('images/cards206x286.png');
@@ -111,6 +112,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
       roughness: 0.2,
       transparent: true,
       depthWrite: false,
+      depthTest: false,
       map: frontTexture
     });
     const mesh = new Mesh(cardGeometry, [material, backMaterial]);
@@ -127,7 +129,8 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
   const indicatorMaterial = new MeshBasicMaterial({
     color: 0xFFFFFF,
     transparent: true,
-    depthWrite: false
+    depthWrite: false,
+    depthTest: false
   });
   const indicatorMesh = new Mesh(indicatorGeometry, indicatorMaterial);
   indicatorMesh.visible = false;
@@ -168,7 +171,9 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
     );
   }
 
+  let nextRenderOrder = 1;
   function positionCard(cardNumber: number, x: number, y: number, elevation: number) {
+    assertDefined(cardMeshes[cardNumber]).renderOrder = nextRenderOrder++;
     assertDefined(cardMeshes[cardNumber]).position.set(
         x + CARD_WIDTH / 2,
         -(y + CARD_HEIGHT / 2),
@@ -186,10 +191,13 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
             .filter(([, index]) => draggableCards[index])
     );
 
-    const [firstIntersect] = raycaster.intersectObjects([
+    const intersects = raycaster.intersectObjects([
       ...meshToCardMap.keys(),
       ...clickablePlaceholders.map(p => p.mesh)
     ]);
+    intersects.sort((a, b) => b.object.renderOrder - a.object.renderOrder);
+
+    const [firstIntersect] = intersects;
     if (!firstIntersect) {
       return {};
     }
@@ -240,6 +248,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
       if (targetMesh) {
         indicatorMesh.position.set(
             targetMesh.position.x, targetMesh.position.y, targetMesh.position.z);
+        indicatorMesh.renderOrder = targetMesh.renderOrder + 1;
         indicatorMesh.visible = true;
       } else {
         indicatorMesh.visible = false;
@@ -279,6 +288,8 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
     placeHolder(x, y, onClick) {
       const material = new MeshBasicMaterial({
         transparent: true,
+        depthWrite: false,
+        depthTest: false,
         map: placeholderTexture
       });
 

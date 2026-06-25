@@ -19,7 +19,6 @@ const WASTE_X = 196;
 const WASTE_X_SPACING = 22;
 const WASTE_Y = STOCK_Y;
 const RAISE_DURATION = 80;
-const CARD_HEIGHT = 0.3;
 const RAISE_HEIGHT = 20;
 const ANIMATION_TIME = 400;
 const ANIMATION_DISTANCE_MAX = 800;
@@ -53,11 +52,15 @@ export function createGameController(renderer: Renderer) {
   const dragStartPositions = new Map<number, [number, number, number]>();
 
   function setPosition(cardNumber: number, x: number, y: number, z: number) {
+    const pos = assertDefined(cardPositions[cardNumber]);
+    if (pos[0] === x && pos[1] === y && pos[2] === z) {
+      return;
+    }
     cardPositions[cardNumber] = [x, y, z];
     renderer.positionCard(cardNumber, x, y, z);
   }
 
-  function _placeCard(cardNumber: number, x: number, y: number, z: number, draggable: boolean,
+  function _placeCard(cardNumber: number, x: number, y: number, draggable: boolean,
                       delay: number) {
     const position = assertDefined(cardPositions[cardNumber]);
 
@@ -76,7 +79,7 @@ export function createGameController(renderer: Renderer) {
       start: position,
       endX: x,
       endY: y,
-      endZ: z,
+      endZ: 0,
       flyHeight,
       draggable
     });
@@ -90,62 +93,53 @@ export function createGameController(renderer: Renderer) {
     curves.clear();
 
     // Position stock cards.
-    let depth = 0;
     for (const cardNumber of gameState.stock) {
       renderer.setFaceUp(cardNumber, false);
-      depth++;
-      _placeCard(cardNumber, STOCK_X, STOCK_Y, depth * CARD_HEIGHT, false, 0);
+      _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0);
     }
 
     // Position waste cards.
     const wasteCardsVisible = Math.min(gameState.rules.cardsToDraw, gameState.waste.length);
-    depth = 0;
     for (const [idx, cardNumber] of gameState.waste.entries()) {
       renderer.setFaceUp(cardNumber, true);
       const xOrder = Math.max(0, idx + wasteCardsVisible - gameState.waste.length);
       const position = assertDefined(cardPositions[cardNumber]);
       const delay = position[0] === STOCK_X ? xOrder * WASTE_DRAW_STAGGER : 0;
-      depth++;
-      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * xOrder, WASTE_Y, depth * CARD_HEIGHT,
+      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * xOrder, WASTE_Y,
           idx === gameState.waste.length - 1, delay);
     }
 
     // Position foundation cards.
     gameState.foundations.forEach((foundation, foundationIdx) => {
-      depth = 0;
       for (const cardNumber of foundation) {
         renderer.setFaceUp(cardNumber, true);
-        depth++;
         _placeCard(cardNumber, FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y,
-            depth * CARD_HEIGHT, true, 0);
+            true, 0);
       }
     });
 
     // Position tableau cards.
     gameState.tableausFaceDown.forEach((tableauFaceDown, tableauIdx) => {
-      depth = 0;
       const tableauX = TABLEAU_X + TABLEAU_X_SPACING * tableauIdx;
       for (const [position, cardNumber] of tableauFaceDown.entries()) {
-        depth++;
         _placeCard(cardNumber, tableauX, TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * position,
-            depth * CARD_HEIGHT, false, 0);
+            false, 0);
         renderer.setFaceUp(cardNumber, false);
       }
 
       const tableauFaceUp = assertDefined(gameState.tableausFaceUp[tableauIdx]);
       for (const [position, cardNumber] of tableauFaceUp.entries()) {
         renderer.setFaceUp(cardNumber, true);
-        depth++;
         _placeCard(cardNumber, tableauX,
             TABLEAU_Y + TABLEAU_Y_SPACING_FACE_DOWN * tableauFaceDown.length +
-            TABLEAU_Y_SPACING_FACE_UP * position, depth * CARD_HEIGHT, true, 0);
+            TABLEAU_Y_SPACING_FACE_UP * position, true, 0);
       }
     });
 
     // Auto play
     if (gameState.stock.length === 0 && gameState.waste.length === 0) {
       const actionsFor = getActions(gameState);
-      const anyFaceDown = gameState.tableausFaceDown.some((t) => t.length > 0);
+      const anyFaceDown = gameState.tableausFaceDown.some(t => t.length > 0);
       if (!anyFaceDown) {
         window.setTimeout(() => {
           for (let tableauIdx = 0; tableauIdx !== NUMBER_TABLEAUS; tableauIdx++) {

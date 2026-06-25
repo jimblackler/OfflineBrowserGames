@@ -23,6 +23,7 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
 
   function positionCard(cardNumber: number, x: number, y: number, z: number) {
     const cardImage = assertDefined(cardImages[cardNumber]);
+    cardsDiv.appendChild(cardImage);
     cardImage.style.left = `${x}px`;
     cardImage.style.top = `${y - z}px`;
     if (z) {
@@ -48,7 +49,6 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
     cardImage.style.pointerEvents = 'none';
     cardImage.className = 'card';
     cardImages[idx] = cardImage;
-    cardsDiv.appendChild(cardImage);
   }
 
   const selectionIndicator = document.createElement('span');
