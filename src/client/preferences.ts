@@ -7,19 +7,15 @@ function isPreference(key: string): key is keyof ThreePreferences {
 
 const keys = Object.keys(defaultPreferences).filter(isPreference);
 
-function isObject(val: unknown): val is {[key: string]: unknown} {
-  return typeof val === 'object' && val !== null;
-}
-
 function loadPreferences() {
   const loadedPreferencesStr = localStorage.getItem('threePreferences');
   const preferences = { ...defaultPreferences };
   if (loadedPreferencesStr) {
     try {
       const parsed: unknown = JSON.parse(loadedPreferencesStr);
-      if (isObject(parsed)) {
+      if (typeof parsed === 'object' && parsed !== null) {
         for (const key of keys) {
-          const {[key]: val} = parsed;
+          const {[key]: val} = parsed as { [key: string]: unknown };
           preferences[key] = typeof val === 'number' ? val : defaultPreferences[key];
         }
       }
