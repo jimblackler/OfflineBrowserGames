@@ -22,7 +22,7 @@ async function init() {
   if (urlParams.has('three')) {
     threePreferencesItem.style.display = 'block';
 
-    function getElement<T extends HTMLElement>(id: string, type: new () => T): T {
+    function getElement<T extends HTMLElement>(id: string, type: new () => T) {
       const element = assertNotNull(document.getElementById(id));
       if (!(element instanceof type)) {
         throw new Error(`${id} is not an instance of ${type.name}`);
@@ -30,7 +30,7 @@ async function init() {
       return element;
     }
 
-    function getNumber(o: {[key: string]: unknown}, key: string, fallback: number): number {
+    function getNumber(o: {[key: string]: unknown}, key: string, fallback: number) {
       const {[key]: val} = o;
       return typeof val === 'number' ? val : fallback;
     }
