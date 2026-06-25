@@ -16,7 +16,7 @@ function getNumber(o: {[key: string]: unknown}, key: string, fallback: number) {
   return typeof val === 'number' ? val : fallback;
 }
 
-function loadPreferences(): ThreePreferences {
+function loadPreferences() {
   const loadedPreferencesStr = localStorage.getItem('threePreferences');
   const preferences = { ...defaultPreferences };
   if (loadedPreferencesStr) {
