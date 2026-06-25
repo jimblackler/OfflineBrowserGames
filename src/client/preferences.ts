@@ -40,8 +40,6 @@ export function setupPreferences(
   threeRenderer.receivePreferences(preferences);
 
   threePreferencesItem.onclick = () => {
-    const currentPreferences = loadPreferences();
-
     const dialog = document.createElement('dialog');
     dialog.setAttribute('id', 'preferencesDialog');
     document.body.append(dialog);
@@ -75,7 +73,7 @@ export function setupPreferences(
       labelContainer.append(valSpan);
       valSpan.setAttribute('id', `${key}Val`);
       valSpan.setAttribute('class', 'slider-value');
-      valSpan.append(String(currentPreferences[key]));
+      valSpan.append(String(preferences[key]));
       valueSpans[key] = valSpan;
 
       const input = document.createElement('input');
@@ -85,7 +83,7 @@ export function setupPreferences(
       input.setAttribute('min', '-1000');
       input.setAttribute('max', '1000');
       input.setAttribute('step', '10');
-      input.setAttribute('value', String(currentPreferences[key]));
+      input.setAttribute('value', String(preferences[key]));
       input.setAttribute('class', 'slider-input');
       inputs[key] = input;
     }
@@ -108,13 +106,12 @@ export function setupPreferences(
       slider.oninput = () => {
         assertDefined(valueSpans[key]).textContent = slider.value;
 
-        const newPreferences = { ...defaultPreferences };
         for (const preferenceKey of keys) {
-          newPreferences[preferenceKey] = getSliderValue(preferenceKey);
+          preferences[preferenceKey] = getSliderValue(preferenceKey);
         }
 
-        threeRenderer.receivePreferences(newPreferences);
-        localStorage.setItem('threePreferences', JSON.stringify(newPreferences));
+        threeRenderer.receivePreferences(preferences);
+        localStorage.setItem('threePreferences', JSON.stringify(preferences));
       };
     }
 
