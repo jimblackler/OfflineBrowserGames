@@ -12,10 +12,10 @@ type ClickablePlaceholder = {
 
 export const defaultPreferences = {
   cameraX: 460,
-  cameraY: -440,
-  cameraZ: 410,
-  deltaX: -10,
-  deltaY: 150,
+  cameraY: -510,
+  cameraZ: 450,
+  deltaX: 0,
+  deltaY: 180,
   deltaZ: -890
 };
 
@@ -172,6 +172,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
   }
 
   let nextRenderOrder = 1;
+
   function positionCard(cardNumber: number, x: number, y: number, elevation: number) {
     assertDefined(cardMeshes[cardNumber]).renderOrder = nextRenderOrder++;
     assertDefined(cardMeshes[cardNumber]).position.set(
