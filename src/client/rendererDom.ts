@@ -5,6 +5,7 @@ import {BLANK_ROW, CARDBACK_COLUMN, CARD_HEIGHT, CARD_WIDTH, INDICATOR_HEIGHT, I
 
 const INDICATOR_OFFSET_X = -4;
 const INDICATOR_OFFSET_Y = -3;
+const HEIGHT_EFFECT = 0.5;
 
 export function createRendererDom(gameDiv: HTMLElement): Renderer {
   const cardImages: HTMLSpanElement[] = [];
@@ -25,7 +26,7 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
     const cardImage = assertDefined(cardImages[cardNumber]);
     cardsDiv.appendChild(cardImage);
     cardImage.style.left = `${x}px`;
-    cardImage.style.top = `${y - z}px`;
+    cardImage.style.top = `${y - z * HEIGHT_EFFECT}px`;
     if (z) {
       if (!cardImage.style.boxShadow) {
         activeShadows++;
