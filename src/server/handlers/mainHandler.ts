@@ -89,67 +89,6 @@ export function mainHandler(req: Request, res: Response, _next: NextFunction) {
   liPrefs.append(aPrefs);
   aPrefs.append('3D Preferences');
 
-  const dialog = document.createElement('dialog');
-  body.append(dialog);
-  dialog.setAttribute('id', 'preferencesDialog');
-
-  const dialogTitle = document.createElement('h2');
-  dialog.append(dialogTitle);
-  dialogTitle.append('3D Renderer Preferences');
-
-  const slidersContainer = document.createElement('div');
-  dialog.append(slidersContainer);
-  slidersContainer.setAttribute('class', 'sliders-grid');
-
-  const preferencesKeys = [
-    {key: 'cameraX', label: 'Camera X', min: -1000, max: 2000, step: 10, default: 450},
-    {key: 'cameraY', label: 'Camera Y', min: -2000, max: 1000, step: 10, default: -500},
-    {key: 'cameraZ', label: 'Camera Z', min: 100, max: 2000, step: 10, default: 450},
-    {key: 'lookAtX', label: 'Look At X', min: -1000, max: 2000, step: 10, default: 460},
-    {key: 'lookAtY', label: 'Look At Y', min: -2000, max: 1000, step: 10, default: -380},
-    {key: 'lookAtZ', label: 'Look At Z', min: -500, max: 500, step: 5, default: 0}
-  ] as const;
-
-  for (const pref of preferencesKeys) {
-    const group = document.createElement('div');
-    slidersContainer.append(group);
-    group.setAttribute('class', 'slider-group');
-
-    const labelContainer = document.createElement('div');
-    group.append(labelContainer);
-    labelContainer.setAttribute('class', 'slider-label-container');
-
-    const labelSpan = document.createElement('span');
-    labelContainer.append(labelSpan);
-    labelSpan.setAttribute('class', 'slider-label');
-    labelSpan.append(pref.label);
-
-    const valSpan = document.createElement('span');
-    labelContainer.append(valSpan);
-    valSpan.setAttribute('id', `${pref.key}Val`);
-    valSpan.setAttribute('class', 'slider-value');
-    valSpan.append(String(pref.default));
-
-    const input = document.createElement('input');
-    group.append(input);
-    input.setAttribute('type', 'range');
-    input.setAttribute('id', pref.key);
-    input.setAttribute('min', String(pref.min));
-    input.setAttribute('max', String(pref.max));
-    input.setAttribute('step', String(pref.step));
-    input.setAttribute('value', String(pref.default));
-    input.setAttribute('class', 'slider-input');
-  }
-
-  const buttonsContainer = document.createElement('div');
-  dialog.append(buttonsContainer);
-  buttonsContainer.setAttribute('class', 'dialog-buttons');
-
-  const closeButton = document.createElement('button');
-  buttonsContainer.append(closeButton);
-  closeButton.setAttribute('id', 'closePreferences');
-  closeButton.append('Done');
-
   addScripts(document, body, 'main');
 
   domStream.end();
