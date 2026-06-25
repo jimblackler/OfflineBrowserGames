@@ -39,10 +39,7 @@ function loadPreferences(): ThreePreferences {
 }
 
 export function setupPreferences(
-  threeRenderer: ThreeRenderer,
-  menu: HTMLElement,
-  threePreferencesItem: HTMLElement
-) {
+    threeRenderer: ThreeRenderer, menu: HTMLElement, threePreferencesItem: HTMLElement) {
   const preferences = loadPreferences();
   threeRenderer.receivePreferences(preferences);
 
