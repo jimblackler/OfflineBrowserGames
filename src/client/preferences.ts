@@ -1,11 +1,8 @@
 import {assertDefined} from '../common/check/defined';
 import {defaultPreferences, type ThreePreferences, type ThreeRenderer} from './rendererThree';
 
-function isPreference(key: string): key is keyof ThreePreferences {
-  return key in defaultPreferences;
-}
-
-const keys = Object.keys(defaultPreferences).filter(isPreference);
+const keys = Object.keys(defaultPreferences).filter(
+    (key): key is keyof ThreePreferences => key in defaultPreferences);
 
 function loadPreferences() {
   const loadedPreferencesStr = localStorage.getItem('threePreferences');
