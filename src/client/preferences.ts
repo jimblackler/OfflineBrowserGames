@@ -43,45 +43,43 @@ export function setupPreferences(
   const preferences = loadPreferences();
   threeRenderer.receivePreferences(preferences);
 
-  const dialog = getElement('preferencesDialog', HTMLDialogElement);
-  const closeButton = getElement('closePreferences', HTMLButtonElement);
-
-  function getSliderValue(id: string) {
-    return getElement(id, HTMLInputElement).valueAsNumber;
-  }
-
-  for (const key of keys) {
-    const slider = getElement(key, HTMLInputElement);
-    const valueSpan = assertNotNull(document.getElementById(`${key}Val`));
-    slider.value = String(preferences[key]);
-    valueSpan.textContent = String(preferences[key]);
-
-    slider.oninput = () => {
-      valueSpan.textContent = slider.value;
-
-      const newPreferences = { ...defaultPreferences };
-      for (const k of keys) {
-        newPreferences[k] = getSliderValue(k);
-      }
-
-      threeRenderer.receivePreferences(newPreferences);
-      localStorage.setItem('threePreferences', JSON.stringify(newPreferences));
-    };
-  }
-
   threePreferencesItem.onclick = () => {
-    const currentPreferences = loadPreferences();
+    function getSliderValue(id: string) {
+      return getElement(id, HTMLInputElement).valueAsNumber;
+    }
+
     for (const key of keys) {
       const slider = getElement(key, HTMLInputElement);
       const valueSpan = assertNotNull(document.getElementById(`${key}Val`));
-      slider.value = String(currentPreferences[key]);
-      valueSpan.textContent = String(currentPreferences[key]);
+      slider.value = String(preferences[key]);
+      valueSpan.textContent = String(preferences[key]);
+
+      slider.oninput = () => {
+        valueSpan.textContent = slider.value;
+
+        const newPreferences = { ...defaultPreferences };
+        for (const k of keys) {
+          newPreferences[k] = getSliderValue(k);
+        }
+
+        threeRenderer.receivePreferences(newPreferences);
+        localStorage.setItem('threePreferences', JSON.stringify(newPreferences));
+      };
+    }
+
+    const dialog = getElement('preferencesDialog', HTMLDialogElement);
+    const closeButton = getElement('closePreferences', HTMLButtonElement);
+    closeButton.onclick = () => {
+      dialog.close();
+    };
+
+    const currentPreferences = loadPreferences();
+    for (const key of keys) {
+      getElement(key, HTMLInputElement).value = String(currentPreferences[key]);
+      assertNotNull(document.getElementById(`${key}Val`)).textContent =
+          String(currentPreferences[key]);
     }
     dialog.showModal();
     menu.className = '';
-  };
-
-  closeButton.onclick = () => {
-    dialog.close();
   };
 }
