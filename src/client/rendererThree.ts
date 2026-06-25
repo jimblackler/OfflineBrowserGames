@@ -11,12 +11,12 @@ type ClickablePlaceholder = {
 };
 
 export const defaultPreferences = {
-  cameraX: 450,
-  cameraY: -500,
-  cameraZ: 450,
-  deltaX: 10,
-  deltaY: 120,
-  deltaZ: -450
+  cameraX: 460,
+  cameraY: -440,
+  cameraZ: 410,
+  deltaX: -10,
+  deltaY: 150,
+  deltaZ: -890
 };
 
 export type ThreePreferences = typeof defaultPreferences;
