@@ -16,8 +16,8 @@ export function createRendererDom(gameDiv: HTMLElement): Renderer {
   let activeShadows = 0;
   let isDragging = false;
   let click = false;
-  let mouseX = 0;
-  let mouseY = 0;
+  let mouseX = Infinity;
+  let mouseY = Infinity;
   let dragStartX = 0;
   let dragStartY = 0;
   let dragHandler: DragHandler;
