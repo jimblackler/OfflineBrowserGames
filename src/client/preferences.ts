@@ -11,11 +11,6 @@ function isObject(val: unknown): val is {[key: string]: unknown} {
   return typeof val === 'object' && val !== null;
 }
 
-function getNumber(o: {[key: string]: unknown}, key: string, fallback: number) {
-  const {[key]: val} = o;
-  return typeof val === 'number' ? val : fallback;
-}
-
 function loadPreferences() {
   const loadedPreferencesStr = localStorage.getItem('threePreferences');
   const preferences = { ...defaultPreferences };
@@ -24,7 +19,8 @@ function loadPreferences() {
       const parsed: unknown = JSON.parse(loadedPreferencesStr);
       if (isObject(parsed)) {
         for (const key of keys) {
-          preferences[key] = getNumber(parsed, key, defaultPreferences[key]);
+          const {[key]: val} = parsed;
+          preferences[key] = typeof val === 'number' ? val : defaultPreferences[key];
         }
       }
     } catch {
