@@ -1,8 +1,10 @@
 import {assertNotNull} from '../common/check/null';
 import {defaultPreferences, type ThreePreferences, type ThreeRenderer} from './rendererThree';
 
+const keys = Object.keys(defaultPreferences) as (keyof ThreePreferences)[];
+
 function getElement<T extends HTMLElement>(id: string, type: new () => T) {
-  const element = assertNotNull(document.getElementById(id));
+  const element = document.getElementById(id);
   if (!(element instanceof type)) {
     throw new Error(`${id} is not an instance of ${type.name}`);
   }
@@ -20,19 +22,14 @@ function isObject(val: unknown): val is {[key: string]: unknown} {
 
 function loadPreferences(): ThreePreferences {
   const loadedPreferencesStr = localStorage.getItem('threePreferences');
-  let preferences = defaultPreferences;
+  const preferences = { ...defaultPreferences };
   if (loadedPreferencesStr) {
     try {
-      const parsed = JSON.parse(loadedPreferencesStr) as unknown;
+      const parsed: unknown = JSON.parse(loadedPreferencesStr);
       if (isObject(parsed)) {
-        preferences = {
-          cameraX: getNumber(parsed, 'cameraX', defaultPreferences.cameraX),
-          cameraY: getNumber(parsed, 'cameraY', defaultPreferences.cameraY),
-          cameraZ: getNumber(parsed, 'cameraZ', defaultPreferences.cameraZ),
-          lookAtX: getNumber(parsed, 'lookAtX', defaultPreferences.lookAtX),
-          lookAtY: getNumber(parsed, 'lookAtY', defaultPreferences.lookAtY),
-          lookAtZ: getNumber(parsed, 'lookAtZ', defaultPreferences.lookAtZ)
-        };
+        for (const key of keys) {
+          preferences[key] = getNumber(parsed, key, defaultPreferences[key]);
+        }
       }
     } catch {
       // Ignore parsing errors.
@@ -52,8 +49,6 @@ export function setupPreferences(
   const dialog = getElement('preferencesDialog', HTMLDialogElement);
   const closeButton = getElement('closePreferences', HTMLButtonElement);
 
-  const keys = ['cameraX', 'cameraY', 'cameraZ', 'lookAtX', 'lookAtY', 'lookAtZ'] as const;
-
   function getSliderValue(id: string) {
     return getElement(id, HTMLInputElement).valueAsNumber;
   }
@@ -67,14 +62,10 @@ export function setupPreferences(
     slider.oninput = () => {
       valueSpan.textContent = slider.value;
 
-      const newPreferences = {
-        cameraX: getSliderValue('cameraX'),
-        cameraY: getSliderValue('cameraY'),
-        cameraZ: getSliderValue('cameraZ'),
-        lookAtX: getSliderValue('lookAtX'),
-        lookAtY: getSliderValue('lookAtY'),
-        lookAtZ: getSliderValue('lookAtZ')
-      };
+      const newPreferences = { ...defaultPreferences };
+      for (const k of keys) {
+        newPreferences[k] = getSliderValue(k);
+      }
 
       threeRenderer.receivePreferences(newPreferences);
       localStorage.setItem('threePreferences', JSON.stringify(newPreferences));
