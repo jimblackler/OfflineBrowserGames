@@ -18,7 +18,7 @@ function isObject(val: unknown): val is {[key: string]: unknown} {
   return typeof val === 'object' && val !== null;
 }
 
-export function loadPreferences(): ThreePreferences {
+function loadPreferences(): ThreePreferences {
   const loadedPreferencesStr = localStorage.getItem('threePreferences');
   let preferences = defaultPreferences;
   if (loadedPreferencesStr) {
