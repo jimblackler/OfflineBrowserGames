@@ -16,7 +16,10 @@ export const defaultPreferences = {
   cameraZ: 450,
   deltaX: 0,
   deltaY: 180,
-  deltaZ: -890
+  deltaZ: -890,
+  lightX: 520,
+  lightY: -100,
+  lightZ: 800
 };
 
 export type ThreePreferences = typeof defaultPreferences;
@@ -44,7 +47,8 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
   scene.add(new AmbientLight(0xFFFFFF, Math.PI / 2));
 
   const directionalLight = new DirectionalLight(0xFFFFFF, Math.PI / 2);
-  directionalLight.position.set(520, -100, 800);
+  directionalLight.position.set(
+      defaultPreferences.lightX, defaultPreferences.lightY, defaultPreferences.lightZ);
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 1024;
   directionalLight.shadow.mapSize.height = 1024;
@@ -327,6 +331,7 @@ export async function createThreeRenderer(gameDiv: HTMLElement): Promise<ThreeRe
           preferences.cameraZ + preferences.deltaZ
       );
       camera.updateProjectionMatrix();
+      directionalLight.position.set(preferences.lightX, preferences.lightY, preferences.lightZ);
     }
   };
 }
