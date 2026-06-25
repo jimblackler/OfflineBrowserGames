@@ -7,29 +7,6 @@ function isPreference(key: string): key is keyof ThreePreferences {
 
 const keys = Object.keys(defaultPreferences).filter(isPreference);
 
-const preferencesKeys = keys.map(key => {
-  let min = -1000;
-  let max = 1000;
-  let step = 10;
-  if (key.endsWith('X')) {
-    min = -1000;
-    max = 2000;
-  } else if (key.endsWith('Y')) {
-    min = -2000;
-    max = 1000;
-  } else if (key.endsWith('Z')) {
-    if (key.startsWith('camera')) {
-      min = 100;
-      max = 2000;
-    } else {
-      min = -500;
-      max = 500;
-      step = 5;
-    }
-  }
-  return {key, label: key, min, max, step};
-});
-
 function isObject(val: unknown): val is {[key: string]: unknown} {
   return typeof val === 'object' && val !== null;
 }
@@ -77,7 +54,7 @@ export function setupPreferences(
   const inputs: {[key: string]: HTMLInputElement} = {};
   const valueSpans: {[key: string]: HTMLElement} = {};
 
-  for (const preference of preferencesKeys) {
+  for (const key of keys) {
     const group = document.createElement('div');
     slidersContainer.append(group);
     group.setAttribute('class', 'slider-group');
@@ -89,25 +66,25 @@ export function setupPreferences(
     const labelSpan = document.createElement('span');
     labelContainer.append(labelSpan);
     labelSpan.setAttribute('class', 'slider-label');
-    labelSpan.append(preference.label);
+    labelSpan.append(key);
 
     const valSpan = document.createElement('span');
     labelContainer.append(valSpan);
-    valSpan.setAttribute('id', `${preference.key}Val`);
+    valSpan.setAttribute('id', `${key}Val`);
     valSpan.setAttribute('class', 'slider-value');
-    valSpan.append(String(preferences[preference.key]));
-    valueSpans[preference.key] = valSpan;
+    valSpan.append(String(preferences[key]));
+    valueSpans[key] = valSpan;
 
     const input = document.createElement('input');
     group.append(input);
     input.setAttribute('type', 'range');
-    input.setAttribute('id', preference.key);
-    input.setAttribute('min', String(preference.min));
-    input.setAttribute('max', String(preference.max));
-    input.setAttribute('step', String(preference.step));
-    input.setAttribute('value', String(preferences[preference.key]));
+    input.setAttribute('id', key);
+    input.setAttribute('min', '-1000');
+    input.setAttribute('max', '1000');
+    input.setAttribute('step', '10');
+    input.setAttribute('value', String(preferences[key]));
     input.setAttribute('class', 'slider-input');
-    inputs[preference.key] = input;
+    inputs[key] = input;
   }
 
   const buttonsContainer = document.createElement('div');
@@ -123,14 +100,14 @@ export function setupPreferences(
     return assertDefined(inputs[key]).valueAsNumber;
   }
 
-  for (const preference of preferencesKeys) {
-    const {[preference.key]: slider} = inputs;
-    assertDefined(slider).oninput = () => {
-      assertDefined(valueSpans[preference.key]).textContent = assertDefined(slider).value;
+  for (const key of keys) {
+    const slider = assertDefined(inputs[key]);
+    slider.oninput = () => {
+      assertDefined(valueSpans[key]).textContent = slider.value;
 
       const newPreferences = { ...defaultPreferences };
-      for (const key of keys) {
-        newPreferences[key] = getSliderValue(key);
+      for (const preferenceKey of keys) {
+        newPreferences[preferenceKey] = getSliderValue(preferenceKey);
       }
 
       threeRenderer.receivePreferences(newPreferences);
