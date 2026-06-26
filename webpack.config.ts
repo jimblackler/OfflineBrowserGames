@@ -9,6 +9,9 @@ export default function config(
     entry: {
       main: {
         import: './src/client/main.ts'
+      },
+      serviceWorker: {
+        import: './src/client/serviceWorker.ts'
       }
     },
     module: {

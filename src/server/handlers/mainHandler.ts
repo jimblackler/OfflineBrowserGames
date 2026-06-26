@@ -89,7 +89,7 @@ export function mainHandler(req: Request, res: Response, _next: NextFunction) {
   liPrefs.append(aPrefs);
   aPrefs.append('3D Preferences');
 
-  addScripts(document, body, 'main');
+  addScripts(document, body, 'main', false);
 
   domStream.end();
 }

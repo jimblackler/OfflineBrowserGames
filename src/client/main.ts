@@ -9,6 +9,10 @@ import {createThreeRenderer} from './rendererThree';
 
 let gameState: GameState;
 async function init() {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/serviceWorker');
+  });
+
   const gameDiv = document.getElementById('gameDiv');
   if (!gameDiv) {
     throw new Error('gameDiv not found');

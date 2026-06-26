@@ -5,6 +5,7 @@ import {assertDefined} from '../common/check/defined';
 import {assertNotNull} from '../common/check/null';
 import {aboutHandler} from './handlers/aboutHandler';
 import {mainHandler} from './handlers/mainHandler';
+import {makeEntryHandlers} from './manifest';
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.route('/dist/{/*path}').get((req, res) => {
   res.set('Cache-Control', `public, max-age=${365 * 24 * 60 * 60}`);
   send(req, assertDefined(assertNotNull(parseurl(req)?.pathname)), {root: 'static'}).pipe(res);
 });
+
+makeEntryHandlers(app);
 
 app.use(express.static('static'));
 
