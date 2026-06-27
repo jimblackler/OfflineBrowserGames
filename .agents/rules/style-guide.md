@@ -27,6 +27,8 @@ When working on this codebase, please adhere to the following style and formatti
 - Where a variable (e.g., dereferenced with `[]`, or obtained from a map) is expected not to be
   undefined per the logic of the app, use the `assertDefined()` wrapper to verify that as early as
   possible.
+- Prefer 'undefined' to 'null' where possible.
+
 
 ## Style Sheets
 
