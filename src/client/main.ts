@@ -1,4 +1,5 @@
 import {assertNotNull} from '../common/check/null';
+import {getStore, getValue, setValue} from './database';
 import {createGameController} from './gameController';
 import {type GameRules, type GameState, newGame} from './gameState';
 import {restore, store} from './gameStore';
@@ -20,14 +21,13 @@ async function init() {
   const menu = assertNotNull(document.getElementById('menu'));
   const gears = assertNotNull(document.getElementById('gears'));
 
-  const urlParams = new URLSearchParams(window.location.search);
   let renderer: Renderer;
   const threePreferencesItem = assertNotNull(document.getElementById('threePreferencesItem'));
 
-  if (urlParams.has('three')) {
+  if (new URLSearchParams(window.location.search).has('three')) {
     threePreferencesItem.style.display = 'block';
     const threeRenderer = await createThreeRenderer(gameDiv);
-    setupPreferences(threeRenderer, menu, threePreferencesItem);
+    await setupPreferences(threeRenderer, menu, threePreferencesItem);
     renderer = threeRenderer;
 
   } else {
@@ -37,52 +37,61 @@ async function init() {
   const controller = createGameController(renderer);
   renderer.setDragHandler(controller);
 
-  function redraw() {
-    const rulesStr = localStorage.getItem('rules');
-    if (!rulesStr) {
-      throw new Error('No rules found in localStorage');
+  async function redraw() {
+    const sessionStore = await getStore('session', 'readonly');
+    const rules = await getValue<GameRules>(sessionStore, 'rules');
+    if (!rules) {
+      throw new Error('No rules found in database');
     }
-    gameState = newGame(JSON.parse(rulesStr) as GameRules);
+    const seed = await getValue<number>(sessionStore, 'seed');
+    if (seed === undefined) {
+      throw new Error('No seed found in database');
+    }
+    gameState = newGame(rules, seed);
     controller.setGameState(gameState);
     controller.render();
     controller.draw();
-    store(gameState);
+    await store(gameState);
     controller.render();
   }
 
-  function startNewGame(rules: GameRules) {
-    localStorage.setItem('gamePosition', '0');
-    localStorage.setItem('version', '3');
-    localStorage.setItem('seed', String(Math.floor(Math.random() * 100000)));
-    localStorage.setItem('rules', JSON.stringify(rules));
-    redraw();
+  async function startNewGame(rules: GameRules) {
+    const sessionStore = await getStore('session', 'readwrite');
+    await setValue(sessionStore, 'gamePosition', 0);
+    await setValue(sessionStore, 'seed', Math.floor(Math.random() * 100000));
+    await setValue(sessionStore, 'rules', rules);
+    await redraw();
   }
 
   document.oncontextmenu = () => false;
 
-  const restored = restore();
+  const restored = await restore();
   if (restored) {
     gameState = restored;
     controller.setGameState(gameState);
     controller.render(); // Render twice to not animate everything (only draw).
     controller.render();
   } else {
-    startNewGame({cardsToDraw: 3});
+    await startNewGame({cardsToDraw: 3});
   }
 
-  function canUndo() {
-    const gamePositionStr = localStorage.getItem('gamePosition');
-    const gamePosition = Number(gamePositionStr);
-    return gamePosition > 1 && localStorage.getItem(`gamePosition${gamePosition - 1}`) !== null;
+  async function canUndo() {
+    const sessionStore = await getStore('session', 'readonly');
+    const gamePosition = await getValue<number>(sessionStore, 'gamePosition');
+    if (gamePosition === undefined || gamePosition <= 1) {
+      return false;
+    }
+    const historyStore = await getStore('history', 'readonly');
+    return await getValue<GameState>(historyStore, gamePosition - 1) !== undefined;
   }
 
-  function undo() {
-    if (canUndo()) {
-      const gamePositionStr = localStorage.getItem('gamePosition');
-      let gamePosition = gamePositionStr ? parseInt(gamePositionStr, 10) : 0;
+  async function undo() {
+    if (await canUndo()) {
+      const sessionStore = await getStore('session', 'readwrite');
+      let gamePosition = await getValue<number>(sessionStore, 'gamePosition') ?? 0;
       gamePosition--;
-      localStorage.setItem('gamePosition', String(gamePosition));
-      const restoredState = restore();
+      await setValue(sessionStore, 'gamePosition', gamePosition);
+      const restoredState = await restore();
       if (restoredState) {
         gameState = restoredState;
         controller.setGameState(gameState);
@@ -93,36 +102,36 @@ async function init() {
 
   let menuFocused = false;
 
-  gears.onmouseover = () => {
+  gears.onmouseover = async () => {
     if (menu.className !== 'visible') {
       const undoItem = assertNotNull(document.getElementById('undoItem'));
-      undoItem.style.display = canUndo() ? 'block' : 'none';
+      undoItem.style.display = await canUndo() ? 'block' : 'none';
       menu.className = 'visible';
       menuFocused = false;
     }
   };
 
   const newGame3 = assertNotNull(document.getElementById('newGame3'));
-  newGame3.onclick = () => {
-    startNewGame({cardsToDraw: 3});
+  newGame3.onclick = async () => {
+    await startNewGame({cardsToDraw: 3});
     menu.className = '';
   };
 
   const newGame1 = assertNotNull(document.getElementById('newGame1'));
-  newGame1.onclick = () => {
-    startNewGame({cardsToDraw: 1});
+  newGame1.onclick = async () => {
+    await startNewGame({cardsToDraw: 1});
     menu.className = '';
   };
 
   const redrawItem = assertNotNull(document.getElementById('redrawItem'));
-  redrawItem.onclick = () => {
-    redraw();
+  redrawItem.onclick = async () => {
+    await redraw();
     menu.className = '';
   };
 
   const undoItem = assertNotNull(document.getElementById('undoItem'));
-  undoItem.onclick = () => {
-    undo();
+  undoItem.onclick = async () => {
+    await undo();
     menu.className = '';
   };
 

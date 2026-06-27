@@ -99,9 +99,9 @@ export function getStack(gameState: GameState, cardNumber: number) {
   return cards;
 }
 
-export function newGame(rules: GameRules): GameState {
+export function newGame(rules: GameRules, seed: number): GameState {
   const deck: number[] = Array.from({length: NUMBER_CARDS}).map((_, idx) => idx);
-  shuffle(deck, alea(localStorage.getItem('seed')));
+  shuffle(deck, alea(String(seed)));
 
   return {
     rules,

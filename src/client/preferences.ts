@@ -1,31 +1,26 @@
 import {assertDefined} from '../common/check/defined';
+import {getStore, getValue, setValue} from './database';
 import {defaultPreferences, type ThreePreferences, type ThreeRenderer} from './rendererThree';
 
 const keys = Object.keys(defaultPreferences).filter(
     (key): key is keyof ThreePreferences => key in defaultPreferences);
 
-function loadPreferences() {
-  const loadedPreferencesStr = localStorage.getItem('threePreferences');
+async function loadPreferences() {
+  const preferenceStore = await getStore('preferences', 'readonly');
+  const loadedPreferences = await getValue<ThreePreferences>(preferenceStore, 'threePreferences');
   const preferences = { ...defaultPreferences };
-  if (loadedPreferencesStr) {
-    try {
-      const parsed: unknown = JSON.parse(loadedPreferencesStr);
-      if (typeof parsed === 'object' && parsed !== null) {
-        for (const key of keys) {
-          const {[key]: val} = parsed as { [key: string]: unknown };
-          preferences[key] = typeof val === 'number' ? val : defaultPreferences[key];
-        }
-      }
-    } catch {
-      // Ignore parsing errors.
+  if (loadedPreferences) {
+    for (const key of keys) {
+      const val = loadedPreferences[key];
+      preferences[key] = typeof val === 'number' ? val : defaultPreferences[key];
     }
   }
   return preferences;
 }
 
-export function setupPreferences(
+export async function setupPreferences(
     threeRenderer: ThreeRenderer, menu: HTMLElement, threePreferencesItem: HTMLElement) {
-  const preferences = loadPreferences();
+  const preferences = await loadPreferences();
   threeRenderer.receivePreferences(preferences);
 
   threePreferencesItem.onclick = () => {
@@ -88,7 +83,7 @@ export function setupPreferences(
 
     for (const key of keys) {
       const slider = assertDefined(inputs[key]);
-      slider.oninput = () => {
+      slider.oninput = async () => {
         assertDefined(valueSpans[key]).textContent = slider.value;
 
         for (const preferenceKey of keys) {
@@ -96,7 +91,8 @@ export function setupPreferences(
         }
 
         threeRenderer.receivePreferences(preferences);
-        localStorage.setItem('threePreferences', JSON.stringify(preferences));
+        await setValue(
+            await getStore('preferences', 'readwrite'), 'threePreferences', preferences);
       };
     }
 

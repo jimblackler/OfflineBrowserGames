@@ -1,32 +1,31 @@
-import type { GameState } from './gameState';
+import {clearStore, deleteValue, getStore, getValue, setValue} from './database';
+import type {GameState} from './gameState';
 
-export function store(gameState: GameState) {
-  const MAX_UNDOS = 3;
-  const gamePositionStr = localStorage.getItem('gamePosition');
-  let gamePosition = gamePositionStr ? parseInt(gamePositionStr, 10) : 0;
-  if (gamePosition > MAX_UNDOS) { // max undos
-    localStorage.removeItem(`gamePosition${gamePosition - MAX_UNDOS}`);
+const MAX_UNDOS = 3;
+
+export async function store(gameState: GameState): Promise<void> {
+  const gamePosition =
+      await getValue<number>(await getStore('session', 'readwrite'), 'gamePosition') ?? 0;
+  const historyStore = await getStore('history', 'readwrite');
+  if (gamePosition > MAX_UNDOS) {
+    await deleteValue(historyStore, gamePosition - MAX_UNDOS);
   }
-  gamePosition++;
-  localStorage.setItem('gamePosition', String(gamePosition));
-  localStorage.setItem(`gamePosition${gamePosition}`, JSON.stringify(gameState));
+  const nextPosition = gamePosition + 1;
+  await setValue(historyStore, nextPosition, gameState);
+  await setValue(await getStore('session', 'readwrite'), 'gamePosition', nextPosition);
 }
 
-export function restore(): GameState | null {
-  const gamePositionStr = localStorage.getItem('gamePosition');
-  if (gamePositionStr !== null) {
-    try {
-      const storedState = localStorage.getItem(`gamePosition${gamePositionStr}`);
-      if (storedState) {
-        return JSON.parse(storedState) as GameState;
-      }
-    } catch (err) {
-      console.log(err);
-    }
+export async function restore() {
+  const sessionStore = await getStore('session', 'readonly');
+  const gamePosition = await getValue<number>(sessionStore, 'gamePosition');
+  if (gamePosition !== undefined) {
+    const historyStore = await getStore('history', 'readonly');
+    return getValue<GameState>(historyStore, gamePosition);
   }
-  return null;
+  return undefined;
 }
 
-export function erase() {
-  localStorage.removeItem('gamePosition');
+export async function erase(): Promise<void> {
+  await setValue(await getStore('session', 'readwrite'), 'gamePosition', 0);
+  await clearStore(await getStore('history', 'readwrite'));
 }
