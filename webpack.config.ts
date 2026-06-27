@@ -1,11 +1,11 @@
 import path from 'path';
-import {type Configuration, DefinePlugin, ManifestPlugin} from 'webpack';
+import webpack from 'webpack';
 
 export default function config(
-    env: { [key: string]: string | undefined }, argv: { [key: string]: string | undefined }
-): Configuration {
+  env: { [key: string]: string | undefined }, argv: { [key: string]: string | undefined }
+): webpack.Configuration {
   return {
-    ...(argv.mode === 'development' && {devtool: 'inline-source-map'}),
+    ...(argv.mode === 'development' && { devtool: 'inline-source-map' }),
     entry: {
       main: {
         import: './src/client/main.ts'
@@ -43,10 +43,10 @@ export default function config(
       path: path.resolve('static/dist')
     },
     plugins: [
-      new ManifestPlugin({
+      new webpack.ManifestPlugin({
         filename: '../../out/webpack-manifest.json'
       }),
-      new DefinePlugin({
+      new webpack.DefinePlugin({
         'process.env.NODE_DEBUG': JSON.stringify(process.env.NODE_DEBUG)
       })
     ],

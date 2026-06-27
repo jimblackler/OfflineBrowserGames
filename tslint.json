@@ -29,6 +29,7 @@
     "no-consecutive-blank-lines": {"severity": "warn"},
     "no-debugger": {"severity": "warn"},
     "no-console": false,
+    "no-default-export": {"severity": "warn"},
     "no-empty": false,
     "no-floating-promises": {"severity": "warn"},
     "no-import-side-effect": false,
