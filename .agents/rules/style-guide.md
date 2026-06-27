@@ -10,6 +10,8 @@ When working on this codebase, please adhere to the following style and formatti
 
 ## TypeScript
 
+- Import statements should always be on one line, even if that means exceeding 100 columns in
+  length.
 - Do not include any unnecessary parentheses/brackets that do not strictly need to be there (e.g.,
   in math/layout expressions where operator precedence or associativity handles evaluation in the
   correct order).
