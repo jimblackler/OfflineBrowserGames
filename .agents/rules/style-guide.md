@@ -15,6 +15,7 @@ When working on this codebase, please adhere to the following style and formatti
 - Do not include any unnecessary parentheses/brackets that do not strictly need to be there (e.g.,
   in math/layout expressions where operator precedence or associativity handles evaluation in the
   correct order).
+- Don't specify TypeScript types where they would otherwise be inferred to the same type.
 - Do not abbreviate in names (e.g., use 'floorMaterial' instead of 'floorMat', and 'cubeGeometry'
   instead of 'cubeGeo'). Exceptions are 'min' and 'max', which are acceptable.
 - Do not use intermediate variables for a calculated value when the intermediate would have a single
@@ -27,11 +28,17 @@ When working on this codebase, please adhere to the following style and formatti
 - Where a variable (e.g., dereferenced with `[]`, or obtained from a map) is expected not to be
   undefined per the logic of the app, use the `assertDefined()` wrapper to verify that as early as
   possible.
+- Where a variable needs to have its type narrowed to a specific type that it is expected to be, use
+  the `assertIs` method, e.g. prefer `assertIs(Float32Array, array);` to wrapping a section with
+  `if (array instanceof Float32Array) {...}`.
 - Prefer 'undefined' to 'null' where possible.
-
+- Literal representations of whole numbers should not have a decimal point and trailing zeroes, e.g.
+  prefer '0' to '0.0', '1' to '1.0'.
+- Literal expression should be on the right-hand side of a binary expression, e.g. prefer
+  `random() * 0.45 + 0.55` to `0.55 + random() * 0.45`
 
 ## Style Sheets
 
 - Always specify both the tag type and the class or ID type, e.g. `div#intro` not `#intro`.
 - Use nesting in the style sheets to match the nesting in the markup, e.g. `section.navigation {
-  a.link { ... } }` not `section.navigation a.link {...}`.  
+  a.link { ... } }` not `section.navigation a.link {...}`.
