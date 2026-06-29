@@ -1,3 +1,4 @@
+import {setSourceMapsSupport} from 'module';
 import express, {type NextFunction, type Request, type Response} from 'express';
 import parseurl from 'parseurl';
 import send from 'send';
@@ -6,6 +7,10 @@ import {assertNotNull} from '../common/check/null';
 import {aboutHandler} from './handlers/aboutHandler';
 import {mainHandler} from './handlers/mainHandler';
 import {makeEntryHandlers} from './manifest';
+
+if (process.env.NODE_ENV !== 'production') {
+  setSourceMapsSupport(true);
+}
 
 const app = express();
 

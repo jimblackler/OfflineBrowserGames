@@ -11,7 +11,7 @@
     "eslint": "eslint src",
     "eslint-fix": "eslint --fix src",
     "start": "node dist/server/main.js",
-    "start:dev": "nodemon --watch dist --watch static dist/server/main.js"
+    "start:dev": "nodemon --watch dist --watch static --exec \"node --enable-source-maps\" dist/server/main.js"
   },
   "dependencies": {
     "@types/three": "^0.185.0",
