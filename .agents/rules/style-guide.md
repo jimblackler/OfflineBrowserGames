@@ -35,7 +35,12 @@ When working on this codebase, please adhere to the following style and formatti
 - Literal representations of whole numbers should not have a decimal point and trailing zeroes, e.g.
   prefer '0' to '0.0', '1' to '1.0'.
 - Literal expression should be on the right-hand side of a binary expression, e.g. prefer
-  `random() * 0.45 + 0.55` to `0.55 + random() * 0.45`
+  `random() * 0.45 + 0.55` to `0.55 + random() * 0.45`.
+- Use destructuring in simple cases where the properties are not nested (like
+  `const {name, age} = user;` or `const [first] = array;`) but not cases like
+  `const {colorAttribute: {array}} = layer;` (prefer in that case
+  `const array = layer.colorAttribute.array;`). Prefer to use destructuring if it makes sense that
+  the variable shares the name of the property.
 
 ## Style Sheets
 

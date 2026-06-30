@@ -139,7 +139,23 @@ export default defineConfig([
                 }
             ],
             '@typescript-eslint/only-throw-error': 'warn',
-            '@typescript-eslint/prefer-destructuring': 'warn',
+            '@typescript-eslint/prefer-destructuring': [
+                'warn',
+                {
+                    VariableDeclarator: {
+                        array: false,
+                        object: false
+                    },
+                    AssignmentExpression: {
+                        array: true,
+                        object: true
+                    }
+                },
+                {
+                    enforceForRenamedProperties: false,
+                    enforceForDeclarationWithTypeAnnotation: false
+                }
+            ],
             '@typescript-eslint/prefer-nullish-coalescing': 'warn',
             '@typescript-eslint/prefer-optional-chain': 'warn',
             '@typescript-eslint/prefer-promise-reject-errors': 'warn',
@@ -223,18 +239,7 @@ export default defineConfig([
             'padded-blocks': 'off',
             'prefer-arrow-callback': 'warn',
             'prefer-const': 'warn',
-            'prefer-destructuring': ['warn', {
-                VariableDeclarator: {
-                    array: true,
-                    object: true
-                },
-                AssignmentExpression: {
-                    array: false,
-                    object: false
-                }
-            }, {
-                enforceForRenamedProperties: true
-            }],
+            'prefer-destructuring': 'off',
             'prefer-rest-params': 'warn',
             'prefer-template': 'warn',
             'quote-props': 'off',
